@@ -1,0 +1,96 @@
+ <widget id="A6064908229084"  version="0.0.1">
+
+    <name>时光马甲</name>
+
+    <description>
+
+        Example For APICloud.
+
+    </description>
+
+    <author email="developer@apicloud.com" href="http://www.apicloud.com">
+
+        Developer
+
+    </author>
+
+    <content src="./html/base_nav.html" />
+
+    <access origin="*" />
+
+    <preference name="pageBounce" value="false"/>
+
+	<preference name="appBackground" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="windowBackground" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="frameBackgroundColor" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="hScrollBarEnabled" value="true"/>
+
+	<preference name="vScrollBarEnabled" value="true"/>
+
+	<preference name="autoLaunch" value="true"/>
+
+	<preference name="fullScreen" value="false"/>
+
+	<preference name="autoUpdate" value="true" />
+
+	<preference name="smartUpdate" value="false" />
+
+	<preference name="debug" value="true"/>
+
+	<preference name="statusBarAppearance" value="false"/>
+
+	<permission name="readPhoneState" />
+
+	<permission name="camera" />
+
+	<permission name="record" />
+
+	<permission name="location" />
+
+	<permission name="fileSystem" />
+
+	<permission name="internet" />
+
+	<permission name="bootCompleted" />
+
+	<permission name="hardware" />
+
+	<preference name="softInputMode" value="resize"/>
+
+	<preference name="querySchemes" value="wechat,weixin,sinaweibohd,sinaweibo,sinaweibosso,weibosdk,weibosdk2.5,mqqapi,mqq,mqqOpensdkSSoLogin,mqqconnect,mqqopensdkdataline,mqqopensdkgrouptribeshare,mqqopensdkfriend,mqqopensdkapi,mqqopensdkapiV2,mqqopensdkapiV3,mqzoneopensdk,wtloginmqq,wtloginmqq2,mqqwpa,mqzone,mqzonev2,mqzoneshare,wtloginqzone,mqzonewx,mqzoneopensdkapiV2,mqzoneopensdkapi19,mqzoneopensdkapi,mqzoneopensdk,alipay,alipayshare,iosamap,baidumap" />
+
+	<feature name="bMap">
+    	<param name="android_api_key" value="RvHOX1eWaOpqtMA6ko9z5SoaKEeY2YTG" />
+   		<param name="ios_api_key" value="stG2Vq7qHs9V5y0X5UR81GGQxClRpMjb" />
+	</feature>
+
+	<feature name="aliPayPlus">
+    	<param name="urlScheme" value="AliPayPlusA6947514585526" />
+	</feature>
+
+	<feature name="wxPay">
+    	<param name="urlScheme" value="wx8047b386f379d33c"/>
+    	<param name="apiKey" value="wx8047b386f379d33c"/>
+    	<param name="apiSecret" value="e87643ff61a105e5214566a122ea4552"/>
+ 	</feature>
+
+ 	<feature name="wx">
+    	<param name="urlScheme" value="wx8047b386f379d33c"/>
+    	<param name="apiKey" value="wx8047b386f379d33c"/>
+    	<param name="apiSecret" value="e87643ff61a105e5214566a122ea4552"/>
+ 	</feature>
+
+ 	<feature name="QQPlus">
+		<param name="urlScheme" value="tencent1106326254" />
+	    <param name="apiKey" value="1106326254" />
+	</feature>
+
+ 	<feature name="ajpush">
+        <param name="app_key" value="1bc600db678b985eb1fac17e" />
+        <param name="channel" value="jftclient" />
+    </feature>
+
+</widget>

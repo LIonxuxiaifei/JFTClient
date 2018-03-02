@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.mui-bar.mui-bar-nav {
+				background-color: rgba(0,0,0,.3);
+			}
+			.mui-bar.mui-bar-nav:after {
+				height: 0;
+			}
+			.btn-top-left,.btn-top-right {
+				color: #fff;
+			}
+			.mui-bar~.mui-content {
+				padding: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="topHeader" class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<span id="btn_share" class="btn-top-right iconfont icon-fenxiang"></span>
+			<span id="btn_collect" class="btn-top-right iconfont icon-aixin"></span>
+		</div>
+		<div class="mui-content haggle-detail">
+			<header class="img-box" style="background-image: url();">
+				<!-- <span class="btn-top-left iconfont icon-houtui"></span>
+				<span class="btn-top-right iconfont icon-fenxiang"></span>
+				<span id="btn_collect" class="btn-top-right iconfont icon-aixin"></span> -->
+				<div id="hotel_pics" class="bot-title">
+					<span id="hotel_name" class="title"><!--曼谷阿玛瑞廊曼机场酒店--></span>
+					<span id="hotel_pic_num" class="pic-num"><!--共4张--></span>
+				</div>
+			</header>
+			<div id="hotel_info" class="shops-info">
+				<div id="hotel_detail" class="item bot-line">
+					<!-- <b>星级: </b>
+					<i class="iconfont icon-xiangyou arrow-right"></i>
+					<span>酒店详情</span> -->
+				</div>
+				<div id="hotel_address" class="item bot-line">
+					<!-- <b>杭州市拱墅区华电国际路568号</b>
+					<i class="iconfont icon-xiangyou arrow-right"></i> -->
+				</div>
+				<div id="hotel_comment" class="item special bot-line">
+					<!-- <div class="grade-left">
+						<div class="total">总分<i>0.0</i></div>
+						<div class="star-level">
+							<div class="bot-bg"><div class="top-bg level-0"></div></div>
+						</div>
+					</div>
+					<div class="grade-right">
+						<div class="li">
+							<b>位置</b>
+							<div class="star-level"><div class="bot-bg"><div class="top-bg level-0"></div></div></div>
+							<i>0.0</i>
+						</div>
+						<div class="li">
+							<b>卫生</b>
+							<div class="star-level"><div class="bot-bg"><div class="top-bg level-0"></div></div></div>
+							<i>0.0</i>
+						</div>
+						<div class="li">
+							<b>服务</b>
+							<div class="star-level"><div class="bot-bg"><div class="top-bg level-0"></div></div></div>
+							<i>0.0</i>
+						</div>
+						<div class="li">
+							<b>设施</b>
+							<div class="star-level"><div class="bot-bg"><div class="top-bg level-0"></div></div></div>
+							<i>0.0</i>
+						</div>
+					</div>
+					<i class="iconfont icon-xiangyou arrow-right"></i> -->
+				</div>
+			</div>
+			<!--<div class="date">
+				<span class="time-all">共一晚</span>
+				<i class="iconfont icon-xiangyou arrow-right"></i>
+				<div class="date-time">
+					<div class="date-item">
+						<i class="iconfont icon-rili"></i>
+						<span>入 10月24日</span>
+					</div>
+					<div class="date-item">
+						<i class="iconfont icon-rili"></i>
+						<span>离 10月25日</span>
+					</div>
+				</div>
+			</div>-->
+			<ul id="roomList" class="haggle-detail-list">
+				<!--<li>
+					<div class="pic img-box" style="background-image: url(../img_temp/haggle-img-1.png);"></div>
+					<b class="text-over">标准房</b>
+					<span class="haggle-info-row text-over">双人床/大床 30m<sup>2</sup></span>
+					<span class="haggle-info-row text-over">不含早/部分有wifi</span>
+					<div class="collect-item-goods">
+						<div class="price-info">
+							<div class="price-box">
+								<i class="m-icon">&yen;</i>
+								<span class="m-num">209</span>
+							</div>
+							<div class="old-price">原价 &yen; 300</div>
+						</div>
+					</div>
+					<div class="btn-radius warning">我出价</div>
+				</li>
+				<li>
+					<div class="pic img-box" style="background-image: url(../img_temp/haggle-img-1.png);"></div>
+					<b class="text-over">大床房</b>
+					<span class="haggle-info-row text-over">大床 30m<sup>2</sup></span>
+					<span class="haggle-info-row text-over">不含早/部分有wifi</span>
+					<div class="collect-item-goods">
+						<div class="price-info">
+							<div class="price-box">
+								<i class="m-icon">&yen;</i>
+								<span class="m-num">109</span>
+							</div>
+							<div class="old-price">原价 &yen; 300</div>
+						</div>
+					</div>
+					<div class="btn-radius warning">我出价</div>
+				</li>-->
+			</ul>
+			<div id="hotel_policy" class="text-info">
+				<!--<div class="text-title">酒店政策</div>
+				<p class="text-content">
+					青皮树酒店定位“年轻时尚”，倡导绿色、环保、低碳的生
+					活方式， 给入住客人大自然一般的清晰入住体验。 青皮树酒店
+					大多数房间价格在150元-300元之间，配备独立卫生间、书桌、
+					床头柜、24小时光纤上网、冷热水、 独立冷暖空调等，设施齐
+					全，服务周到
+				</p>-->
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			var share_title = "邀请注册",
+				share_desc = "邀请注册",
+				share_pic = "Skin/img/share.png",
+				share_url = "http://jiafutong.iaapp.cn/index.php/app/Share/register/Pid/" + db2.getVal("user_pid");
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				hotelPics: [],
+				hotelAddress: "",
+				hotelLat: 0,
+				hotelLng: 0,
+				timerCount: 1,
+				init: function() {
+					pageControl.winBack();
+					PubApp.share();
+
+					api.setWinAttr({
+					    vScrollBarEnabled: false
+					});
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: true
+					});
+
+					//var urlParam = "HotelId=2";
+					var urlParam = "HotelId=" + api.pageParam.hotal_id;
+					urlParam += "&token=" + (isLogin() == true ? db2.getVal("user_token") : "0");
+					
+					doAjax("Hotel", "getHotelDetail", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				getGradeHtml: function(count) {
+					var level = Number(count);
+					var score = level.toFixed(1);
+					var starPercentage = (score / 5) * 100 + "%";
+					var gradeHtml = '<div class="star-level"><div class="bot-bg"><div class="top-bg" style="width:'+starPercentage+'"></div></div></div>\n' +
+									'<i>'+score+'</i>';
+
+					return gradeHtml;
+				},
+				fillData: function(data) {
+					thisPage.hotelAddress = data.lists.Address;
+					thisPage.hotelLat = data.lists.Lat;
+					thisPage.hotelLng = data.lists.Lng;
+
+					var hotelInfo = data.lists;
+
+					/*收藏状态*/
+					if (hotelInfo.is_collection && hotelInfo.is_collection == 1) {
+						document.getElementById("btn_collect").classList.add("on");
+					}
+
+					/*酒店信息*/
+					thisPage.hotelPics = JSON.stringify(hotelInfo.HotelPic);
+					document.querySelector("header").style.backgroundImage = 'url('+toAbsUrl(hotelInfo.HotelPic[0])+')';
+					document.getElementById("hotel_name").innerHTML = hotelInfo.ShopName;
+					document.getElementById("hotel_pic_num").innerHTML = '共'+hotelInfo.HotelPic.length+'张';
+
+					var rankStr = "";
+					switch (hotelInfo.HotelRank) {
+						case "1":
+							rankStr = "经济型";
+							break;
+						case "2":
+							rankStr = "两星";
+							break;
+						case "3":
+							rankStr = "三星";
+							break;
+						case "4":
+							rankStr = "四星";
+							break;
+						case "5":
+							rankStr = "五星";
+							break;
+						default:
+							rankStr = "普通型";
+							break;
+					}
+
+					/*总分*/
+					var level_total = Number(hotelInfo.CommentAveStar);
+					var score_total = level_total.toFixed(1);
+					var starPercentage = (score_total / 5) * 100 + "%";
+
+					var dataValue = 'name='+hotelInfo.ShopName+'&tel='+hotelInfo.Tel+'&sheshi='+hotelInfo.HotelSheSi+'&desc='+hotelInfo.HotelIntroduce;
+					document.getElementById("hotel_detail").setAttribute("data-value", dataValue);
+
+					document.getElementById("hotel_detail").innerHTML = '<b>星级: '+rankStr+'</b>' +
+																		'<i class="iconfont icon-xiangyou arrow-right"></i>' +
+																		'<span class="btn_hotal_detail">酒店详情</span>';
+
+					document.getElementById("hotel_address").innerHTML = 	'<b>'+hotelInfo.Address+'</b>' +
+																			'<i class="iconfont icon-xiangyou arrow-right"></i>';
+
+					document.getElementById("hotel_comment").innerHTML = 	'<div class="grade-left">' +
+																				'<div class="total">总分<i>'+score_total+'</i></div>' +
+																				'<div class="star-level">' +
+																					'<div class="bot-bg"><div class="top-bg" style="width:'+starPercentage+'"></div></div>' +
+																				'</div>' +
+																			'</div>' +
+																			'<div class="grade-right">' +
+																				'<div class="li">' +
+																					'<b>位置</b>' +
+																					thisPage.getGradeHtml(hotelInfo.CommentAvePlace) +
+																				'</div>' +
+																				'<div class="li">' +
+																					'<b>卫生</b>' +
+																					thisPage.getGradeHtml(hotelInfo.CommentAveHealth) +
+																				'</div>' +
+																				'<div class="li">' +
+																					'<b>服务</b>' +
+																					thisPage.getGradeHtml(hotelInfo.CommentAveService) +
+																				'</div>' +
+																				'<div class="li">' +
+																					'<b>设施</b>' +
+																					thisPage.getGradeHtml(hotelInfo.CommentAveSheSi) +
+																				'</div>' +
+																			'</div>' +
+																			'<i class="iconfont icon-xiangyou arrow-right"></i>';
+					
+					/*房间列表*/
+					var room_list = data.roomlists;
+					var page_html = "";
+					if (isset(room_list)) {
+						room_list.forEach(function(item) {
+							page_html += '<li data-id="'+item.RoomId+'">' +
+											'<div class="pic img-box" style="background-image: url('+toAbsUrl(item.RoomPic)+');"></div>' +
+											'<b class="text-over roomtype">'+item.RoomType+'</b>' +
+											'<span class="haggle-info-row text-over">'+item.RoomArea+'m<sup>2</sup></span>' +
+											'<div class="collect-item-goods">' +
+												'<div class="price-info">' +
+													'<div class="price-box">' +
+														'<i class="m-icon">&yen;</i>\n' +
+														'<span class="m-num roomprice">'+parseInt(item.RoomPrice)+'</span>' +
+														'<i class="m-icon">/'+item.RoomUnit+'</i>' +
+													'</div>' +
+													'<div class="old-price">原价 &yen; <i class="oldprice">'+parseInt(item.RoomOriginalPrice)+'</i></div>' +
+												'</div>' +
+											'</div>' +
+											'<div class="btn-radius warning btn_bid">我出价</div>' +
+										'</li>';
+						});
+						document.getElementById("roomList").innerHTML = page_html;
+					}
+
+					/*酒店政策*/
+					document.getElementById("hotel_policy").innerHTML = '<div class="text-title bot-line">酒店政策</div>' +
+																		'<p class="text-content">'+(hotelInfo.HotelDescribe==''?'暂无':hotelInfo.HotelDescribe)+'</p>';
+				},
+				addToCollect: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&gid=" + api.pageParam.hotal_id;
+					urlParam += "&type_key=taojiahuanjia";
+					
+					doAjax("Index", "addCollection", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							control.classList.add("on");
+							PubApp.toast(rs.msg);
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						} else {
+							api.toast({ msg: rs.msg });
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						}
+					});
+				},
+				removeToCollect: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&gid=" + api.pageParam.hotal_id;
+					urlParam += "&type_key=taojiahuanjia";
+					
+					doAjax("Index", "cancelCollection", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							control.classList.remove("on");
+							PubApp.toast(rs.msg);
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						} else {
+							api.toast({ msg: rs.msg });
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						}
+					});
+				},
+				addEvent: function() {
+					/*图片预览*/
+					document.querySelector("#hotel_pics").addEventListener("tap", function() {
+						var param = "pic_list=" + thisPage.hotelPics;
+						openWin("haggle_detail_hotal_pics", param);
+					});
+
+					/*酒店详情*/
+					document.querySelector("#hotel_detail").addEventListener("tap", function() {
+						var param = this.getAttribute("data-value");
+						openWin("haggle_detail_hotal_info", param);			
+					});
+
+					/*房间详情*/
+					mui("#roomList").on("tap", "li", function() {
+						var param = "room_id=" + this.getAttribute("data-id");
+						param += "&hotel_id=" + api.pageParam.hotal_id;
+						param += "&room_type=" + this.querySelector(".roomtype").innerText;
+						param += "&room_price=" + this.querySelector(".roomprice").innerText;
+						param += "&old_price=" + this.querySelector(".oldprice").innerText;
+
+						openWin("haggle_detail_room_info", param);
+					});
+
+					/*酒店评论*/
+					document.querySelector("#hotel_comment").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.hotal_id;
+						openWin("haggle_detail_evaluate", param);				
+					});
+
+					/*我出价*/
+					mui("#roomList").on("tap", ".btn_bid", function() {
+						var parent = this.parentNode;
+
+						var param = "hotel_id=" + api.pageParam.hotal_id;
+						param += "&room_id=" + parent.getAttribute("data-id");
+						param += "&room_type=" + parent.querySelector(".roomtype").innerText;
+						param += "&room_price=" + parent.querySelector(".roomprice").innerText;
+						param += "&old_price=" + parent.querySelector(".oldprice").innerText;
+
+						if (isLogin() == true) {
+							openWin("haggle_detail_room_bid", param);
+						} else {
+							openWin('login');
+						}
+
+						return false;
+					});
+
+					/*收藏或取消收藏*/
+					document.querySelector("#btn_collect").addEventListener("tap", function() {
+						var self = this;
+						if (isLogin() == true) {
+							if (this.classList.contains("on")) { //取消收藏
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									thisPage.removeToCollect(self);
+								}
+							} else { //添加收藏
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									thisPage.addToCollect(self);
+								}
+							}
+						} else {
+							openWin('login');
+						}
+					});
+
+					//查看地图
+					document.getElementById("hotel_address").addEventListener("tap", function() {
+						var lat = thisPage.hotelLat,
+							lng = thisPage.hotelLng,
+							address = thisPage.hotelAddress;
+						if (lat != "" && lng != "" && address != "") {
+							//PubApp.nav(lat, lng, title, address);
+							openWin("map_view", "e_lat="+lat+"&e_lon="+lng+"&e_address="+address);
+						}									
+					});
+
+					/*分享给朋友*/
+					document.querySelector("#btn_share").addEventListener("tap", function() {
+						mask.show();
+            			$api.removeCls($api.dom("#share_box"), "hide");
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

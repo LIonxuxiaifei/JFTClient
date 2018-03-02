@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+	<link rel="stylesheet" href="../css/mui.min.css" />
+	<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+	<link rel="stylesheet" href="../css/style.css" />
+	<style type="text/css">
+		.mui-bar-nav.mui-bar .mui-icon {
+			margin: 0;
+		}
+
+		.mui-bar .mui-icon {
+			padding: 0;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="mui-bar mui-bar-nav">
+		<span class="btn-top-left iconfont icon-houtui"></span>
+		<h1 class="mui-title">位置</h1>
+		<span class="btn-top-right mui-icon mui-icon-more"></span>
+	</div>
+	<script type="text/javascript" src="../js/mui.min.js"></script>
+	<script type="text/javascript" src="../js/db.js"></script>
+	<script type="text/javascript">
+		var pageControl = new PageControl();
+		var bMap;
+		apiready = function() {
+			thisPage.init();
+			thisPage.addEvent();
+		};
+		var thisPage = {
+			init: function() {
+				pageControl.winBack();
+				bMap = api.require('bMap');
+				//打开地图
+				thisPage.openMap();
+			},
+			openMap: function() {
+				bMap.open({
+					rect: {
+						x: 0,
+						y: 44
+					},
+					center: {
+						lon: api.pageParam.e_lon,
+						lat: api.pageParam.e_lat
+					},
+					zoomLevel: 18,
+					showUserLocation: true,
+					fixed: true
+				}, function(ret) {
+					thisPage.searchRoute();
+				});
+			},
+			searchRoute: function() {
+				api.showProgress({
+					title: "",
+					text: "",
+					modal: true
+				});
+				bMap.searchRoute({
+					id: 1,
+					type: 'drive',
+					policy: 'ecar_fee_first',
+					start: {
+						lon: db2.getVal("location_lon"),
+						lat: db2.getVal("location_lat")
+					},
+					end: {
+						lon: api.pageParam.e_lon,
+						lat: api.pageParam.e_lat
+					}
+				}, function(ret, err) {
+					api.hideProgress();
+					if (err.code && err.code != 1) {
+						//alert(err.code+"\n"+api.pageParam.e_lon+"\n"+api.pageParam.e_lat);
+						PubApp.toast("获取路线失败");
+					}
+					if (ret.status) {
+						bMap.drawRoute({
+							id: 1,
+							autoresizing: true,
+							index: 0,
+							styles: {
+								start: {
+									icon: 'widget://image/bmap_start.png'
+								},
+								end: {
+									icon: 'widget://image/bmap_end.png'
+								}
+							}
+						}, function(ret) {
+							//api.alert({ msg: JSON.stringify(err) });
+						});
+					} else {
+						//api.alert({ msg: JSON.stringify(err) });
+						PubApp.toast("获取地址失败");
+					}
+				});
+			},
+			addEvent: function() {
+				//第三方导航
+				var title = api.pageParam.e_address,
+					address = api.pageParam.e_address,
+					lat = api.pageParam.e_lat,
+					lon = api.pageParam.e_lon;
+
+				document.querySelector(".btn-top-right").addEventListener("tap", function() {
+					api.actionSheet({
+						title: '导航',
+						cancelTitle: '取消',
+						buttons: ['打开高德地图', '打开百度地图']
+					}, function(ret, err) {
+						var index = ret.buttonIndex;
+						if (index == 1) {
+							if (api.appInstalled({ //高德地图是否安装
+									sync: true,
+									appBundle: (api.systemType == "android" ? 'com.autonavi.minimap' : "iosamap")
+								})) {
+								window.location.href = api.systemType == "android" ? 'androidamap://poi?sourceApplication=mpgj&keywords=' + address : 'iosamap://poi?sourceApplication=mpgj&name=' + address;
+								return;
+							} else {
+								PubApp.toast("没有安装高德地图");
+							}
+						} else if (index == 2) {
+							if (api.appInstalled({ //百度地图是否安装
+									sync: true,
+									appBundle: (api.systemType == "android" ? "com.baidu.BaiduMap" : "baidumap")
+								})) {
+								window.location.href = 'baidumap://map/marker?location=' + lat + ',' + lon + '&title=' + (title || address) + '&content=' + address + "&src=mycjhapp";
+								return;
+							} else {
+								PubApp.toast("没有安装百度地图");
+							}
+						}
+					});
+					return false;
+				});
+			}
+		};
+	</script>
+</body>
+
+</html>

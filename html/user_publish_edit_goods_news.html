@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../css/mui.picker.css" />
+		<link rel="stylesheet" href="../css/mui.poppicker.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.publish-item.select .item-text{color: #333;}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">预览</h1>
+		</div>
+		<div class="mui-content publish has-bot-tab">
+			<div class="publish-used">
+				<div id="select_type" class="publish-item select">
+					<b class="item-name">分类</b>
+					<span class="item-text"></span>
+					<!--<i class="mui-icon mui-icon-arrowright arrow-right"></i>-->
+				</div>
+				<div class="publish-item inpt">
+					<b class="item-name">名称</b>
+					<input id="goods_name" type="text" placeholder="" disabled="disabled"/>
+				</div>
+				<div class="publish-item normal">
+					<div class="upload-imgs">
+						<div id="imgBox" style="display: inline-block">
+							<!--<div class="item img-box" style="background-image: url(../img_temp/upload-1.png);">
+								<i class="iconfont icon-cha"></i>
+							</div>-->
+						</div>
+						<div id="btn_upload" class="btn-upload" style="display:none;">
+							<i class="iconfont icon-jiahao1"></i>
+							<span>上传图片</span>
+						</div>
+						<input id="goods_content" class="desc" type="text" placeholder="" disabled="disabled"/>
+					</div>
+				</div>
+				<div class="publish-item inpt">
+					<b class="item-name">单位</b>
+					<input id="goods_unit" type="text" placeholder="" disabled="disabled"/>
+				</div>
+				<div class="publish-item inpt">
+					<b class="item-name">原价</b>
+					<input id="goods_old_price" type="number" placeholder="" disabled="disabled"/>
+				</div>
+				<div class="publish-item inpt">
+					<b class="item-name">吐血价</b>
+					<input id="goods_discount_price" type="number" placeholder="" disabled="disabled"/>
+				</div>
+				<div class="publish-item inpt">
+					<b class="item-name">数量</b>
+					<input id="goods_num" type="number" placeholder="" disabled="disabled"/>
+				</div>
+				<div id="goods_degree" class="publish-item select">
+					<b class="item-name">新旧程度</b>
+					<span class="item-text"></span>
+					<!--<i class="mui-icon mui-icon-arrowright arrow-right"></i>-->
+				</div>
+				<div id="freight_way" class="publish-item select">
+					<b class="item-name">运费方式</b>
+					<span class="item-text"></span>
+					<!--<i class="mui-icon mui-icon-arrowright arrow-right"></i>-->
+				</div>
+				<div id="user_location" class="publish-item location">
+					<span class="item-text"><!-- 浙江省杭州市拱墅区祥园路88号 --></span>
+					<div class="user-location">
+						<span class="iconfont icon-dizhi"></span>
+						<span class="text">我的位置</span>
+					</div>
+				</div>
+				<div id="btn_select_addr" class="publish-item select addr">
+					<b class="item-name">地址</b>
+					<div id="user_address">
+						<span id="unselected" class="item-text text-right">&nbsp;</span>
+						<!-- <div class="addr-text">
+							<span>张飞13852643222</span>
+							<span>浙江省杭州市拱墅区丰登街341</span>
+							<span>某某小区20栋1单元302</span>
+						</div> -->
+					</div>
+					<!--<i class="mui-icon mui-icon-arrowright arrow-right"></i>-->
+				</div>
+				<div class="publish-item inpt">
+					<b class="item-name">联系方式</b>
+					<input id="user_phone" type="number" placeholder="" disabled="disabled"/>
+				</div>
+			</div>
+			<!--<div class="btn-submit atbot">确认更改</div>-->
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.picker.js" ></script>
+		<script type="text/javascript" src="../js/mui.poppicker.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+//				thisPage.addEvent();
+			};
+			var thisPage = {
+				typeKey: "taosihuo",
+				pid: "0", //主类id
+				//sid: "0", //子类id
+				userAddress: { //地址
+					userAddress: "",
+			    	addrPro: "",
+			    	addrCity: "",
+			    	addrArea: "",
+			    	addrRelname: "",
+			    	addrPhone: ""
+				},
+				userLocation: { //位置
+					address: "",
+					addrName: "",
+		        	addrDetail: "",
+		        	lat: "0",
+		        	lng: "0"
+				},
+				imgIndex: 0,
+				imgArray: [],
+				goodsDegree: "", //新旧程度
+				freightWay: "", //运费方式
+				init: function() {
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".btn-submit"));
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+
+			        /*初始化新旧程度选择器*/
+					window.picker = new mui.PopPicker();
+					var dataArray = [];
+					for (var i = 1; i < 11; i++) {
+						dataArray.push({
+							value: i + '',
+							text: i + ' 成新'
+						});
+					}
+					window.picker.setData(dataArray);
+
+					 /*初始化运费方式选择器*/
+					window.pickerWay = new mui.PopPicker();
+					window.pickerWay.setData([{text: "自提", value: 0},{text: "包邮", value: 1}]);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&goods_id=" + api.pageParam.data_id;
+
+					doAjax("Goods", "getcat_tsh", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				setLocation: function(lat, lon) {
+					var map = api.require('bMap');
+					map.getNameFromCoords({
+					    lon: lon,
+					    lat: lat
+					}, function(ret, err) {
+					    if (ret.status) {
+					    	thisPage.userLocation.address = ret.address;
+					    	thisPage.userLocation.lat = ret.lat;
+					    	thisPage.userLocation.lng = ret.lon;
+					    	document.querySelector("#user_location .item-text").innerText = thisPage.userLocation.address;
+					    } else {
+					    	//mui.toast("获取位置信息失败");
+					    	thisPage.userLocation.address = "获取位置信息失败";
+					    }
+					});
+				},
+				fillData: function(data) {
+					/*初始化类型选择器*/
+					window.typePicker = new mui.PopPicker({
+						layer: 1
+					});
+					window.typePicker.setData(data.category);
+
+					/*初始化编辑信息*/
+					var dataInfo = data.info;
+
+					thisPage.setLocation(dataInfo.goods_last_login_lat, dataInfo.goods_last_login_lon);
+
+					thisPage.pid = dataInfo.goods_type1;
+					//thisPage.sid = dataInfo.goods_type2;
+					document.querySelector("#select_type .item-text").innerText = dataInfo.goods_catpname;
+
+					document.getElementById("goods_name").value = dataInfo.goods_goodsname;
+					document.getElementById("goods_content").value = dataInfo.goods_content;
+
+					var picHtml = "";
+					dataInfo.goods_picture.forEach(function(item, index) {
+						picHtml += 	'<div class="item img-box" style="background-image: url('+toAbsUrl(item)+');">' +
+										'<i class="iconfont icon-cha btn_remove" data-value="'+item+'"></i>' +
+									'</div>';
+					});
+					document.getElementById("imgBox").innerHTML = picHtml;
+
+					document.getElementById("goods_unit").value = dataInfo.goods_unit;
+					document.getElementById("goods_old_price").value = dataInfo.goods_price;
+					document.getElementById("goods_discount_price").value = dataInfo.goods_discount_price;
+					document.getElementById("goods_num").value = dataInfo.goods_num;
+
+					thisPage.goodsDegree = dataInfo.goods_degree;
+					document.querySelector("#goods_degree .item-text").innerText = dataInfo.goods_degree + "成新";
+
+					thisPage.freightWay = dataInfo.goods_freight_mode;
+					document.querySelector("#freight_way .item-text").innerText = dataInfo.goods_freight_mode;
+
+					thisPage.userLocation.lat = dataInfo.goods_last_login_lat;
+					thisPage.userLocation.lng = dataInfo.goods_last_login_lon;
+
+					thisPage.userAddress.userAddress = dataInfo.goods_address;
+					thisPage.userAddress.addrPro = dataInfo.goods_province;
+					thisPage.userAddress.addrCity = dataInfo.goods_city;
+					thisPage.userAddress.addrArea = dataInfo.goods_area;
+					thisPage.userAddress.addrRelname = dataInfo.goods_realname;
+					thisPage.userAddress.addrPhone = dataInfo.goods_phone;
+					document.getElementById("user_address").innerHTML = '<div class="addr-text">' +
+																			'<span>'+dataInfo.goods_realname+'</span>' +
+																			'<span>'+dataInfo.goods_address+'</span>' +
+																		'</div>';
+					document.getElementById("user_phone").value = dataInfo.goods_phone;
+				},
+			};
+		</script>
+	</body>
+</html>

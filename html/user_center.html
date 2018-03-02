@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body class="color-white">
+		<div class="mui-content user-center">
+			<header class="img-box" style="background-image: url(../img/user-center-header.png);">
+				<span class="iconfont icon-houtui"></span>
+			</header>
+			<div class="user-info">
+				<div class="avatar-bg">
+					<div id="user_avatar" class="avatar-img img-box" style="background-image: url();"></div>
+					<span id="user_level" class="user-lv">LV0</span>
+				</div>
+				<div id="user_nickname" class="user-nickname">&nbsp;</div>
+				<div id="btnEdit" class="user-edit">
+					<i class="iconfont icon-bianji1"></i>
+					<span>编辑资料</span>
+				</div>
+			</div>
+			<div class="tab-control">
+				<div class="item on" data-type="follow">关注</div>
+				<div class="item" data-type="fans">粉丝</div>
+				<div class="item" data-type="comment">评价</div>
+				<div class="item" data-type="intro">简介</div>
+			</div>
+			<div id="pageList"></div>
+			<!-- <ul id="follow" class="follow-list content-box active">
+				<li>
+					<div class="user-avatar img-box" style="background: url(../img_temp/follow-1.png);"></div>
+					<div class="follow-user-info">
+						<span class="user-name">毕鑫业</span>
+						<span class="user-lv">LV2</span>
+					</div>
+					<span class="btn-radius">取消关注</span>
+				</li>
+			</ul>
+			<ul id="fans" class="follow-list content-box">
+				<li>
+					<div class="user-avatar img-box" style="background: url(../img_temp/follow-1.png);"></div>
+					<div class="follow-user-info">
+						<span class="user-name">毕鑫业</span>
+						<span class="user-lv">LV2</span>
+					</div>
+					<span class="btn-radius">取消关注</span>
+				</li>
+				<li>
+					<div class="user-avatar img-box" style="background: url(../img_temp/follow-2.png);"></div>
+					<div class="follow-user-info">
+						<span class="user-name">青春的老章鱼</span>
+						<span class="user-lv">LV6</span>
+					</div>
+					<span class="btn-radius warning">加关注</span>
+				</li>
+			</ul>
+			<ul id="comment" class="comment-list content-box" style="background-color: #fff;">
+				<li>
+					<div class="user-avatar img-box" style="background-image: : url();"></div>
+					<div class="com-time">2016-12-06</div>
+					<div class="com-info">
+						<div class="com-person">菜和</div>
+						<div class="grade">
+							<span>打分</span>
+							<div class="star-level">
+								<div class="bot-bg"><div class="top-bg level-0"></div></div>
+							</div>
+						</div>
+						<p class="com-content">好喜欢test内容，下次还找啊啊啊啊啊</p>
+						<div class="pics">
+							<p class="pic-item img-box" style="background-image: url();"></p>
+							<p class="pic-item img-box" style="background-image: url();"></p>
+							<p class="pic-item img-box" style="background-image: url();"></p>
+						</div>
+					</div>
+					<div class="reply">
+						<i class="iconfont icon-07"></i>
+						<div class="reply-info">
+							<span class="reply-person">回复 : </span>
+							<span class="reply-content">很好地客户，欢迎下次光临。很好地客户，欢迎下次光临</span>
+						</div>
+					</div>
+				</li>
+			</ul>
+			<div id="intro" class="center-intro content-box">
+				<p id="user_intro"></p>
+			</div> -->
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				tabType: "follow", //follow fans comment intro
+				timerCount: 1,
+				init: function() {
+					pageControl.winBack();
+
+					thisPage.getUserInfo();
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				getUserInfo: function() { //获取用户信息
+					document.getElementById("user_avatar").style.background = "url("+ toAbsUrl(db2.getVal('user_avatar')) +")";
+					document.getElementById("user_level").innerHTML = db2.getVal('user_level');
+					document.getElementById("user_nickname").innerHTML = db2.getVal('user_nickname');
+					//document.getElementById("user_intro").innerText = db2.getVal('user_intro');
+				},
+				doAjax: function(mod, fn, type) {
+					document.getElementById("pageList").innerHTML = '<div style="padding: 20px 0;text-align: center;color: #bbb;font-size: 0.813em;">加载中...</div>';
+
+					var urlParam = "Token=" + db2.getVal("user_token");
+					setTimeout(function() {
+						doAjax(mod, fn, urlParam, "post", function(rs) {
+							if (rs.ErrorCode == 1) {
+								thisPage.fillData(rs.Data);
+							} else {
+								document.getElementById("pageList").innerHTML = '<div class="empty-list">获取信息失败, 请重试</div>';
+								api.toast({ msg: rs.ErrorMsg });
+							}
+						});
+					}, 500);
+				},
+				requestData: function() {
+					if (thisPage.tabType == "follow") {
+						thisPage.doAjax("Member", "getFollowUser", "follow");
+					} else if (thisPage.tabType == "fans") {
+						thisPage.doAjax("Member", "getFansUser", "fans");
+					} else if (thisPage.tabType == "comment") {
+						thisPage.doAjax("Member", "getCommentList", "comment");
+					} else {
+						thisPage.fillData("");
+					}
+				},
+				fillData: function(data) {
+					var lists = data.lists;
+					var lists_html = "";
+					if (thisPage.tabType == "follow") {
+						if (isset(lists)) {
+							lists.forEach(function(item) {
+								lists_html += 	'<li>' +
+													'<div class="user-avatar img-box" data-id="'+item.follow_mid+'" style="background-image: url('+toAbsUrl(item.UserHead)+');"></div>' +
+													'<div class="follow-user-info">' +
+														'<span class="user-name">'+item.NickName+'</span>' +
+														'<span class="user-lv">'+item.level+'</span>' +
+													'</div>' +
+													'<span class="btn-radius btn_follow" data-id="'+item.follow_mid+'">取消关注</span>' +
+												'</li>';
+							});
+							document.getElementById("pageList").innerHTML = '<ul id="follow" class="follow-list content-box active">'+lists_html+'</ul>';;
+						} else {
+							document.getElementById("pageList").innerHTML = '<div class="empty-list">空空如也</div>';
+						}
+					} else if (thisPage.tabType == "fans") {
+						if (isset(lists)) {
+							lists.forEach(function(item) {
+								var followHtml = '';
+								if (item.follow_status == 0) {
+									followHtml = '<span class="btn-radius btn_follow warning" data-id="'+item.follow_uid+'">加关注</span>';
+								} else {
+									followHtml = '<span class="btn-radius btn_follow" data-id="'+item.follow_uid+'">取消关注</span>';
+								}
+
+								lists_html += 	'<li>' +
+													'<div class="user-avatar img-box" data-id="'+item.follow_uid+'" style="background-image: url('+toAbsUrl(item.UserHead)+');"></div>' +
+													'<div class="follow-user-info">' +
+														'<span class="user-name">'+item.NickName+'</span>' +
+														'<span class="user-lv">'+item.level+'</span>' +
+													'</div>' +
+													followHtml +
+												'</li>';
+							});
+							document.getElementById("pageList").innerHTML = '<ul id="fans" class="follow-list content-box active">'+lists_html+'</ul>';
+						} else {
+							document.getElementById("pageList").innerHTML = '<div class="empty-list">空空如也</div>';
+						}
+					} else if (thisPage.tabType == "comment") {
+						if (isset(lists)) {
+							lists.forEach(function(item) {
+								var scoreNum = Number(item.commen_score);
+								var starHtml = '<div class="bot-bg"><div class="top-bg level-'+Math.round(scoreNum)+'"></div></div>';
+
+								var comPicHtml = "";
+								if (item.commen_picture) {
+									var comPicList = item.commen_picture;
+									comPicList.forEach(function(item) {
+										comPicHtml += '<p class="pic-item img-box" style="background-image: url('+toAbsUrl(item)+');"></p>'
+									});
+								}
+								var replyHtml = "";
+								if (item.reply != '') {
+									replyHtml = '<div class="reply">' +
+													'<i class="iconfont icon-07"></i>' +
+													'<div class="reply-info">' +
+														'<span class="reply-person">回复 : </span>' +
+														'<span class="reply-content">'+item.reply+'</span>' +
+													'</div>' +
+												'</div>';
+								}
+
+								lists_html += 	'<li>' +
+													'<div class="user-avatar img-box" data-id="'+item.Mid+'" style="background-image: url('+toAbsUrl(item.UserHead)+');"></div>' +
+													'<div class="com-time">'+item.commen_create_time+'</div>' +
+													'<div class="com-info">' +
+														'<div class="com-person">'+item.NickName+'</div>' +
+														'<div class="grade">' +
+															'<span>打分</span>' +
+															'<div class="star-level">'+starHtml+'</div>' +
+														'</div>' +
+														'<p class="com-content">'+item.commen_content+'</p>' +
+														'<div class="pics">'+comPicHtml+'</div>' +
+													'</div>' +
+													replyHtml +
+												'</li>';
+							});
+							document.getElementById("pageList").innerHTML = '<ul id="comment" class="comment-list content-box active">'+lists_html+'</ul>';	
+						} else {
+							document.getElementById("pageList").innerHTML = '<div class="empty-list">空空如也</div>';
+						}
+					} else {
+						document.getElementById("pageList").innerHTML = '<div id="intro" class="center-intro content-box active">' +
+																			'<p id="user_intro">'+db2.getVal('user_intro').replace(/\n/g, "<br />")+'</p>' +
+																		'</div>';
+					}
+				},
+				addFollow: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&follow_mid=" + control.getAttribute("data-id");
+					
+					doAjax("Index", "addFollow", urlParam, "post", function(rs) {
+						if (rs.code == 1) {
+							//PubApp.toast(rs.msg);
+							control.classList.remove("warning");
+							control.innerText = "取消关注";
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				cancelFollow: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&follow_mid=" + control.getAttribute("data-id");
+					
+					doAjax("Index", "cancelFollow", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							if (thisPage.tabType == "fans") {
+								control.classList.add("warning");
+								control.innerText = "加关注";
+							} else {
+								setTimeout(function() {
+						            thisPage.requestData();
+						        }, 350);
+							}
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*编辑资料*/
+					document.querySelector("#btnEdit").addEventListener("tap", function() {
+						openWin("user_info");		
+					});
+
+					/*用户信息更新监听*/
+					api.addEventListener({
+						name: "updataUserInfo"
+					}, function(ret, err) {
+						log("收到用户信息更新广播");
+						thisPage.getUserInfo();
+						if (document.getElementById("user_intro")) {
+							document.getElementById("user_intro").innerHTML = db2.getVal('user_intro').replace(/\n/g, "<br />");
+						}
+					});
+
+					/*选项卡切换*/
+					mui(".tab-control").on("tap", ".item", function() {
+						if (this.classList.contains("on")) return;
+						document.querySelector(".tab-control .on").classList.remove("on");
+						this.classList.add("on");
+
+						var type = this.getAttribute("data-type");
+						thisPage.tabType = type;
+
+						setTimeout(function() {
+				            thisPage.requestData();
+				        }, 350);
+					});
+
+					/*添加关注或取消关注*/
+					mui("#pageList").on("tap", ".btn_follow", function() {
+						var self = this;
+						if (isLogin() == true) {
+							if (this.classList.contains("warning")) { //加关注
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+
+									thisPage.addFollow(self);
+								}
+							} else { //取消关注
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+
+									if (thisPage.tabType == "follow") {
+										api.confirm({
+										    title: '提示',
+										    msg: '是否取消关注',
+										    buttons: ['是', '否']
+										}, function(ret, err) {
+											if (ret.buttonIndex == 1) {
+												thisPage.cancelFollow(self);
+											}
+										});
+									} else {
+										thisPage.cancelFollow(self);
+									}
+								}
+							}
+						} else {
+							PubApp.toast("请先登录");
+						}
+
+						return false;
+					});
+
+					/*头像链接*/
+					mui("#pageList").on("tap", ".user-avatar", function() {
+						var dataId = this.getAttribute("data-id");
+						api.openWin({
+						    name: 'user_center_'+dataId,
+						    url: './user_center_person.html',
+						    pageParam: {
+						        user_id: dataId
+						    }
+						});
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

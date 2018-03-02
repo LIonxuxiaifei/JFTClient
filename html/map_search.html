@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../css/mui.picker.css" />
+		<link rel="stylesheet" href="../css/mui.poppicker.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.top-search{margin-left: 80px;}
+			#user_location{position: absolute;top: 0;left: 12px;}
+			.location-text{display: inline-block;line-height: 44px;font-size: 0.75em;width: 40px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align: center;}
+			.mui-bar .icon-xiasanjiao{color: #00aaf0;display: inline-block;vertical-align: top;line-height: 44px;font-size: 1em;}
+			.map-addr .addr-list{padding-top: 0;}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav search">
+			<div id="user_location">
+				<span id="location_city" class="location-text"></span><i class="iconfont icon-xiasanjiao"></i>
+			</div>
+			<div class="top-search">
+				<span class="mui-icon mui-icon-search"></span>
+				<input id="pageSarch" oninput="thisPage.gerAddressList(this.value)" type="text" placeholder="请输入查找内容" />
+			</div>
+			<span class="btn-search btn_cancel">取消</span>
+		</div>
+		<div class="mui-content map-addr">
+			<ul id="searchList" class="addr-list">
+				<!-- <li>
+					<span class="addr-name">浙江省创意设计协会</span>
+					<span class="addr-detail">浙江省杭州市拱墅区祥园路99号运河广告大厦2号楼</span>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.picker.js" ></script>
+		<script type="text/javascript" src="../js/mui.poppicker.js" ></script>
+		<script type="text/javascript" src="../js/city.data.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var bMap;
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				province: "",
+				city: "",
+				init: function() {
+					//document.getElementById("pageSarch").focus();
+
+					if (!bMap) {
+						bMap = api.require('bMap');
+					}
+
+					thisPage.city = api.pageParam.currentCity; //获取当前城市
+					document.getElementById("location_city").innerText = thisPage.city || "杭州市";
+
+					/*初始化城市选择器*/
+					window.picker_city = new mui.PopPicker({layer: 2});
+					window.picker_city.setData(cityData);
+				},
+				gerAddressList: function(keyword) {
+					api.showProgress({
+					    title: "",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var searchList = document.getElementById("searchList");
+					if (keyword != "") {
+						bMap.searchInCity({
+		                    keyword: keyword,
+		                    city: thisPage.city || "杭州",
+		                    pageCapacity: 40,
+		                }, function(ret) {
+		                    if (ret.status) {
+		                        thisPage.fillData(ret.results);
+		                    } else {
+		                        searchList.innerHTML = '<div class="empty-list">没有搜索结果</div>';
+		                    }
+		                    api.hideProgress();
+		                });
+					} else {
+						api.hideProgress();
+						searchList.innerHTML = "";
+					}
+				},
+				fillData: function(lists) {
+					var searchList = document.getElementById("searchList");
+					var listHtml = "";
+					if (lists) {
+						lists.forEach(function(item) {
+							listHtml += '<li data-lat="'+item.lat+'" data-lon="'+item.lon+'">' +
+											'<span class="addr-name">'+item.name+'</span>' +
+											'<span class="addr-detail">'+item.address+'</span>' +
+										'</li>';
+						});
+						searchList.innerHTML = listHtml;
+					}
+				},
+				selectAddr: function(lat, lon) {
+					api.sendEvent({
+		                name: 'selectSarchAddr',
+		                extra: {
+		                    lat: lat,
+		                    lon: lon
+		                }
+		            });
+
+		            setTimeout(function() {
+		                api.closeWin();
+		            }, 100);
+				},
+				addEvent: function() {
+					/*取消*/
+					document.querySelector(".btn_cancel").addEventListener("tap", function() {
+						api.closeWin();			
+					});
+
+					/*选择地址*/
+					mui("#searchList").on("tap", "li", function() {
+						var data_lat = this.getAttribute("data-lat"),
+							data_lon = this.getAttribute("data-lon");
+
+						thisPage.selectAddr(data_lat, data_lon);
+					});
+
+					/*城市选择*/
+					document.getElementById("user_location").addEventListener("tap", function() {
+						window.picker_city.show(function (selectItems) {
+							document.getElementById("location_city").innerText = selectItems[1].text;
+							thisPage.province = selectItems[0].text;
+							thisPage.city = selectItems[1].text;
+							
+							picker_city.pickers[0].setSelectedValue(thisPage.province, 200);
+           					picker_city.pickers[1].setSelectedValue(thisPage.city, 200);
+						});					
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

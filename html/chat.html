@@ -1,0 +1,67 @@
+<!-- chat 引入
+chat_body.html
+ajpush.js,chat.js,arttmpl.js 放在index.html
+open("chat","user_id=123");
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <link href="../css/mui.min.css" rel="stylesheet" />
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
+    </style>
+</head>
+
+<body contextmenu="return false;">
+    <header class="mui-bar mui-bar-nav">
+        <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+        <h1 class="mui-title">聊天窗口</h1>
+    </header>
+</body>
+
+</html>
+<!-- 因为ios下软键盘会把聊天头部推到上面；所以使用frame(Android没有这个问题) -->
+<script src="../js/db.js" charset="utf-8"></script>
+<script type="text/javascript">
+    var apiready = function() {
+        api.openFrame({
+            name: 'chat_body',
+            url: 'chat_body.html',
+            rect: {
+                x: 0,
+                y: $api.offset(document.querySelector("header")).h,
+                h: "auto",
+            },
+            pageParam: {
+                user_id: api.pageParam.user_id
+            },
+            bounces: false,
+            bgColor: 'rgba(0,0,0,0)',
+            vScrollBarEnabled: false,
+            hScrollBarEnabled: false,
+            softInputMode:api.systemType =="android" ?"resize":"resize",
+            softInputBarEnabled:false,
+        });
+        PubApp.setCloseBtn(function(){
+
+
+          //“通知”列表页更新列表
+          api.sendEvent({
+              name: 'upFriendLists'
+          });
+
+        });
+    }
+</script>

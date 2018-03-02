@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.publish-item.select.addr .addr-text span {
+				text-align: right;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">免费申请</h1>
+		</div>
+		<div class="mui-content apply-free">
+			<div class="collect-item-goods">
+				<div class="top-row">
+					<div id="user_avatar" class="user-avatar img-box" style="background-image: url();"></div>
+					<b id="user_name" class="user-name"><!--李果果--></b>
+				</div>
+				<div class="goods-info">
+					<p id="goods_pic" class="goods-pic img-box" style="background-image: url();"></p>
+					<strong id="goods_info" class="goods-name"><!--iPhone7数据线  x1--></strong>
+				</div>
+			</div>
+			<div class="publish-edit">
+				<div id="apply_num" class="publish-item" style="display: none;">
+					<b class="item-name">申请数量</b>
+					<div class="select-number">
+						<i class="iconfont icon-jian"></i>
+						<!-- <span id="g_num" class="s-num">1</span> -->
+						<input id="g_num" type="number" value="1" />
+						<i class="iconfont icon-jia"></i>
+					</div>
+				</div>
+				<div id="btn_select_addr" class="publish-item select addr">
+					<b class="item-name">地址</b>
+					<div id="user_address">
+						<span id="unselected" class="item-text text-right">请选择地址</span>
+						<!-- <div class="addr-text">
+							<span>张飞13852643222</span>
+							<span>浙江省杭州市拱墅区丰登街341</span>
+							<span>某某小区20栋1单元302</span>
+						</div> -->
+					</div>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div class="publish-item normal reason">
+					<div class="upload-imgs">
+						<div class="apply-reason">
+							<span class="before-title">申请理由：</span>
+							<textarea id="apply_reason" placeholder="请输入申请理由"></textarea>
+						</div>
+						<div id="imgBox" style="display: inline-block">
+							<!--<div class="item img-box" style="background-image: url(../img_temp/upload-1.png);">
+								<i class="iconfont icon-cha"></i>
+							</div>-->
+						</div>
+						<div id="btn_upload" class="btn-upload">
+							<i class="iconfont icon-jiahao1"></i>
+							<span>上传图片</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="btn-submit atbot">确认申请</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				userAddress: {},
+				imgIndex: 0,
+				imgArray: [],
+				isshownum: 0,
+				init: function() {
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".btn-submit"));
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&goods_id=" + api.pageParam.data_id;
+
+					doAjax("Goods", "publicApply", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					var dataInfo = data.info;
+
+					if (dataInfo.isshownum == 1) {
+						thisPage.isshownum = 1;
+						document.getElementById("apply_num").style.display = 'block';
+					}
+
+					document.getElementById("user_avatar").style.backgroundImage = 'url('+toAbsUrl(dataInfo.UserHead)+')';
+					document.getElementById("user_name").innerText = dataInfo.NickName;
+					document.getElementById("goods_pic").style.backgroundImage = 'url('+toAbsUrl(dataInfo.goods_picture)+')';
+					document.getElementById("goods_info").innerHTML = dataInfo.goods_goodsname + '&nbsp;x' + dataInfo.goods_num;
+
+					/*默认地址*/
+					var addressInfo = data.info.addressInfo;
+					if (isset(addressInfo)) {
+
+						thisPage.userAddress.userAddress = addressInfo.adrress;
+						thisPage.userAddress.addrPhone = addressInfo.Tel;
+						thisPage.userAddress.addrRelname = addressInfo.Consignee;
+
+						document.getElementById("user_address").innerHTML = '<div class="addr-text">\
+																				<span>'+addressInfo.Consignee+" "+addressInfo.Tel+'</span>\
+																				<span>'+addressInfo.adrress+'</span>\
+																			</div>';
+					}
+				},
+				submit: function() {
+					var apply_reason = document.getElementById("apply_reason").value;
+
+					if (document.getElementById("g_num").value == "" || document.getElementById("g_num").value == 0) {
+						mui.toast("数量必须为大于0的数字");
+						return false;
+					}
+
+					if (document.getElementById("unselected")) {
+						PubApp.toast("请选择地址");
+						return false;
+					}
+
+					// if (apply_reason == "") {
+					// 	PubApp.toast("请输入申请理由");
+					// 	return false;
+					// }
+
+					api.showProgress({
+					    title: "提交中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&goods_id=" + api.pageParam.data_id;
+					urlParam += "&papply_realname=" + this.userAddress.addrRelname;
+					urlParam += "&papply_address=" + this.userAddress.userAddress;
+					urlParam += "&papply_apply_reason=" + apply_reason;
+					urlParam += "&papply_picture=" + imgSet.value;
+
+					if (thisPage.isshownum == 1) {
+						urlParam += "&papply_apply_num=" + document.getElementById("g_num").value;
+					} else {
+						urlParam += "&papply_apply_num=0";
+					}
+
+					doAjax("Goods", "publicApply_submit", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+							openWin("user_public");
+							setTimeout(function() {
+								api.closeWin();
+							}, 1000);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*需求量加减*/
+					var countNum = document.getElementById("g_num");
+					document.querySelector(".icon-jia").addEventListener("tap", function() {
+						countNum.value ++;
+					});
+					document.querySelector(".icon-jian").addEventListener("tap", function() {
+						if (countNum.value > 1) {
+							countNum.value --;
+						}
+					});
+
+					/*选择地址*/
+					document.querySelector("#btn_select_addr").addEventListener("tap", function() {
+						openWin("user_setting_address_manage");
+					});
+
+					/*upload image*/
+					window.imgSet = new Set();
+					var addImgView = function(imgurl) {
+						var imgNode = document.createElement("div");
+						imgNode.setAttribute("class","item img-box");
+						imgNode.style.backgroundImage = 'url('+imgurl+')';
+						imgNode.innerHTML = '<i data-value="'+imgurl+'" class="iconfont icon-cha btn_remove"></i>';
+						document.getElementById("imgBox").appendChild(imgNode);
+					};
+					document.getElementById("btn_upload").addEventListener("tap", function() {
+						if (imgSet.value.length == 3) {
+							mui.toast('最多上传3张图片');
+							return false;
+						}
+						getImgAndCrop(function(locationImgPath) {
+			                if (typeof locationImgPath == 'string') {
+			                	uploadimg(locationImgPath, function(remateurl) {
+						        	imgSet.add(remateurl);
+						        	addImgView(locationImgPath);
+				                });
+			                } else if (typeof locationImgPath == 'object') {
+			                	locationImgPath.forEach(function(item) {
+			     					uploadimg(item.path, function(remateurl) {
+							        	imgSet.add(remateurl);
+			     						addImgView(item.thumbPath);
+					                });
+			     				});
+			                }
+			            }, 500, 500, imgSet.value.length);
+					});
+					/*remove image*/
+					mui("#imgBox").on("tap", ".btn_remove", function() {
+						imgSet.remove(this.getAttribute("data-value"));
+						var parent = this.parentNode;
+						parent.parentNode.removeChild(parent);
+					});
+
+					/*监听地址选择事件*/
+					api.addEventListener({
+					    name: "userSelectAddress"
+					}, function(ret, err) {
+						thisPage.userAddress = ret.value;
+					    var htmlStr = 	'<div class="addr-text">' +
+											'<span>'+ret.value.userInfo+'</span>' +
+											'<span>'+ret.value.userAddress+'</span>' +
+										'</div>';
+					    document.getElementById("user_address").innerHTML = htmlStr;
+					});
+
+					/*确认申请*/
+					document.querySelector(".btn-submit").addEventListener("tap", function() {
+						thisPage.submit();
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

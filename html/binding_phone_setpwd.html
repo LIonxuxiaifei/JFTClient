@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<h1 class="mui-title">设置登录密码</h1>
+			<span class="btn-top-right iconfont icon-cha"></span>
+		</div>
+		<div class="mui-content">
+			<div class="input-row">
+				<input id="userPassword" type="password" placeholder="请输入密码" />
+			</div>
+			<div class="input-row">
+				<input id="confirmPassword" type="password" placeholder="请确认密码" />
+			</div>
+			<div class="btn-submit">完成</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					thisPage.addEvent();
+				},
+				submit: function() {
+					//get input value
+					var userPassword = document.getElementById("userPassword").value,
+						confirmPassword = document.getElementById("confirmPassword").value;
+					//verify
+					if (userPassword.length < 6) {
+						PubApp.toast("密码长度不能小于6");
+						return false;
+					}
+					if (confirmPassword != userPassword) {
+						PubApp.toast("两次密码不一致");
+						return false;
+					}
+					//show progress
+					api.showProgress({
+					    title: "提交中...",
+					    text: "请稍候",
+					    modal: true
+					});
+					//ajax
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&UserPass=" + userPassword;
+					doAjax("Member", "setPass", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							PubApp.toast("设置密码成功");
+							if (api.pageParam.from == "binding") {
+								//send event
+								api.sendEvent({
+			                        name: 'userloginorout'
+			                    });
+			                    api.sendEvent({
+			                        name: 'updateLocation'
+			                    });
+			                    //close to root
+								setTimeout(function() {
+									api.closeToWin({
+		                                name: "root",
+		                            });
+								}, 800);
+							} else {
+								//send event
+								api.sendEvent({
+			                        name: 'AlertUserInfo'
+			                    });
+			                    //close current window
+								setTimeout(function() {
+									api.closeWin();
+								}, 350);
+							}
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				addEvent: function() {
+					//submit
+					document.querySelector(".btn-submit").addEventListener("tap", function() {
+						thisPage.submit();					
+					});
+
+					//close window
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						if (api.pageParam.from == "binding") {
+							setTimeout(function() {
+								api.closeToWin({
+	                                name: "root",
+	                            });
+							}, 550);
+						} else {
+							api.closeWin();
+						}				
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

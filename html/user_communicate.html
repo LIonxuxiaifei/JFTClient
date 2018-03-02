@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.mui-bar .btn-top-left{font-size: 0.938em;}
+			.mui-bar .btn-top-right{font-size: 0.938em;color: #333;}
+			.mui-bar .btn-top-right.hascon{color: #E50014;}
+		</style>
+	</head>
+	<body class="color-white">
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left font">取消</span>
+			<h1 class="mui-title">评论</h1>
+			<span class="btn-top-right font">发送</span>
+		</div>
+		<div class="mui-content user-communicate">
+			<textarea id="com_content" oninput="thisPage.hasContent(this.value)" placeholder="写评论..."></textarea>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					thisPage.addEvent();
+				},
+				hasContent: function(value) {
+					if (value == "") {
+						document.querySelector(".btn-top-right").classList.remove("hascon");
+					} else {
+						document.querySelector(".btn-top-right").classList.add("hascon");
+					}
+				},
+				submit: function() {
+					var com_content = document.getElementById("com_content").value;
+
+					api.showProgress({
+					    title: "提交中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&goods_id=" + api.pageParam.data_id;
+					urlParam += "&type_key=" + api.pageParam.data_type;
+					urlParam += "&interflow_content=" + com_content;
+					
+					doAjax("Client", "interflow_add", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast("评论成功");
+
+							api.sendEvent({
+								name: "updateComList"
+							});
+
+							setTimeout(function() {
+								api.closeWin();
+							}, 550);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					document.querySelector(".btn-top-left").addEventListener("tap", function() {
+						api.closeWin();
+					});
+
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						if (this.classList.contains("hascon")) {
+							thisPage.submit();
+						}		
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

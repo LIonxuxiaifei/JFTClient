@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">房型详情</h1>
+		</div>
+		<div class="bot-control">
+			<div class="btn-item total">
+				<span class="total-text">合计 : <i id="page_total">95.00</i>元</span>
+			</div>
+			<div id="btn_bid" class="btn-item warning">我出价</div>
+		</div>
+		<div class="mui-content room-detail">
+			<div class="home-banner">
+				<div id="homeBanner" class="mui-slider">
+					<div id="img_array" class="mui-slider-group mui-slider-loop">
+						<div class="mui-slider-item mui-slider-item-duplicate">
+							<p class="img-box" style="background-image: url();"></p>
+						</div>
+						<!-- <div class="mui-slider-item">
+							<p class="img-box" style="background: url(../img_temp/room-img.png);"></p>
+						</div>
+						<div class="mui-slider-item">
+							<p class="img-box" style="background: url(../img_temp/room-img.png);"></p>
+						</div>
+						<div class="mui-slider-item">
+							<p class="img-box" style="background: url(../img_temp/room-img.png);"></p>
+						</div>
+						<div class="mui-slider-item mui-slider-item-duplicate">
+							<p class="img-box" style="background: url(../img_temp/room-img.png);"></p>
+						</div> -->
+					</div>
+					<div id="img_circle" class="mui-slider-indicator">
+						<!-- <div class="mui-indicator mui-active"></div>
+						<div class="mui-indicator"></div>
+						<div class="mui-indicator"></div> -->
+					</div>
+				</div>
+			</div>
+			<div class="room-info">
+				<h2 id="room_type"><!-- 大床房 (不含早) --></h2>
+				<!-- <span class="iconfont icon-chuang confi-icon"></span>
+				<strong>大床1.6M</strong> -->
+			</div>
+			<div class="other-info">
+				<ul id="room_info" class="confi-list">
+					<!-- <li>
+						<span class="iconfont icon-curtain confi-icon"></span>
+						<b>有窗</b>
+					</li>
+					<li>
+						<span class="iconfont icon-youkewuxianshangwangdegonggongquyu confi-icon"></span>
+						<b>WIFI</b>
+					</li>
+					<li>
+						<span class="iconfont icon-dianti confi-icon"></span>
+						<b>5-6层</b>
+					</li>
+					<li>
+						<span class="iconfont icon-pfm confi-icon"></span>
+						<b>18平米</b>
+					</li>
+					<li>
+						<span class="iconfont icon-chuang confi-icon"></span>
+						<b>宽带免费</b>
+					</li>
+					<li>
+						<span class="iconfont icon-changzhurenkou confi-icon"></span>
+						<b>可入住2人</b>
+					</li> -->
+				</ul>
+				<div class="use-rule">
+					<h2>使用规则</h2>
+					<div id="roomRule" style="margin-top: 10px;"></div>
+					<!-- <p>
+						1.入住请携带身份证，凭姓名和预定手机直接办理入住<br />
+						2.请于12：00之后入住并与次日12：00之前退房；如需提前入住后延迟退房，请咨询商家<br />
+						3.入住须押金，以前台为准
+					</p> -->
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "RoomId=" + api.pageParam.room_id;
+					
+					doAjax("Hotel", "getRoomDetail", urlParam, "post", function(rs) {
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data[0]);
+						} else {
+							api.hideProgress();
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				fillData: function(data) {
+					/*轮播图*/
+					var imgArray =  data.RoomPic;
+					var len = imgArray.length;
+					setTimeout(function() {
+						var img_array = document.getElementById("img_array");
+						var img_circle = document.getElementById("img_circle");
+						var img_html = "";
+						var circle_html = "";
+
+						var first_img = '<div class="mui-slider-item mui-slider-item-duplicate">' +
+											'<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[len-1])+');"></p>' +
+										'</div>';
+						var last_img = '<div class="mui-slider-item mui-slider-item-duplicate">' +
+											'<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[0])+');"></p>' +
+										'</div>';
+
+						for (var i = 0; i < len; i++) {
+							img_html += '<div class="mui-slider-item mui-slider-item-duplicate">' +
+											'<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[i])+');"></p>' +
+										'</div>';
+							if (i == 0) {
+								circle_html += '<div class="mui-indicator mui-active"></div>';
+							} else {
+								circle_html += '<div class="mui-indicator"></div>';
+							}
+						}
+
+						img_array.innerHTML = first_img + img_html + last_img;
+						img_circle.innerHTML = circle_html;
+
+						setTimeout(function(){
+							if (imgArray.length > 1) {
+								mui('#homeBanner').slider({interval: 5000});
+							}
+						}, 350);
+					}, 100);
+
+					document.getElementById("page_total").innerText = data.RoomPrice;
+					document.getElementById("room_type").innerText = data.RoomType;
+
+					var infoHtml = 	'<li>' +
+										'<span class="iconfont icon-curtain confi-icon"></span>\n' +
+										'<b>'+(data.IsWindow=='1'?'有':'无')+'窗</b>' +
+									'</li>' +
+									'<li>' +
+										'<span class="iconfont icon-youkewuxianshangwangdegonggongquyu confi-icon"></span>\n' +
+										'<b>'+(data.IsWifi=='1'?'有':'无')+'WIFI</b>' +
+									'</li>' +
+									'<li>' +
+										'<span class="iconfont icon-dianti confi-icon"></span>\n' +
+										'<b>'+data.Floor+'层</b>' +
+									'</li>' +
+									'<li>' +
+										'<span class="iconfont icon-pfm confi-icon"></span>\n' +
+										'<b>'+data.RoomArea+'平米</b>' +
+									'</li>' +
+									'<li>' +
+										'<span class="iconfont icon-chuang confi-icon"></span>\n' +
+										'<b>'+(data.IsFreeBroadband=='1'?'有':'无')+'宽带免费</b>' +
+									'</li>' +
+									'<li>' +
+										'<span class="iconfont icon-changzhurenkou confi-icon"></span>\n' +
+										'<b>可入住'+data.PeopleNum+'人</b>' +
+									'</li>';
+					document.getElementById("room_info").innerHTML = infoHtml;
+
+					document.getElementById("roomRule").innerHTML = pageControl.htmlDecode(data.Rule);
+
+					api.hideProgress();
+				},
+				addEvent: function() {
+					/*我出价*/
+					document.querySelector("#btn_bid").addEventListener("tap", function() {
+						var param = "hotel_id=" + api.pageParam.hotel_id;
+						param += "&room_id=" + api.pageParam.room_id;
+						param += "&room_type=" + api.pageParam.room_type;
+						param += "&room_price=" + api.pageParam.room_price;
+						param += "&old_price=" + api.pageParam.old_price;
+
+						if (isLogin() == true) {
+							openWin("haggle_detail_room_bid", param);
+						} else {
+							api.toast({ msg: "请先登录" });
+						}
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

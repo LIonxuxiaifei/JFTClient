@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">优惠券</h1>
+			<span class="btn-top-right font">规则</span>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+
+					/*打开子页面*/
+					api.openFrame({
+					    name: 'user_ticket',
+					    url: 'user_ticket_sub.html',
+					    vScrollBarEnabled: false,
+       					hScrollBarEnabled: false,
+       					bounces: false,
+					    rect: {
+					        x: 0,
+					        y: 0,
+					        w: 'auto',
+					        h: 'auto',
+					        marginTop: 44,
+					    },
+					    animation: {
+					    	type: 'none'
+					    },
+					    pageParam: {
+					        name: 'test'
+					    }
+					});
+				},
+				addEvent: function() {
+					/*规则*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						/* empty */		openWin("user_ticket_text");
+					});
+				},
+			};
+		</script>
+	</body>
+</html>

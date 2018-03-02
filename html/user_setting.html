@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">设置</h1>
+		</div>
+		<!-- <div id="share_box" class="action-sheet-control share hide">
+			<div class="dark"></div>
+			<div class="share-box">
+				<div class="title">分享至</div>
+				<ul class="btn-items">
+					<li class="item"><span class="btn img-box wechat"></span><b>微信</b></li>
+					<li class="item"><span class="btn img-box wechat-friend"></span><b>朋友圈</b></li>
+					<li class="item"><span class="btn img-box qq"></span><b>QQ</b></li>
+					<li class="item"><span class="btn img-box qzone"></span><b>QQ空间</b></li>
+				</ul>
+				<div class="btn-cancel">取消</div>
+			</div>
+		</div> -->
+		<div class="mui-content setting">
+			<ul class="setting-list">
+				<li id="user_info" class="special">
+					<b>个人资料</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="user_address">
+					<b>地址管理</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<!-- <li id="bind_email" class="special">
+					<b>绑定邮箱</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li> -->
+				<li id="change_phone_number">
+					<b>修改手机号</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="change_login_pwd">
+					<b>修改登录密码</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="change_pay_pwd">
+					<b>修改支付密码</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="help" class="special">
+					<b>帮助</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="about_us" class="">
+					<b>关于我们</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li>
+					<b>版本信息</b>
+					<span id="app_version" class="right-info">V0</span>
+				</li>
+				<li id="share_to">
+					<b>分享给朋友</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="clear_cache" class="special">
+					<b>清除缓存</b>
+					<span id="app_cache" class="right-info">0.0M</span>
+				</li>
+			</ul>
+			<div class="btn-submit">退出登录</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/api.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			var share_title = "邀请注册",
+				share_desc = "邀请注册",
+				share_pic = "Skin/img/share.png",
+				share_url = "http://jiafutong.iaapp.cn/index.php/app/Share/register/Pid/" + db2.getVal("user_pid");
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+					thisPage.addEvent();
+					PubApp.share();
+
+					//获取APP版本号
+					document.getElementById("app_version").innerHTML = "V" + api.appVersion;
+					//获取使用缓存大小
+					api.getCacheSize(function(ret) {
+					    var size = ret.size;
+					    document.getElementById("app_cache").innerHTML = (size / 1024 / 1024).toFixed(1) + "M";
+					});
+
+				},
+				addEvent: function() {
+					api.addEventListener({
+					    name:'resume'
+					}, function(ret, err){
+					    api.hideProgress();
+					});
+
+					/*个人资料*/
+					document.querySelector("#user_info").addEventListener("tap", function() {
+						openWin("user_info");
+					});
+
+					/*地址管理*/
+					document.querySelector("#user_address").addEventListener("tap", function() {
+						var param = "notSelect=1";
+						openWin("user_setting_address_manage", param);
+					});
+
+					/*修改手机号*/
+					document.querySelector("#change_phone_number").addEventListener("tap", function() {
+						openWin("user_setting_change_phone");
+					});
+
+					/*修改登录密码*/
+					document.querySelector("#change_login_pwd").addEventListener("tap", function() {
+						if (db2.getVal("user_issetloginpwd") == 0) { //password is not set
+							openWin("binding_phone_setpwd", "from=setting");
+						} else { //have set
+							openWin("user_setting_change_pwd");
+						}
+					});
+
+					/*修改支付密码*/
+					document.querySelector("#change_pay_pwd").addEventListener("tap", function() {
+						if (db2.getVal("user_issetpaypwd") == 0) { //payword is not set
+							openWin("user_setting_set_payword");
+						} else { //have set
+							openWin("user_setting_change_paypwd");
+						}
+					});
+
+					/*帮助*/
+					document.querySelector("#help").addEventListener("tap", function() {
+						openWin("user_setting_help");
+					});
+					/*关于我们*/
+					document.querySelector("#about_us").addEventListener("tap", function() {
+						openWin("user_setting_aboutus");
+					});
+
+					/*分享给朋友*/
+					document.querySelector("#share_to").addEventListener("tap", function() {
+						mask.show();
+            			$api.removeCls($api.dom("#share_box"), "hide");
+					});
+
+					/*退出登录*/
+					document.querySelector(".btn-submit").addEventListener("tap", function() {
+						PubApp.doLogout();
+					});
+
+					/*清除缓存*/
+					document.querySelector("#clear_cache").addEventListener("tap", function() {
+						api.confirm({
+						    title: '提醒',
+						    msg: '确定要清除缓存？',
+						    buttons: ['确定', '取消']
+						}, function(ret, err) {
+						    var index = ret.buttonIndex;
+						    if (index == 1) {
+								api.clearCache({
+									timeThreshold: 0 //清除多少天前的缓存
+								}, function() {
+								    api.toast({
+								        msg: "清除完成"
+								    });
+								    //更新缓存信息
+								    api.getCacheSize(function(ret) {
+									    var size = ret.size;
+									    document.getElementById("app_cache").innerHTML = (size / 1024 / 1024).toFixed(1) + "M";
+									});
+								});
+						    }
+						});
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body class="color-white">
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">投诉</h1>
+			<span class="btn-top-right font">提交</span>
+		</div>
+		<div class="mui-content feedback">
+			<textarea id="fb_content" class="content" placeholder="请输入投诉内容"></textarea>
+			<div class="upload-imgs">
+				<div id="imgBox" style="display: inline-block">
+					<!--<div class="item img-box" style="background-image: url(../img_temp/upload-1.png);">
+						<i class="iconfont icon-cha"></i>
+					</div>-->
+				</div>
+				<div id="btn_upload" class="btn-upload">
+					<i class="iconfont icon-jiahao1"></i>
+					<span>上传图片</span>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				imgIndex: 0,
+				imgArray: [],
+				init: function() {
+					pageControl.winBack();
+				},
+				requestData: function() {
+					/* empty */
+				},
+				fillData: function(data) {
+					/* empty */
+				},
+				submit: function() {
+					var fb_content = document.getElementById("fb_content").value;
+
+					if (fb_content == "") {
+						PubApp.toast("请输入投诉内容");
+						return false;
+					}
+
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + api.pageParam.order_id;
+					urlParam += "&content=" + fb_content;
+					urlParam += "&pic=" + imgSet.value;
+					
+					doAjax("Client", "complain", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast("投诉成功");
+							setTimeout(function() {
+								api.closeWin();
+							}, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*upload image*/
+					window.imgSet = new Set();
+					var addImgView = function(imgurl) {
+						var imgNode = document.createElement("div");
+						imgNode.setAttribute("class","item img-box");
+						imgNode.style.backgroundImage = 'url('+imgurl+')';
+						imgNode.innerHTML = '<i data-value="'+imgurl+'" class="iconfont icon-cha btn_remove"></i>';
+						document.getElementById("imgBox").appendChild(imgNode);
+					};
+					document.getElementById("btn_upload").addEventListener("tap", function() {
+						if (imgSet.value.length == 3) {
+							mui.toast('最多上传3张图片');
+							return false;
+						}
+						getImgAndCrop(function(locationImgPath) {
+			                if (typeof locationImgPath == 'string') {
+			                	uploadimg(locationImgPath, function(remateurl) {
+						        	imgSet.add(remateurl);
+						        	addImgView(locationImgPath);
+				                });
+			                } else if (typeof locationImgPath == 'object') {
+			                	locationImgPath.forEach(function(item) {
+			     					uploadimg(item.path, function(remateurl) {
+							        	imgSet.add(remateurl);
+			     						addImgView(item.thumbPath);
+					                });
+			     				});
+			                }
+			            }, 500, 500, imgSet.value.length);
+					});
+					/*remove image*/
+					mui("#imgBox").on("tap", ".btn_remove", function() {
+						imgSet.remove(this.getAttribute("data-value"));
+						var parent = this.parentNode;
+						parent.parentNode.removeChild(parent);
+					});
+
+					/*提交*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						thisPage.submit();				
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

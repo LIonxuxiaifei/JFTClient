@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">我的收藏</h1>
+		</div>
+		<div class="mui-content collect">
+			<ul id="pageList" class="collect-list">
+				<!-- <li class="collect-item-shops">
+					<p class="shops-pic img-box" style="background: url(../img_temp/collect-shops.png);"></p>
+					<div class="shops-info">
+						<div class="shops-name">七天连锁酒店</div>
+						<div class="other-info-row"><span>距您182公里</span></div>
+					</div>
+					<div class="price-info">
+						<div class="price-box">
+							<i class="m-icon">&yen;</i>
+							<span class="m-num">209</span>
+							<span class="m-end"></span>
+						</div>
+						<div class="old-price"></div>
+					</div>
+					<span class="btn-cancel-collect">取消收藏</span>
+				</li>
+				<li class="collect-item-shops">
+					<p class="shops-pic img-box" style="background: url(../img/no-pic.png);"></p>
+					<div class="shops-info">
+						<div class="shops-name">iphone6国行(型号:A1586)16G白银</div>
+						<div class="other-info-row"></div>
+					</div>
+					<div class="price-info">
+						<div class="price-box">
+							<i class="m-icon">&yen;</i>
+							<span class="m-num">209</span>
+							<span class="m-end">起</span>
+						</div>
+						<div class="old-price">原价 &yen; 300</div>
+					</div>
+					<span class="btn-cancel-collect">取消收藏</span>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					api.setWinAttr({
+					    bgColor: "#f2f2f2"
+					});
+
+					pageControl.winBack();
+					thisPage.addEvent();
+			
+					thisPage.requestData("history");
+					setTimeout(function() {
+			            thisPage.requestData("new");
+			        }, 350);
+			
+					/*初始化下拉刷新*/
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#eee",
+			            textColor: "#bbb",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData("new");
+			        });
+				},
+				requestData: function(dataFrom) {
+					window.cachename = api.frameName + api.winName + JSON.stringify(api.pageParam) + db2.getVal("user_token");
+			
+					dataFrom = dataFrom || "all";
+			
+					if (dataFrom != "new") {
+						db.getConfig(cachename, function(data) {
+							window.histroydata = data;
+							if (data != "" && (window.ajaxsuccess || 0) == 0) {
+								log("历史数据填充");
+								thisPage.fillData(JSON.parse(data));
+							}
+						});
+					}
+			
+					if (dataFrom == "history") return false;
+			
+					/*Ajax请求*/
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+			
+					var urlParam = "Token=" + db2.getVal("user_token");
+
+					doAjax("Member", "getCollectionList", urlParam, "post", function(rs) {
+						window.ajaxsuccess = 1;
+						
+						if (rs.ErrorCode == 1) {
+							var stringifyData = JSON.stringify(rs.Data);
+							if (window.histroydata != stringifyData || !rs.Data) {
+								db.setConfig(cachename, stringifyData);
+								thisPage.fillData(rs.Data);
+								log("使用最新数据渲染了");
+							} else {
+								log("与历史一致，不处理【" + window.histroydata + "】");
+							}
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+						
+						api.hideProgress();
+						api.refreshHeaderLoadDone();
+					});
+				},
+				fillData: function(data) {
+					var lists = data.lists;
+					var lists_html = "";
+					var endText = "";
+					var price = 0;
+					var picUrl = "";
+
+					if (isset(lists)) {
+						for (var i = 0; i < lists.length; i++) {
+							endText = lists[i].collection_type_key == "taojiahuanjia" ? "起" : "";
+							price = parseInt(lists[i].collection_goods_price);
+							picUrl = lists[i].collection_picture ? toAbsUrl(lists[i].collection_picture) : "../img/no-pic.png";
+
+							var originalHtml = "";
+							if (lists[i].collection_type_key == "taosihuo") {
+								originalHtml = '<div class="old-price">原价 &yen; '+parseInt(lists[i].collection_original_price)+'</div>'
+							}
+
+							lists_html += '<li class="collect-item-shops" data-id="'+lists[i].collection_gid+'" data-value="'+lists[i].collection_type_key+'" data-type="'+lists[i].cat_type+'">' +
+											'<p class="shops-pic img-box" style="background-image:url('+picUrl+');"></p>' +
+											'<div class="shops-info">' +
+												'<div class="shops-name">'+lists[i].collection_title+'</div>' +
+												'<div class="other-info-row"></div>' +
+											'</div>' +
+											'<div class="price-info">' +
+												'<div class="price-box">' +
+													'<i class="m-icon">&yen; </i>' +
+													'<span class="m-num">'+price+'</span>' +
+													'<span class="m-end"> '+endText+'</span>' +
+												'</div>' +
+												originalHtml +
+											'</div>' +
+											'<span class="btn-cancel-collect">取消收藏</span>' +
+										 '</li>';
+						}
+						document.getElementById("pageList").innerHTML = lists_html;
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">没有收藏记录</div>';
+					}
+
+					api.hideProgress();
+					api.refreshHeaderLoadDone();
+				},
+				removeCollect: function(control) {
+					api.showProgress({
+					    title: "",
+					    text: "",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&type_key=" + control.getAttribute("data-value");
+					urlParam += "&gid=" + control.getAttribute("data-id");
+
+					doAjax("Index", "cancelCollection", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+							window.histroydata = null;
+
+							setTimeout(function() {
+					            thisPage.requestData("new");
+					        }, 350);
+						} else {
+							PubApp.toast(rs.msg);
+						}
+					});
+				},
+				addEvent: function() {
+					/*取消收藏*/
+					mui("#pageList").on("tap", ".btn-cancel-collect", function() {
+						var data_id = this.parentNode.getAttribute("data-id");
+						var data_type = this.parentNode.getAttribute("data-value");
+						var parentControl = this.parentNode;
+						api.confirm({
+						    title: '提示',
+						    msg: '确定要删除该条收藏?',
+						    buttons: ['确定', '取消']
+						}, function(ret, err) {
+						    var index = ret.buttonIndex;
+						    if (index == 1) {
+						    	//thisPage.removeCollect(data_id, data_type);
+						    	thisPage.removeCollect(parentControl);
+						    }
+						});
+
+						return false;
+					});
+
+					/*详情链接*/
+					mui("#pageList").on("tap", "li", function() {
+						var data_value = this.getAttribute("data-value");
+						var data_id = this.getAttribute("data-id");
+						var data_type = this.getAttribute("data-type");
+						var param = "";
+
+						switch (data_value) {
+							case "taojiahuanjia":
+								param = "hotal_id=" + data_id;
+								openWin("haggle_detail", param);
+								break;
+							case "weigongyi":
+								param = "page_id=" + data_id;
+								openWin("list_public_detail", param);
+								break;
+							case "taosihuo":
+								param = "page_id=" + data_id;
+								openWin("list_tao_detail", param);
+								break;
+							case "huanhuo":
+								param = "page_id=" + data_id;
+								openWin("list_exchange_detail", param);
+								break;
+							default:
+								param = "id=" + data_id;
+								param += "&type_key=" + data_value;
+								param += "&ser_type=" + data_type;
+								openWin("service_detail", param);
+								break;
+						}
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

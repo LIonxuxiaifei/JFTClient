@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">订单详情</h1>
+			<span class="btn-top-right font">投诉</span>
+		</div>
+		<div id="unpaid" class="bot-control haggle" style="display: none;">
+			<div class="btn-item btn_cancel">取消订单</div>
+			<div class="btn-item warning btn_pay">立即付款</div>
+		</div>
+		<div id="btn_refund" class="bot-control haggle" style="display: none;">
+			<div class="btn-item warning after-line btn_refuse">拒绝退款</div>
+			<div class="btn-item warning btn_agree">确认退款</div>
+		</div>
+		<div class="mui-content order-detail-tao">
+			<div class="order-list">
+				<div class="item">
+					<div class="order-top-info bot-line">
+						<div id="user_avatar" class="user-avatar img-box" style="background-image: url();"></div>
+						<b id="user_name" class="user-name"><!--李果果--></b>
+						<span id="order_status_name" class="order-status warning"><!--待支付--></span>
+					</div>
+					<div class="order-mid-info bot-line">
+						<div class="outer-box">
+							<div class="order-pic img-box" style="background-image: url();"></div>
+							<div class="order-main">
+								<div class="order-name"><!--iphone6国行(型号:A1586)16G白银--></div>
+								<div class="other-info"><!--自提--></div>
+							</div>
+							<div class="price-info">
+								<!--<div class="price-box">
+									<i class="m-icon">吐血价&yen;</i>
+									<span class="m-num">209</span>
+								</div>
+								<div class="old-price">原价&yen;300</div>-->
+							</div>
+						</div>
+						<!-- <div id="btnRefund" class="status-refund" style="color: #999;">申请退款</div> -->
+					</div>
+					<div class="order-price-info bot-line">
+						<div class="total">合计 : &nbsp;<i id="order_total">0.00</i>元</div>
+					</div>
+					<div id="btn_call" class="order-bot-tel">
+						<i class="iconfont icon-rexian"></i>
+						<span>联系对方</span>
+					</div>
+				</div>
+			</div>
+			<div id="refund_reason" class="order-refund-reason" style="display: none;">
+				<h2>退款理由</h2>
+				<p>理由描述</p>
+				<ul class="pics">
+					<!-- <li class="img-box" style="background-image: url(../img_temp/collect-goods.png);"></li> -->
+				</ul>
+			</div>
+			<div id="order_info_block">
+				<!--<div class="order-info-block">
+					<div class="item">订单编号：<i>1234567890</i></div>
+					<div class="item">下单时间：<i>2016-12-10 15:30:10</i></div>
+					<div class="item">数量：<i>1件</i></div>
+					<div class="item">总价：<i>95元</i></div>
+					<div class="item">收货人：<i>张飞</i></div>
+					<div class="item">联系电话：<i>13838383855</i></div>
+					<div class="item">收货地址：<i>浙江省杭州市拱墅区丰登街333号</i></div>
+					<div class="item">卖货人：<i>张飞</i></div>
+					<div class="item">联系电话：<i>13838383855</i></div>
+					<div class="item">收货地址：<i>浙江省杭州市拱墅区丰登街333号</i></div>
+				</div>-->
+			</div>
+			<div id="commentContainer" class="user-center" style="margin-top: 10px;"></div>
+			<div id="btn_shipped" class="btn-submit atbot" style="display: none;">已发货</div>
+			<div id="btn_confirm" class="btn-submit atbot" style="display: none;">确认收货</div>
+			<div id="btn_comment" class="btn-submit atbot" style="display: none;">评价</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				telephone: "",
+				pageType: 0,
+				refundStatus: null,
+				init: function() {
+					pageControl.winBack();
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + api.pageParam.order_id;
+					urlParam += "&type_key=" + api.pageParam.order_type;
+					
+					doAjax("Client", "orderDetails", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: "获取网络失败" });
+							//api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					thisPage.pageType = data.is_seller;
+
+					/*重置按钮显示*/
+					document.getElementById("btn_shipped").style.display = 'none';
+					document.getElementById("btn_confirm").style.display = 'none';
+					document.getElementById("btn_comment").style.display = 'none';
+					document.getElementById("unpaid").style.display = 'none';
+					document.getElementById("btn_refund").style.display = 'none';
+
+					var orderInfo = data.orderInfo;
+					document.querySelector(".order-mid-info").setAttribute("data-id", orderInfo.order_gid);
+
+					/*联系电话*/
+					if (data.is_seller == 0) { //买家
+						document.querySelector("#btn_call span").innerText = "联系卖家";
+						thisPage.telephone = orderInfo.order_username;
+					} else { //卖家
+						document.querySelector("#btn_call span").innerText = "联系买家";
+						thisPage.telephone = orderInfo.order_phone;
+					}
+
+					/*用户信息*/
+					document.getElementById("user_avatar").style.backgroundImage = 'url('+toAbsUrl(orderInfo.UserHead)+')';
+					document.getElementById("user_avatar").setAttribute("data-id", orderInfo.Mid);
+					document.getElementById("user_name").innerHTML = orderInfo.NickName;
+
+					/*订单状态信息*/
+					document.getElementById("order_status_name").innerText = orderInfo.order_vstatus_name;
+
+					/*状态模块*/
+					var refundHtml = ""; //买家退款状态
+					if (data.is_seller == 0) { //买入
+						switch (orderInfo.order_status) {
+							case "1": //待支付
+								document.getElementById("unpaid").style.display = 'block';
+								break;
+							case "2": //待卖家发货
+								break;
+							case "3": //待收货
+								document.getElementById("btn_confirm").style.display = 'block';
+								break;
+							case "4": //已完成
+								if (orderInfo.order_is_comment == 0) { //待评价
+									document.getElementById("btn_comment").style.display = 'block';
+								}
+								break;
+							default:
+								break;
+						}
+
+						//买家申请退款
+						if (orderInfo.order_status > 1) {
+							if (orderInfo.order_is_refund == 0) {
+								thisPage.refundStatus = 0;
+								refundHtml = '<div id="btnRefund" class="status-refund" style="color: #999;">申请退款</div>';
+							} else if (orderInfo.order_is_refund == 1) {
+								thisPage.refundStatus = 1;
+								refundHtml = '<div id="btnRefund" class="status-refund" style="color: #e88510;">退款申请中</div>';
+							} else if (orderInfo.order_is_refund == 3) {
+								thisPage.refundStatus = 3;
+								refundHtml = '<div id="btnRefund" class="status-refund" style="color: #e88510;">退款成功</div>';
+							} else if (orderInfo.order_is_refund == 4) {
+								thisPage.refundStatus = 4;
+								refundHtml = '<div id="btnRefund" class="status-refund" style="color: #f00;">退款失败</div>';
+							}
+						}
+					} else { //卖出
+						switch (orderInfo.order_status) {
+							case "1": //待买家支付
+								break;
+							case "2": //待发货
+								document.getElementById("btn_shipped").style.display = 'block';
+								break;
+							case "3": //已发货
+								break;
+							case "4": //已完成
+								if (orderInfo.order_is_comment == 0) { //待评价
+									document.getElementById("btn_comment").style.display = 'block';
+								}
+								break;
+							default:
+								break;
+						}
+
+						if (orderInfo.order_is_refund == 1) { //买家申请退款
+							document.getElementById("btn_refund").style.display = 'block';
+						}
+					}
+
+					/*商品信息*/
+					var oldPrice = ""; //原价
+					if (parseInt(orderInfo.order_old_price) > 0) {
+						oldPrice = '<div class="old-price">原价&yen;'+parseInt(orderInfo.order_old_price)+'</div>';
+					}
+
+					var goodsHtml = '<div class="outer-box">' +
+										'<div class="order-pic img-box" style="background-image: url('+toAbsUrl(orderInfo.order_picture)+');"></div>' +
+										'<div class="order-main">' +
+											'<div class="order-name">'+orderInfo.order_goodsname+'</div>' +
+											'<div class="number">数量 : &nbsp;<i>'+orderInfo.order_num+'</i></div>' +
+											'<div class="other-info">'+orderInfo.order_freight_mode+'</div>' +
+										'</div>' +
+										'<div class="price-info">' +
+											'<div class="price-box">' +
+												'<i class="m-icon">吐血价&yen;</i>\n' +
+												'<span class="m-num">'+orderInfo.order_price.split(".")[0]+'</span><span class="m-num-deci">.'+orderInfo.order_price.split(".")[1]+'</span>' +
+												'<i class="m-icon">/'+orderInfo.order_unit+'</i>'+
+												oldPrice +
+											'</div>' +
+										'</div>' +
+									'</div>' +
+									refundHtml;
+
+					document.querySelector(".order-mid-info").innerHTML = goodsHtml;
+
+					/*合计*/
+					if (orderInfo.order_is_refund > 2) {
+						document.querySelector(".total").innerHTML = '退款 : &nbsp;<i id="order_total">'+orderInfo.order_total+'</i>元';
+					}
+					document.getElementById("order_total").innerText = orderInfo.order_total;
+
+					/*退款原因*/
+					if (data.refundInfo && data.refundInfo!= "") {
+						document.querySelector("#refund_reason p").innerText = data.refundInfo.refund_refund_reason;
+
+						var picHtml = "";
+						data.refundInfo.refund_picture.forEach(function(item) {
+							picHtml += '<li class="img-box" style="background-image: url('+toAbsUrl(item)+');"></li>'
+						});
+						document.querySelector("#refund_reason .pics").innerHTML = picHtml;
+
+						document.getElementById("refund_reason").style.display = 'block';
+					}
+
+					/*订单信息*/
+					var sellerInfo = "";
+					if (orderInfo.order_freight_mode == "自提") {
+						sellerInfo = 	'<div class="item">卖货人：<i>'+orderInfo.RealName+'</i></div>' +
+										'<div class="item">联系电话：<i>'+orderInfo.order_username+'</i></div>' +
+										'<div class="item">自提地址：<i>'+orderInfo.order_seller_address+'</i></div>';
+					}
+					document.getElementById("order_info_block").innerHTML = '<div class="order-info-block">' +
+																				'<div class="item">订单编号：<i>'+orderInfo.order_number+'</i></div>' +
+																				'<div class="item">下单时间：<i>'+orderInfo.order_create_time+'</i></div>' +
+																				'<div class="item">数量：<i>'+orderInfo.order_num+'件</i></div>' +
+																				'<div class="item">总价：<i>'+parseInt(orderInfo.order_total)+'元</i></div>' +
+																				'<div class="item">收货人：<i>'+orderInfo.order_truename+'</i></div>' +
+																				'<div class="item">联系电话：<i>'+orderInfo.order_phone+'</i></div>' +
+																				'<div class="item">收货地址：<i>'+orderInfo.order_address+'</i></div>' +
+																				sellerInfo +
+																			'</div>';
+
+					//评论信息
+					var commentInfo = data.comment;
+					if (isset(commentInfo)) {
+						var commentContainer = document.getElementById('commentContainer');
+						//评分
+						var scoreNum = Number(commentInfo.commen_score);
+						var starHtml = '<div class="bot-bg"><div class="top-bg level-'+Math.round(scoreNum)+'"></div></div>';
+
+						//图片
+						var comPicList = commentInfo.commen_picture;
+						var comPicHtml = "";
+						comPicList.forEach(function(item) {
+							comPicHtml += '<p class="pic-item img-box" style="background-image: url('+toAbsUrl(item)+');"></p>'
+						});
+
+						//回复
+						var replyHtml = "";
+						if (commentInfo.reply && commentInfo.reply != '') {
+							replyHtml = '<div class="reply">\
+											<i class="iconfont icon-07"></i>\
+											<div class="reply-info">\
+												<span class="reply-person">回复 : </span>\
+												<span class="reply-content">'+commentInfo.reply+'</span>\
+											</div>\
+										</div>';
+						}
+
+						commentContainer.innerHTML = '<ul class="comment-list active">\
+														<li>\
+															<div class="user-avatar img-box" style="background-image: url('+toAbsUrl(commentInfo.UserHead)+');"></div>\
+															<div class="com-time">'+commentInfo.commen_create_time+'</div>\
+															<div class="com-info">\
+																<div class="com-person">'+commentInfo.commen_username+'</div>\
+																<div class="grade">\
+																	<span>打分</span>\
+																	<div class="star-level">'+starHtml+'</div>\
+																</div>\
+																<p class="com-content">'+commentInfo.commen_content+'</p>\
+																<div class="pics">'+comPicHtml+'</div>\
+															</div>\
+															'+replyHtml+'\
+														</li>\
+													</ul>';
+					}
+
+				},
+				doCancelOrder: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+					
+					doAjax("Client", "order_cancel", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				doFinishOrder: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+					
+					doAjax("Client", "order_finish", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				doConfirmSend: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+					
+					doAjax("Client", "order_send", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				doVerifyRefund: function(id, status) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+					urlParam += "&act=submit";
+					urlParam += "&refund_status=" + status;
+					
+					doAjax("Client", "order_verify_refund", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*投诉*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						var param = "order_id=" + api.pageParam.order_id;
+						openWin("user_complaint", param);			
+					});
+					
+					/*联系电话*/
+					document.querySelector("#btn_call").addEventListener("tap", function() {
+						if (thisPage.telephone != "") {
+							var tel_number = thisPage.telephone;
+							api.confirm({
+							    title: '提示',
+							    msg: '是否拨打' + tel_number,
+							    buttons: ['拨打', '取消']
+							}, function(ret, err) {
+								if (ret.buttonIndex == 1) {
+									api.call({
+									    type: 'tel',
+									    number: tel_number
+									});
+								}
+							});
+						}
+					});
+
+					/*取消订单*/
+					document.querySelector(".btn_cancel").addEventListener("tap", function() {
+						api.confirm({
+						    title: '提示',
+						    msg: '是否取消订单?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doCancelOrder(api.pageParam.order_id);
+							}
+						});
+					});
+
+					/*立即支付*/
+					document.querySelector(".btn_pay").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.order_id;
+						openWin("order_pay", param);
+					});
+
+					/*同意退款*/
+					document.querySelector(".btn_agree").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.order_id;
+						api.confirm({
+						    title: '提示',
+						    msg: '是否同意退款?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doVerifyRefund(api.pageParam.order_id, "1");
+							}
+						});
+					});
+
+					/*拒绝退款*/
+					document.querySelector(".btn_refuse").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.order_id;
+						api.confirm({
+						    title: '提示',
+						    msg: '是否拒绝退款?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doVerifyRefund(api.pageParam.order_id, "2");
+							}
+						});
+					});
+
+					/*确认收货*/
+					document.querySelector("#btn_confirm").addEventListener("tap", function() {
+						api.confirm({
+						    title: '提示',
+						    msg: '是否确认收货?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doFinishOrder(api.pageParam.order_id);
+							}
+						});		
+					});
+
+					/*确认发货（已发货）*/
+					document.querySelector("#btn_shipped").addEventListener("tap", function() {
+						api.confirm({
+						    title: '提示',
+						    msg: '是否确认发货?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doConfirmSend(api.pageParam.order_id);
+							}
+						});			
+					});
+
+					/*评价*/
+					document.querySelector("#btn_comment").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.order_id;
+						
+						if (thisPage.pageType == 0) {
+							openWin("user_evaluate", param);
+						} else {
+							param += "&type=other";
+							openWin("user_evaluate_reply", param);
+						}
+					});
+
+					//申请退款
+					mui(".order-mid-info").on("tap", ".status-refund", function() {
+						if (thisPage.refundStatus == 0) {
+							openWin("order_detail_refund", "order_id=" + api.pageParam.order_id);
+						}
+					});
+
+					/*头像*/
+					document.getElementById("user_avatar").addEventListener("tap", function() {
+						var dataId = this.getAttribute("data-id");
+						api.openWin({
+						    name: 'user_center_'+dataId,
+						    url: './user_center_person.html',
+						    pageParam: {
+						        user_id: dataId
+						    }
+						});
+					});
+
+					/*商品详情*/
+					document.querySelector(".order-mid-info").addEventListener("tap", function() {
+						var param = "page_id=" + this.getAttribute("data-id");
+						openWin("list_tao_detail", param);
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

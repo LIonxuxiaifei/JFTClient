@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../css/mui.dtpicker.css" />
+		<link rel="stylesheet" href="../css/mui.picker.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.mui-dtpicker-title{display: block;background-color: #fff;}
+			.mui-dtpicker-title h5{background-color: #fff;}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">我出价</h1>
+		</div>
+		<div class="bot-control">
+			<div class="btn-item total">
+				<span class="total-text">合计 : <i id="page_total">0.00</i>元</span>
+			</div>
+			<div id="btn_orders" class="btn-item warning">我出价</div>
+		</div>
+		<div class="mui-content user-bid">
+			<div class="top-info">
+				<b id="room_type"><!--大床房--></b>
+				<strong id="room_info"><!--大床|无早餐--></strong>
+				<div class="collect-item-goods">
+					<div class="price-info">
+						<!--<div class="price-box">
+							<i class="m-icon">&yen;</i>
+							<span class="m-num">109</span>
+						</div>
+						<div class="old-price">原价 &yen; 300</div>-->
+					</div>
+				</div>
+			</div>
+			<div class="tips">
+				<i class="iconfont icon-tips"></i>
+				<strong>您出价后，酒店根据您的出价和其他情况为您报价，如果不满意，可以重新出价；还价过程需要等待，但比直订便宜许多！</strong>
+			</div>
+			<div class="info-in">
+				<div class="item time">
+					<div class="date">
+						<span>
+							入店时间&nbsp;
+							<em id="date_checkin">请选择</em>&nbsp;
+							<strong id="week_checkin"><!--周六--></strong>
+							&nbsp;~&nbsp;
+							离店时间&nbsp;
+							<em id="date_leave">请选择</em>&nbsp;
+							<strong id="week_leave"><!--周日--></strong>
+						</span>
+					</div>
+					<span class="date-all">共<b id="nightNum">0</b>晚</span>
+				</div>
+				<div class="item">
+					<b class="item-name">房间数量</b>
+					<span class="item-text"><i id="roomNum">1</i>间</span>
+					<div class="select-number">
+						<i class="iconfont icon-jian"></i>
+						<span id="g_num" class="s-num">1</span>
+						<i class="iconfont icon-jia"></i>
+					</div>
+				</div>
+				<div class="item inpt">
+					<b class="item-name">我的出价</b>
+					<input id="user_price" type="number" placeholder="请输入您的出价" />
+				</div>
+				<div class="item inpt">
+					<b class="item-name">入住人</b>
+					<input id="user_name" type="text" placeholder="请输入入住人姓名" />
+				</div>
+				<div class="item inpt">
+					<b class="item-name">联系手机</b>
+					<input id="user_phone" type="number" placeholder="请输入联系手机" />
+				</div>
+				<div class="item">
+					<b class="item-name" id="count_room_num">共1间</b>
+					<span class="total">合计: &nbsp;&nbsp;<i id="price_total">&yen; 0</i></span>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.dtpicker.js" ></script>
+		<script type="text/javascript" src="../js/mui.picker.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+				thisPage.setPhone();
+			};
+			var thisPage = {
+				nightNum:0,
+				dateCheckin: new Date(), //入店日期
+				dateLeave: new Date(new Date().getTime() + 24*60*60*1000), //离店日期
+				priceSingle: 0,
+				init: function() {
+					var tempYear = thisPage.dateCheckin.getFullYear(),
+							tempMonth = thisPage.dateCheckin.getMonth(),
+							tempDay = thisPage.dateCheckin.getDate(),
+							tempNextDay = tempDay + 1;
+					thisPage.dateCheckin = 	new Date(tempYear,tempMonth,tempDay,"01","00","00");
+					thisPage.dateLeave =  new Date(tempYear,tempMonth,tempNextDay,"01","00","00");
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".bot-control"));
+
+					setTimeout(function() {
+			            thisPage.fillData();
+			        }, 350);
+
+			        /*设置默认日期*/
+					var curDate = new Date();
+					var nextDate = new Date(curDate.getTime() + 24*60*60*1000);
+					document.getElementById("date_checkin").innerText = (curDate.getMonth() + 1) + "." + curDate.getDate();
+					document.getElementById("week_checkin").innerText = thisPage.getDayStr(curDate.getDay());
+					document.getElementById("date_leave").innerText = (nextDate.getMonth() + 1) + "." + nextDate.getDate();
+					document.getElementById("week_leave").innerText = thisPage.getDayStr(nextDate.getDay());
+
+					thisPage.setNightNum();
+				},
+				fillData: function() {
+					/*初始化日期选择器*/
+					window.picker_checkin = new mui.DtPicker({
+					    type: "monthday",
+					    beginDate: new Date()
+					});
+					window.picker_leave = new mui.DtPicker({
+					    type: "monthday",
+					    beginDate: new Date()
+					});
+
+					thisPage.priceSingle = api.pageParam.room_price;
+
+					document.getElementById("page_total").innerText = new Number(api.pageParam.room_price).toFixed(2);
+					document.getElementById("price_total").innerHTML = '&yen; ' + api.pageParam.room_price;
+					document.getElementById("room_type").innerText = api.pageParam.room_type;
+					document.getElementById("room_info").innerText = api.pageParam.room_type;
+					document.querySelector(".price-info").innerHTML = 	'<div class="price-box">' +
+																			'<i class="m-icon">&yen;</i>' +
+																			'<span class="m-num">'+api.pageParam.room_price+'</span>' +
+																		'</div>' +
+																		'<div class="old-price">原价 &yen;'+api.pageParam.old_price+'</div>';
+				},
+				getDayStr: function(getDayNum) {
+					var weekStr = "";
+					switch(getDayNum) {
+						case 0:
+							weekStr = "周日";
+							break;
+						case 1:
+							weekStr = "周一";
+							break;
+						case 2:
+							weekStr = "周二";
+							break;
+						case 3:
+							weekStr = "周三";
+							break;
+						case 4:
+							weekStr = "周四";
+							break;
+						case 5:
+							weekStr = "周五";
+							break;
+						case 6:
+							weekStr = "周六";
+							break;
+						default:
+							break;
+					}
+					return weekStr;
+				},
+				setPhone:function(){
+						var urlParam = "token=" + db2.getVal("user_token");
+						doAjax("Member", "getUserTel", urlParam, "post", function(rs) {
+							if (rs.ErrorCode == 1) {
+										document.getElementById('user_phone').value = rs.Data;
+							} else {
+
+							}
+						});
+				},
+				setPrice:function(num){
+					var countNum = Number(document.getElementById("g_num").innerText);
+					var nightNum = thisPage.nightNum;
+					var priceTotal = document.getElementById("price_total");
+					var pageTotal = document.getElementById("page_total");
+					if(nightNum == 0){nightNum =1};
+					var currentPrice = (thisPage.priceSingle * countNum * nightNum).toFixed(2);
+					pageTotal.innerText = currentPrice;
+					priceTotal.innerHTML = '&yen; ' + currentPrice;
+				},
+				selectDay:function(b,e){
+					 var begintime = b.getTime();
+					 var endtime = e.getTime();
+					 var nTime = endtime-begintime;
+					 var day =Math.floor(nTime/86400000);
+						return day;
+				},
+				setNightNum: function() {
+					//  ((thisPage.dateLeave.getTime() -  thisPage.dateCheckin.getTime())/(1000 * 60 * 60 * 24)).toFixed(0);
+					var nightNum =  thisPage.selectDay(thisPage.dateCheckin,thisPage.dateLeave);
+					if (nightNum > 0) {
+						document.getElementById("nightNum").innerText = nightNum;
+						thisPage.nightNum = Number(nightNum);
+					} else {
+						document.getElementById("nightNum").innerText = 0;
+						thisPage.nightNum = 0;
+					}
+					thisPage.setPrice();
+				},
+				submit: function() {
+					var nightNum = document.getElementById("nightNum").innerText;
+					var user_price = document.getElementById("user_price").value;
+					var user_name = document.getElementById("user_name").value;
+					var user_phone = document.getElementById("user_phone").value;
+
+					if (nightNum == 0) {
+						api.toast({ msg: "离店时间有误" });
+						return false;
+					}
+
+					if (user_price == "") {
+						api.toast({ msg: "请输入您的出价" });
+						return false;
+					}
+
+					if (user_name == "") {
+						api.toast({ msg: "请输入入住人姓名" });
+						return false;
+					}
+
+					var rule_phone = new RegExp(/^(1[0-9]{2})+\d{8}$/i);
+					if (!rule_phone.test(user_phone)) {
+						api.toast({ msg: "手机号不正确" });
+						return false;
+					}
+
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_seller_id=" + api.pageParam.hotel_id;
+					urlParam += "&order_type_key=taojiahuanjia";
+
+					urlParam += "&order_price=" + api.pageParam.room_price;
+					urlParam += "&order_old_price=" + api.pageParam.old_price;
+					urlParam += "&order_goodsname=" + api.pageParam.room_type;
+
+					urlParam += "&order_start_time=" + Math.round(thisPage.dateCheckin.getTime()/1000);
+					urlParam += "&order_end_time=" + Math.round(thisPage.dateLeave.getTime()/1000);
+
+					urlParam += "&order_num=" + document.getElementById("g_num").innerText;
+
+					urlParam += "&order_price_p1=" + user_price;
+					urlParam += "&order_truename=" + user_name;
+					urlParam += "&order_phone=" + user_phone;
+
+					urlParam += "&room_id=" + api.pageParam.room_id;
+
+					//alert(Math.round(thisPage.dateCheckin.getTime()/1000));
+
+
+
+					doAjax("Hotel", "addOffer", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							PubApp.toast("出价成功");
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							api.sendEvent({
+							    name: "gotoOrderList"
+							});
+							setTimeout(function() {
+								api.closeToWin({
+								    name: "root"
+								});
+							}, 350);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+
+				},
+				addEvent: function() {
+					var curDate = new Date();
+					/*选择入店时间*/
+					document.getElementById("date_checkin").addEventListener("tap", function() {
+						window.picker_checkin.show(function(items) {
+						    // var dateStr = curDate.getFullYear() + "-" + items.value;
+								var tempData = items.value.split('-');
+								var monthNum = Number(tempData[0])-1;
+						    var selectDate = new Date(curDate.getFullYear(),monthNum,tempData[1],"01","00","00");
+						    var selectDateWeek = thisPage.getDayStr(selectDate.getDay());
+
+						    thisPage.dateCheckin = selectDate;
+
+						    document.getElementById("date_checkin").innerText = Number(items.m.text) + "." + Number(items.d.text);
+						    document.getElementById("week_checkin").innerText = selectDateWeek;
+
+						   thisPage.setNightNum();
+						});
+					});
+
+					/*选择离店日期*/
+					document.getElementById("date_leave").addEventListener("tap", function() {
+						window.picker_leave.show(function(items) {
+						    // var dateStr = curDate.getFullYear() + "-" + items.value;
+								var tempData = items.value.split('-');
+								var monthNum = Number(tempData[0])-1;
+						    var selectDate = new Date(curDate.getFullYear(),monthNum,tempData[1],"01","00","00");
+						    var selectDateWeek = thisPage.getDayStr(selectDate.getDay());
+
+						    thisPage.dateLeave = selectDate;
+
+						    document.getElementById("date_leave").innerText = Number(items.m.text) + "." + Number(items.d.text);
+						    document.getElementById("week_leave").innerText = selectDateWeek;
+
+						    thisPage.setNightNum();
+						});
+					});
+
+					/*数量加减*/
+					var countNum = document.getElementById("g_num");
+					document.querySelector(".icon-jia").addEventListener("tap", function() {
+						countNum.innerText ++;
+						document.getElementById("roomNum").innerText = countNum.innerText;
+						document.getElementById('count_room_num').innerText = "共" +countNum.innerText+ "间";
+						thisPage.setPrice();
+					});
+					document.querySelector(".icon-jian").addEventListener("tap", function() {
+						if (countNum.innerText > 1) {
+							countNum.innerText --;
+							document.getElementById("roomNum").innerText = countNum.innerText;
+							document.getElementById('count_room_num').innerText = "共" +countNum.innerText+ "间";
+							thisPage.setPrice();
+						}
+					});
+
+					/*我出价*/
+					document.querySelector("#btn_orders").addEventListener("tap", function() {
+						thisPage.submit();
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">现金金额</h1>
+		</div>
+		<div class="mui-content balance">
+			<header>
+				<div class="price-box">
+					<i class="m-icon">&yen;</i><span id="user_balance" class="m-num">0.00</span>
+				</div>
+				<div class="btn-box">
+					<span id="btn_recharge" class="btn-item">充值</span>
+					<span id="btn_withdraw" class="btn-item">提现</span>
+				</div>
+			</header>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+					thisPage.getBalanceInfo();
+					thisPage.addEvent();
+
+					/*打开子页面*/
+					api.openFrame({
+					    name: 'user_balance_sub',
+					    url: 'user_balance_sub.html',
+					    vScrollBarEnabled: false,
+       					hScrollBarEnabled: false,
+       					bounces: false,
+					    rect: {
+					        x: 0,
+					        y: 0,
+					        w: 'auto',
+					        h: 'auto',
+					        marginTop: 188,
+					    },
+					    animation: {
+					    	type: 'none'
+					    },
+					    pageParam: {
+					        name: 'test'
+					    }
+					});
+				},
+				getBalanceInfo: function() {
+					var urlParam = "token=" + db2.getVal("user_token");
+					doAjax("member", "getUserMoney", urlParam, "post", function(rs) {
+						if (rs.code == 1) {
+								db2.setVal("user_balance",rs.data)
+								document.getElementById("user_balance").innerHTML = rs.data;
+						} else {
+								PubApp.toast(rs.msg);
+						}
+					});
+
+				},
+				addEvent: function() {
+					/*用户信息更新监听*/
+					api.addEventListener({
+						name: "updataUserInfo"
+					}, function(ret, err) {
+						log("收到用户信息更新广播");
+						thisPage.getBalanceInfo();
+					});
+
+					/*充值*/
+					document.querySelector("#btn_recharge").addEventListener("tap", function() {
+						openWin("user_balance_recharge");
+					});
+
+					/*提现*/
+					document.querySelector("#btn_withdraw").addEventListener("tap", function() {
+						var param = "user_balance=" + document.getElementById("user_balance").innerText;
+						openWin("user_balance_withdraw", param);
+					});
+				},
+			};
+		</script>
+	</body>
+</html>

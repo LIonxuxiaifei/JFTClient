@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+	<link rel="stylesheet" href="../css/mui.min.css" />
+	<link rel="stylesheet" href="../css/mui.picker.css" />
+	<link rel="stylesheet" href="../css/mui.poppicker.css" />
+	<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+	<link rel="stylesheet" href="../css/style.css" />
+	<style type="text/css">
+		.withdraw .radio-item .select-item {
+			height: 45px;
+			line-height: 45px;
+		}
+
+		.withdraw .radio-item .select-item span {
+			font-size: 0.875em;
+			color: #999;
+		}
+
+		.withdraw .radio-item .select-item i {
+			font-size: 1.5em;
+			line-height: 45px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="mui-bar mui-bar-nav">
+		<span class="btn-top-left iconfont icon-houtui"></span>
+		<h1 class="mui-title">余额提现</h1>
+	</div>
+	<div class="mui-content withdraw money" style="padding-bottom: 60px;">
+		<h2 class="usable-balance">可用余额<i id="user_balance">0.00</i>元</h2>
+		<div class="withdraw-num">
+			<span class="expla">提现金额</span>
+			<i class="m-icon">&yen;</i>
+			<input id="withdraw_number" type="number" />
+		</div>
+		<div class="user-bid">
+			<div class="tips">
+				<i class="iconfont icon-tips"></i>
+				<strong>预计5个工作日内到账</strong>
+			</div>
+		</div>
+		<div class="input-radios" id="mainContent">
+			<!-- 支付宝 -->
+			<!-- <div class="radio-item mui-radio mui-right">
+					<span class="pay-icon iconfont icon-alipay"></span>
+					<label class="pay-name" for="alipay">支付宝</label>
+					<input id="alipay" name="pay" value="alipay" type="radio" checked="checked" />
+				</div>
+				<div class="withdraw-info alipay radio-on">
+					<div class="radio-item input-block">
+						<input id="ali_number" type="text" placeholder="输入支付宝帐号" />
+					</div>
+				</div> -->
+			<!-- 个人银行账户 -->
+			<div class="radio-item mui-radio mui-right">
+				<span class="pay-icon union img-box"></span>
+				<label class="pay-name" for="union">个人银行账户</label>
+				<input id="union" name="pay" value="union" type="radio" checked="checked" />
+			</div>
+			<div class="withdraw-info union radio-on">
+				<div class="radio-item input-block">
+					<div class="select-item add_history" data-value="1">
+						<span style="color: #00aaf0;">从历史提现账户中添加<span>
+							<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+						</div>
+					</div>
+					<div class="radio-item input-block">
+						<div class="select-item select_bank_name" data-value="person">
+							<span id="bank_name_person">选择开户行<span>
+							<!-- <i class="mui-icon mui-icon-arrowright arrow-right"></i> -->
+						</div>
+					</div>
+					<div class="radio-item input-block" style="display:none">
+						<div class="select-item select_bank_area" data-value="person">
+							<span id="bank_area_person">选择开户行所在区域<span>
+							<!-- <i class="mui-icon mui-icon-arrowright arrow-right"></i> -->
+						</div>
+					</div>
+					<div class="radio-item input-block" style="display:none">
+						<div class="select-item select_bank_sub_name" id="person_bank_sub" data-value="person">
+							<span id="bank_sub_name_person">选择开户支行<span>
+							<!-- <i class="mui-icon mui-icon-arrowright arrow-right"></i> -->
+						</div>
+					</div>
+					<div class="radio-item input-block">
+						<input id="bank_user_name" type="text" placeholder="输入银行预留姓名" />
+					</div>
+					<div class="radio-item input-block">
+						<input id="bank_card_number" type="number" placeholder="输入银行卡号" />
+					</div>
+				</div>
+				<!-- 对公银行账户 -->
+				<div class="radio-item mui-radio mui-right">
+					<span class="pay-icon union img-box"></span>
+						<label class="pay-name" for="union_public">对公银行账户</label>
+						<input id="union_public" name="pay" value="union_public" type="radio" />
+					</div>
+					<div class="withdraw-info union_public">
+						<div class="radio-item input-block">
+							<div class="select-item add_history" data-value="2">
+								<span style="color: #00aaf0;">从历史提现账户中添加<span>
+							<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+						</div>
+					</div>
+					<div class="radio-item input-block">
+						<div class="select-item select_bank_name" data-value="public">
+							<span id="bank_name_public">选择开户行<span>
+							<!-- <i class="mui-icon mui-icon-arrowright arrow-right"></i> -->
+						</div>
+					</div>
+					<div class="radio-item input-block" style="display:none">
+						<div class="select-item select_bank_area" data-value="public">
+							<span id="bank_area_public">选择开户行所在区域<span>
+							<!-- <i class="mui-icon mui-icon-arrowright arrow-right"></i> -->
+						</div>
+					</div>
+					<div class="radio-item input-block" style="display:none">
+						<div class="select-item select_bank_sub_name" id="public_bank_sub" data-value="public">
+							<span id="bank_sub_name_public">选择开户行<span>
+							<!-- <i class="mui-icon mui-icon-arrowright arrow-right"></i> -->
+						</div>
+					</div>
+					<div class="radio-item input-block">
+						<input id="bank_user_name_pubic" type="text" placeholder="输入开户企业全称" />
+					</div>
+					<div class="radio-item input-block">
+						<input id="bank_card_number_public" type="number" placeholder="输入银行卡号" />
+					</div>
+				</div>
+			</div>
+			<div class="btn-submit invalid">立即提现</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.picker.js" ></script>
+		<script type="text/javascript" src="../js/mui.poppicker.js" ></script>
+		<script type="text/javascript" src="../js/city.data-4.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				withdrawType: "2",
+				bank_info_person: {
+					name: null,
+					subname:null,
+					province: null,
+					city: null,
+					area: null
+				},
+				bank_info_public: {
+					name: null,
+					subname:null,
+					province: null,
+					city: null,
+					area: null
+				},
+				init: function() {
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".btn-submit"));
+
+					thisPage.requestData();
+
+					//获取可用余额
+					document.getElementById("user_balance").innerText = api.pageParam.user_balance;
+
+					/*初始化开户行选择器*/
+					window.picker_bank = new mui.PopPicker();
+					/*初始化开户支行选择器*/
+					window.picker_bank_sub = new mui.PopPicker();
+					/*初始化省市区选择器*/
+					window.picker_city = new mui.PopPicker({layer: 3});
+					window.picker_city.setData(cityData3);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					doAjax("Member", "bankList", "", "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							//填充开户行选择器数据
+							window.picker_bank.setData(rs.data.list);
+						} else {
+							mui.toast(rs.msg);
+						}
+					});
+				},
+				submit: function() {
+					var withdraw_number = document.getElementById("withdraw_number").value;
+					var bank_user_name = document.getElementById("bank_user_name").value,
+						bank_card_number = document.getElementById("bank_card_number").value,
+						bank_user_name_pubic = document.getElementById("bank_user_name_pubic").value,
+						bank_card_number_public = document.getElementById("bank_card_number_public").value;
+
+					var bank_reg = /^(\d{16}|\d{19})$/;
+
+					var urlParam = "Token=" + db2.getVal("user_token");
+					urlParam += "&ChangeMoney=" + withdraw_number;
+					urlParam += "&BankType=" + thisPage.withdrawType;
+
+					if (thisPage.withdrawType == "1") { //支付宝
+						// if(ali_number == ""){
+						// 	PubApp.toast("请输入支付宝帐号");
+						// 	return false;
+						// }
+
+						// urlParam += "&BankNumber=" + ali_number;
+					} else if(thisPage.withdrawType == "2") { //个人银行账户
+						if (thisPage.bank_info_person.name == null) {
+							PubApp.toast("请选择开户行");
+							return false;
+						}
+						if (thisPage.bank_info_person.subname == null) {
+							PubApp.toast("请选择开户支行");
+							return false;
+						}
+						if (thisPage.bank_info_person.province == null) {
+							PubApp.toast("请选择开户行所在区域");
+							return false;
+						}
+
+						if(bank_user_name == ""){
+							PubApp.toast("请输入银行预留姓名");
+							return false;
+						}
+
+						if(!bank_reg.test(bank_card_number)){
+							PubApp.toast("银行卡号不正确");
+							return false;
+						}
+
+						urlParam += "&BankNumber=" + bank_card_number;
+						urlParam += "&BankName=" + bank_user_name;
+						urlParam += "&Bank=" + thisPage.bank_info_person.name;
+						urlParam += "&AccountNameZhihang=" + thisPage.bank_info_person.subname;
+						urlParam += "&BankSheng=" + thisPage.bank_info_person.province;
+						urlParam += "&BankShi=" + thisPage.bank_info_person.city;
+						urlParam += "&BankQu=" + thisPage.bank_info_person.area;
+					} else if(thisPage.withdrawType == "4") { //对公银行账户
+						if (thisPage.bank_info_public.name == null) {
+							PubApp.toast("请选择开户行");
+							return false;
+						}
+						if (thisPage.bank_info_public.subname == null) {
+							PubApp.toast("请选择开户支行");
+							return false;
+						}
+						if (thisPage.bank_info_public.province == null) {
+							PubApp.toast("请选择开户行所在区域");
+							return false;
+						}
+
+						if(bank_user_name_pubic == ""){
+							PubApp.toast("请输入银行预留姓名");
+							return false;
+						}
+
+						if(!bank_reg.test(bank_card_number_public)){
+							PubApp.toast("银行卡号不正确");
+							return false;
+						}
+
+						urlParam += "&BankNumber=" + bank_card_number_public;
+						urlParam += "&BankName=" + bank_user_name_pubic;
+						urlParam += "&Bank=" + thisPage.bank_info_public.name;
+						urlParam += "&BankSheng=" + thisPage.bank_info_public.province;
+						urlParam += "&BankShi=" + thisPage.bank_info_public.city;
+						urlParam += "&BankQu=" + thisPage.bank_info_public.area;
+					}
+
+					//alert(urlParam); return;
+
+					api.showProgress({
+					    title: "提现申请中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					doAjax("Member", "withdrawalsAccountLog", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							PubApp.toast("申请提现成功");
+							//广播用户信息修改事件（余额）
+							api.sendEvent({
+		                        name: 'AlertUserInfo'
+		                    });
+		                    //更新流水记录
+		                    api.execScript({
+							    name: 'user_balance',
+							    frameName: 'user_balance_sub',
+							    script: 'thisPage.requestData("new");'
+							});
+							//关闭当前页面
+							setTimeout(function() {
+								api.closeWin();
+							}, 550);
+						} else {
+							PubApp.toast(rs.ErrorMsg);
+						}
+					});
+				},
+				getBankSub:function(str){
+					api.showProgress({
+					    title: "读取支行中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					var urlParam = 'sheng' + thisPage['bank_info_'+str].province;
+							urlParam += "&shi=" + thisPage['bank_info_'+str].city;
+							urlParam += "&qu=" + thisPage['bank_info_'+str].area;
+							urlParam += "&bank=" + thisPage['bank_info_'+str].name;
+
+					doAjax("Member", "getBankZhihang", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							//填充开户行选择器数据
+							window.picker_bank_sub.setData(rs.Data.lists);
+						} else {
+							mui.toast(rs.msg);
+						}
+					});
+				},
+				addEvent: function() {
+					/*提现方式选择*/
+					mui(".mui-content").on("change",".mui-radio",function(){
+						var radioValue = this.querySelector("input").value;
+
+						if (radioValue == "alipay") { thisPage.withdrawType = "1"; }
+						if (radioValue == "union") { thisPage.withdrawType = "2"; }
+						if (radioValue == "union_public") { thisPage.withdrawType = "4"; }
+
+						document.querySelector(".radio-on").classList.remove("radio-on");
+						document.querySelector(".withdraw-info." + radioValue).classList.add("radio-on");
+					});
+
+					/*监听提现金额是否为空*/
+					document.querySelector("#withdraw_number").addEventListener("input", function() {
+						if (this.value.length > 0) {
+							document.querySelector(".btn-submit").classList.remove("invalid");
+						} else {
+							document.querySelector(".btn-submit").classList.add("invalid");
+						}
+					});
+
+					/*立即提现*/
+					document.querySelector(".btn-submit").addEventListener("tap", function() {
+						if (!this.classList.contains("invalid")) {
+							thisPage.submit();
+						}
+					});
+
+					/*选择开户行*/
+					mui("#mainContent").on("tap", ".select_bank_name", function() {
+						var self = this;
+						var data_value = this.getAttribute("data-value");
+						window.picker_bank.show(function (selectItems) {
+
+							self.querySelector("span").innerText = selectItems[0].text;
+							self.querySelector("span").style.color = "#333";
+							thisPage['bank_info_'+data_value].name = selectItems[0].text;
+							if(data_value == "person"){
+									if(document.querySelector('#bank_area_person').parentNode.parentNode.style.display == "block"){
+											thisPage.getBankSub(data_value);
+									}else{
+										document.querySelector('#bank_area_person').parentNode.parentNode.style.display = "block";
+									}
+							}else{
+								if(document.querySelector('#bank_area_public').parentNode.parentNode.style.display == "block"){
+										thisPage.getBankSub(data_value);
+								}else{
+									document.querySelector('#bank_area_public').parentNode.parentNode.style.display = "block";
+								}
+
+							};
+						});
+					});
+					/*选择开户支行*/
+					mui("#mainContent").on("tap", ".select_bank_sub_name", function() {
+						var self = this;
+						var data_value = this.getAttribute("data-value");
+						window.picker_bank_sub.show(function (selectItems) {
+							if(isset(selectItems[0].text)){
+								self.querySelector("span").innerText = selectItems[0].text;
+								self.querySelector("span").style.color = "#333";
+								thisPage['bank_info_'+data_value].subname = selectItems[0].text;
+							};
+						});
+					});
+					/*选择开户行所在区域*/
+					mui("#mainContent").on("tap", ".select_bank_area", function() {
+						var self = this;
+						var data_value = this.getAttribute("data-value");
+						window.picker_city.show(function (selectItems) {
+								self.querySelector("span").innerText = selectItems[0].text+' '+selectItems[1].text+' '+selectItems[2].text;
+								self.querySelector("span").style.color = "#333";
+								thisPage['bank_info_'+data_value].province = selectItems[0].text;
+								thisPage['bank_info_'+data_value].city = selectItems[1].text;
+								thisPage['bank_info_'+data_value].area = selectItems[2].text;
+								if(data_value == "person"){
+										document.querySelector('#person_bank_sub').parentNode.style.display = "block";
+								}else{
+										document.querySelector('#public_bank_sub').parentNode.style.display = "block";
+								};
+								thisPage.getBankSub(data_value);
+						});
+					});
+
+					/*从历史提现账户添加*/
+					mui("#mainContent").on("tap", ".add_history", function() {
+						var data_value = this.getAttribute("data-value");
+						openWin("user_balance_withdraw_history", "bank_type="+data_value);
+					});
+
+					api.addEventListener({
+						name: 'select_history_account'
+					}, function(ret) {
+						var data = ret.value;
+						if (data.bank_type == 1) {
+							thisPage['bank_info_person'].name = data.bank_name;
+							thisPage['bank_info_person'].subname = data.bank_zhihang;
+							thisPage['bank_info_person'].province = data.bank_sheng;
+							thisPage['bank_info_person'].city = data.bank_shi;
+							thisPage['bank_info_person'].area = data.bank_qu;
+							document.getElementById("bank_name_person").style.color = "#333";
+							document.getElementById("bank_sub_name_person").style.color = "#333";
+							document.getElementById("bank_area_person").style.color = "#333";
+							document.getElementById("bank_name_person").innerText = data.bank_name;
+							document.getElementById("bank_sub_name_person").innerText = data.bank_zhihang;
+							document.getElementById("person_bank_sub").parentNode.style.display = "block";
+							document.getElementById("bank_area_person").innerText = data.bank_sheng+' '+data.bank_shi+' '+data.bank_qu;
+							document.querySelector('#bank_area_person').parentNode.parentNode.style.display = "block";
+							document.getElementById("bank_user_name").value = data.bank_username;
+							document.getElementById("bank_card_number").value = data.bank_number;
+
+						} else if (data.bank_type == 2) {
+							thisPage['bank_info_public'].name = data.bank_name;
+							thisPage['bank_info_person'].subname = data.bank_zhihang;
+							thisPage['bank_info_public'].province = data.bank_sheng;
+							thisPage['bank_info_public'].city = data.bank_shi;
+							thisPage['bank_info_public'].area = data.bank_qu;
+							document.getElementById("bank_name_public").style.color = "#333";
+							document.getElementById("bank_sub_name_public").style.color = "#333";
+							document.getElementById("bank_area_public").style.color = "#333";
+							document.getElementById("bank_name_public").innerText = data.bank_name;
+							document.getElementById("bank_sub_name_public").innerText = data.bank_zhihang;
+							document.getElementById("public_bank_sub").parentNode.style.display = "block";
+							document.getElementById("bank_area_public").innerText = data.bank_sheng+' '+data.bank_shi+' '+data.bank_qu;
+							document.querySelector('#bank_area_public').parentNode.parentNode.style.display = "block";
+							document.getElementById("bank_user_name_pubic").value = data.bank_username;
+							document.getElementById("bank_card_number_public").value = data.bank_number;
+						}
+					});
+
+				}
+			};
+		</script>
+	</body>
+</html>

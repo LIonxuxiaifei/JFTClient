@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body style="background-color: #f5f5f5;">
+		<div class="mui-content home-publish">
+			<div class="main-content">
+				<ul>
+					<li id="btn_weigongyi">
+						<span class="publish-pic img-box" style="background: url(../img/h-p-1.png);"></span>
+						<span class="publish-name">微公益</span>
+					</li>
+					<li id="btn_maixianzhi">
+						<span class="publish-pic img-box" style="background: url(../img/h-p-2.png);"></span>
+						<span class="publish-name">二手市场</span>
+					</li>
+					<li id="btn_huanhuo">
+						<span class="publish-pic img-box" style="background: url(../img/h-p-3.png);"></span>
+						<span class="publish-name">换货</span>
+					</li>
+				</ul>
+				<div class="btn-requirement"><i class="iconfont icon-pingtaijieshao"></i><span>发布服务需求</span></div>
+				<div class="btn-close"><i class="iconfont icon-cha"></i></div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					thisPage.addEvent();
+				},
+				closeWin: function() {
+					//广播自定义事件
+					api.sendEvent({
+						name: "setActiveNav"
+					});
+					//关闭当前页面
+					api.closeWin({
+						animation: {type:"none"}
+					});
+				},
+				addEvent: function() {
+					//监听关闭按钮
+					document.querySelector(".btn-close").addEventListener("tap", function(){
+						thisPage.closeWin();
+					});
+
+					//监听设备返回键
+					api.addEventListener({
+					    name: 'keyback'
+					}, function(ret, err) {
+					    thisPage.closeWin();
+					});
+
+					//发布服务需求
+					document.querySelector(".btn-requirement").addEventListener("tap", function(){
+						if (isLogin() == true) {
+							openWin("service_publish");
+						} else {
+							openWin("login");
+						}
+					});
+
+					//发布微公益
+					document.querySelector("#btn_weigongyi").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("publish_charity");
+						} else {
+							openWin("login");
+						}				
+					});
+
+					//发布卖闲置
+					document.querySelector("#btn_maixianzhi").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("publish_used");
+						} else {
+							openWin("login");
+						}
+					});
+
+					//发布换货
+					document.querySelector("#btn_huanhuo").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("publish_exchange");
+						} else {
+							openWin("login");
+						}			
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">修改手机号</h1>
+			<span class="btn-top-right font">提交</span>
+		</div>
+		<div class="mui-content alter-phone">
+			<div class="input-row code">
+				<input id="user_phone_old" type="number" placeholder="请输入原手机号" />
+				<span class="btn-code btn_code_old">验证码</span>
+			</div>
+			<div class="input-row">
+				<input id="user_code_old" type="number" placeholder="短信验证码" />
+			</div>
+			<div class="input-row code special">
+				<input id="user_phone_new" type="number" placeholder="请输入新手机号" />
+				<span class="btn-code btn_code_new">验证码</span>
+			</div>
+			<div class="input-row">
+				<input id="user_code_new" type="number" placeholder="短信验证码" />
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				btnCode: {
+					"old": {
+						times: 120,
+						isCanSend: 1,
+						btnControl: document.querySelector(".btn_code_old"),
+						phoneControl: document.querySelector("#user_phone_old")
+					},
+					"new": {
+						times: 120,
+						isCanSend: 1,
+						btnControl: document.querySelector(".btn_code_new"),
+						phoneControl: document.querySelector("#user_phone_new")
+					}
+				},
+				init: function() {
+					pageControl.winBack();
+				},
+				codeCount: function(type) { //验证码倒计时
+					thisPage.btnCode[type].times --;
+
+					if (thisPage.btnCode[type].times > 0) {
+						thisPage.btnCode[type].btnControl.innerHTML = "稍等(" + thisPage.btnCode[type].times + ")";
+						setTimeout(function() {
+							thisPage.codeCount(type);
+						}, 1000);
+					} else {
+						thisPage.btnCode[type].btnControl.innerHTML = "验证码";
+						thisPage.btnCode[type].times = 120;
+						thisPage.btnCode[type].isCanSend = 1;
+					}
+				},
+				getCode: function(type) { //获取手机验证码
+					var phoneNumber = thisPage.btnCode[type].phoneControl.value;
+
+					if (thisPage.btnCode[type].isCanSend == 1) {
+						/*验证手机号格式*/
+						if (!(new RegExp("^1[0-9]{10}$", "gi")).test(phoneNumber)) {
+							api.toast({
+							    msg: "手机号不正确"
+							});
+							return false;
+						}
+
+						thisPage.btnCode[type].isCanSend = 0;
+						
+						api.showProgress({
+						    title: "正在发送短信验证码...",
+						    text: "请稍候",
+						    modal: false
+						});
+
+						var urlParam = "freeSignName=6";
+						urlParam += "&phone=" + phoneNumber;
+						
+						doAjax("Member", "sendSmsCode", urlParam, "post", function(rs) {
+							api.hideProgress();
+							if (rs.code == 1) {
+								api.toast({ msg: rs.msg });
+
+								thisPage.btnCode[type].times = 120;
+								thisPage.codeCount(type);
+							} else {
+								PubApp.toast(rs.msg);
+
+								thisPage.btnCode[type].isCanSend = 1;
+							}
+						});
+					}
+				},
+				submit: function() {
+					var user_phone_old = document.getElementById("user_phone_old").value,
+						user_code_old = document.getElementById("user_code_old").value,
+						user_phone_new = document.getElementById("user_phone_new").value,
+						user_code_new = document.getElementById("user_code_new").value;
+
+					/*显示进度提示框*/
+					api.showProgress({
+					    title: "提交中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					/*Ajax请求*/
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&UserTel=" + user_phone_old;
+					urlParam += "&VerifyTel=" + user_code_old;
+					urlParam += "&NewUserTel=" + user_phone_new;
+					urlParam += "&NewVerifyTel=" + user_code_new;
+
+					doAjax("Member", "saveUserTel", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							api.toast({
+							    msg: "手机号修改成功"
+							});
+							setTimeout(function() {
+								api.closeWin();
+							}, 350);
+						} else {
+							api.toast({
+							    msg: rs.ErrorMsg
+							});
+						}
+					});
+				},
+				addEvent: function() {
+					/*旧手机获取验证码*/
+					document.querySelector(".btn_code_old").addEventListener("tap", function() {
+						thisPage.getCode("old");
+					});
+
+					/*新手机获取验证码*/
+					document.querySelector(".btn_code_new").addEventListener("tap", function() {
+						thisPage.getCode("new");		
+					});
+
+					/*提交*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						thisPage.submit();					
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

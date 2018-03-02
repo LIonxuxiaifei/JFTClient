@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">订单详情</h1>
+			<span class="btn-top-right font">投诉</span>
+		</div>
+		<div id="in_haggle" class="bot-control haggle" style="display: none;">
+			<div class="btn-item">
+				<span class="item after-line btn_continue">
+					<span>继续出价</span>
+				</span>
+				<span class="item btn_cancel">
+					<span>取消订单</span>
+				</span>
+			</div>
+			<div class="btn-item warning btn_pay">立即付款</div>
+		</div>
+		<div id="unpaid" class="bot-control haggle" style="display: none;">
+			<div class="btn-item btn_cancel">取消订单</div>
+			<div class="btn-item warning btn_pay">立即付款</div>
+		</div>
+		<div class="mui-content order-detail-haggle">
+			<div class="top-info bot-line">
+				<div id="hotal_name" class="info-name"><!--酒店名称-->&nbsp;</div>
+				<div id="hotal_addr" class="info-addr"><!--酒店地址-->&nbsp;</div>
+				<span id="status_info" class="info-status"><!--待付款--></span>
+				<div id="btn_link_hotal" class="info-link">查看商家<i class="iconfont icon-xiangyou"></i></div>
+			</div>
+			<div class="top-btns">
+				<div id="gotoGPS" class="item after-line">
+					<i class="iconfont icon-comiisdingwei"></i>
+					<span>查看路线</span>
+				</div>
+				<div class="item" id="btn_call">
+					<i class="iconfont icon-rexian"></i>
+					<span>联系商家</span>
+				</div>
+			</div>
+			<div class="mid-info">
+				<!--<div class="mid-top">
+					<h2>大床房</h2>
+					<div class="price-info">
+						<div class="price-box">
+							<i class="m-icon">&yen;</i>
+							<span class="m-num">109</span>
+						</div>
+						<div class="old-price">原价 &yen; 300</div>
+					</div>
+					<div class="info-item">大床∣无早餐</div>
+					<div class="info-item">入住：11-26 (周六) 离店：11-27 (周日) 1晚</div>
+					<div class="info-item">我的出价：<i>90</i>元</div>
+					<div class="info-item">店家回复：<i>100</i>元</div>
+					<div class="info-item">我的出价：<i>95</i>元</div>
+					<div class="info-item">店家回复：<i>95</i>元</div>
+				</div>
+				<div class="mid-bot">
+					<div class="status">砍价成功为&nbsp;<i>95元</i></div>
+					<div class="total">合计 : &nbsp;<i>95.00</i>元</div>
+				</div>-->
+			</div>
+			<div id="order_info_block">
+				<!--<div class="order-info-block">
+					<div class="item">订单编号：<i>1234567890</i></div>
+					<div class="item">下单时间：<i>2016-12-10 15:30:10</i></div>
+					<div class="item">数量：<i>1晚1间</i></div>
+					<div class="item">总价：<i>109元</i></div>
+					<div class="item">入住人：<i>张飞</i></div>
+					<div class="item">联系电话：<i>13838383855</i></div>
+					<div class="item">入住说明：<i>商家12:00开始办理入住,如需提早办理请联商家</i></div>
+				</div>-->
+			</div>
+			<!-- <div id="commentContainer" class="user-center" style="margin-top: 10px;"></div> -->
+			<div id="btn_cancel_single" class="btn-submit atbot btn_cancel" style="display: none;">取消订单</div>
+			<div id="btn_comment" class="btn-submit atbot" style="display: none;">评价</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				hotalId: "", //酒店ID
+				hotalTel: "", //酒店电话
+				hotalLat: "",
+				hotalLng: "",
+				hotalAddress: "",
+				init: function() {
+					pageControl.winBack();
+
+					/*初始化下拉刷新*/
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#eee",
+			            textColor: "#bbb",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData();
+			        });
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "Token=" + db2.getVal("user_token");
+					urlParam += "&order_number=" + api.pageParam.order_number;
+
+					doAjax("Hotel", "getOfferDetail", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.hotalId = rs.Data.SellerId; //记录酒店ID
+							thisPage.hotalTel = rs.Data.hotel_tel; //记录酒店电话
+
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: "获取网络失败" });
+							//api.toast({ msg: rs.ErrorMsg });
+						}
+
+						api.refreshHeaderLoadDone();
+					});
+				},
+				fillData: function(data) {
+					//alert(JSON.stringify(data));
+
+					thisPage.hotalLat = data.hotel_Lat;
+					thisPage.hotalLng = data.hotel_Lng;
+					thisPage.hotalAddress = data.hotel_address;
+
+					//alert(data.hotel_Lat+"\n"+data.hotel_Lng);
+
+					/*初始化按钮控件显示*/
+					document.getElementById("in_haggle").style.display = 'none';
+					document.getElementById("unpaid").style.display = 'none';
+					document.getElementById("btn_cancel_single").style.display = 'none';
+					document.getElementById("btn_comment").style.display = 'none';
+
+					/*酒店信息*/
+					document.getElementById("hotal_name").innerText = data.hotel_name;
+					document.getElementById("hotal_addr").innerText = data.hotel_address;
+
+					//alert("订单状态: "+data.order_status);
+
+					/*订单状态*/
+					var haggleInfo = "";
+					switch (data.order_status) {
+						case "1": //待支付（砍价中）
+
+
+							if (data.order_price_status == 1) { //买家第一次出价（下单）
+								haggleInfo = '等待店家回复';
+								document.getElementById("status_info").innerText = "等回复";
+								document.getElementById("btn_cancel_single").style.display = 'block';
+							} else if (data.order_price_status == 2) { //店家第一次回价
+								haggleInfo = '砍价中';
+								document.getElementById("status_info").innerText = "砍价中";
+								document.getElementById("in_haggle").style.display = 'block';
+							} else if (data.order_price_status == 3) { //买家第二次出价
+								haggleInfo = '砍价中';
+								document.getElementById("status_info").innerText = "砍价中";
+								document.getElementById("btn_cancel_single").style.display = 'block';
+							} else if (data.order_price_status == 4) { //店家第二次回价（结束）
+								haggleInfo = '砍价结束 店家价为&nbsp;<i>'+parseInt(data.order_total)+'元</i>';
+								document.getElementById("unpaid").style.display = 'block';
+								document.getElementById("status_info").innerText = "待付款";
+							} else if (data.order_price_status == 5) { //砍价成功
+								haggleInfo = '砍价成功为&nbsp;<i>'+parseInt(data.order_total)+'元</i>';
+								document.getElementById("unpaid").style.display = 'block';
+								document.getElementById("status_info").innerText = "待付款";
+							}
+							break;
+						case "2": //待入住
+							document.getElementById("status_info").innerText = "待入住";
+							haggleInfo = '砍价结束 店家价为&nbsp;<i>'+parseInt(data.order_total)+'元</i>';
+							break;
+						case "4": //已完成
+							document.getElementById("status_info").innerText = "已完成";
+							haggleInfo = '砍价结束 店家价为&nbsp;<i>'+parseInt(data.order_total)+'元</i>';
+
+							if (data.order_is_comment == 0) {
+								document.getElementById("status_info").innerText = "待评价";
+								document.getElementById("btn_comment").style.display = 'block';
+							} else if (data.order_is_comment == 1) {
+								document.getElementById("status_info").innerText = "已评价";
+							}
+							break;
+						case "5": //已取消
+							haggleInfo = '砍价结束 店家价为&nbsp;<i>'+parseInt(data.order_total)+'元</i>';
+							document.getElementById("status_info").innerText = "已取消";
+							break;
+						default:
+							break;
+					}
+
+					/*房间信息*/
+					var roomHtml = 	'<div class="mid-top bot-line">' +
+										'<h2>'+data.room_type+'</h2>' +
+										'<div class="price-info">' +
+											'<div class="price-box">' +
+												'<i class="m-icon">&yen;</i>' +
+												'<span class="m-num">'+parseInt(data.room_price)+'</span>' +
+											'</div>' +
+											'<div class="old-price">原价 &yen; '+parseInt(data.room_original_price)+'</div>' +
+										'</div>' +
+										'<div class="info-item">入住时间：'+data.order_start_time+'</div>' +
+										'<div class="info-item">离店时间：'+data.order_end_time+'</div>' +
+										'<div class="info-item">我的出价：<i>'+parseInt(data.order_price_p1)+'</i>元</div>' +
+										(parseInt(data.order_price_p2) > 0 ? '<div class="info-item">店家回复：<i>'+parseInt(data.order_price_p2)+'</i>元</div>' : '') +
+										(parseInt(data.order_price_p3) > 0 ? '<div class="info-item">我的出价：<i>'+parseInt(data.order_price_p3)+'</i>元</div>' : '') +
+										(parseInt(data.order_price_p4) > 0 ? '<div class="info-item">店家回复：<i>'+parseInt(data.order_price_p4)+'</i>元</div>' : '') +
+									'</div>' +
+									'<div class="mid-bot">' +
+										'<div class="status">'+haggleInfo+'</div>' +
+										'<div class="total">合计 : &nbsp;<i>'+data.order_total+'</i>元</div>' +
+									'</div>';
+
+					document.querySelector(".mid-info").innerHTML = roomHtml;
+
+					/*订单信息*/
+					var orderInfo = '<div class="order-info-block">' +
+										'<div class="item">订单编号：<i>'+data.order_number+'</i></div>' +
+										'<div class="item">下单时间：<i>'+data.order_create_time+'</i></div>' +
+										'<div class="item">数量：<i>'+data.order_num+'间</i></div>' +
+										'<div class="item">总价：<i>'+parseInt(data.order_total)+'元</i></div>' +
+										'<div class="item">入住人：<i>'+data.order_truename+'</i></div>' +
+										'<div class="item">联系电话：<i>'+data.order_phone+'</i></div>' +
+										'<div class="item">入住说明：<i>'+(data.order_message==null?'暂无':data.order_message)+'</i></div>' +
+									'</div>';
+
+					document.getElementById("order_info_block").innerHTML = orderInfo;
+
+					api.refreshHeaderLoadDone();
+				},
+				doCancelOrder: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+
+					doAjax("Client", "order_cancel", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*投诉*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						var param = "order_id=" + api.pageParam.order_id;
+						openWin("user_complaint", param);
+					});
+
+					/*查看路线*/
+					document.getElementById("gotoGPS").addEventListener("tap", function() {
+						var lat = thisPage.hotalLat,
+							lng = thisPage.hotalLng,
+							address = thisPage.hotalAddress;
+						if (lat != "" && lng != "" && address != "") {
+							//PubApp.nav(lat, lng, title, address);
+							openWin("map_view", "e_lat="+lat+"&e_lon="+lng+"&e_address="+address);
+						}
+					});
+
+					/*查看商家*/
+					document.querySelector("#btn_link_hotal").addEventListener("tap", function() {
+						if (thisPage.hotalId != "") {
+							var param = "hotal_id=" + thisPage.hotalId;
+							openWin("haggle_detail", param);
+						}
+					});
+
+					/*联系商家*/
+					document.querySelector("#btn_call").addEventListener("tap", function() {
+						if (thisPage.hotalTel != "") {
+							var tel_number = thisPage.hotalTel;
+							api.confirm({
+							    title: '提示',
+							    msg: '是否拨打' + tel_number,
+							    buttons: ['拨打', '取消']
+							}, function(ret, err) {
+								if (ret.buttonIndex == 1) {
+									api.call({
+									    type: 'tel',
+									    number: tel_number
+									});
+								}
+							});
+						}
+					});
+
+					/*继续出价*/
+					document.querySelector(".btn_continue").addEventListener("tap", function() {
+						var param = "order_number=" + api.pageParam.order_number;
+						openWin("haggle_detail_room_bid_again", param);
+					});
+
+					/*取消订单*/
+					mui("body").on("tap", ".btn_cancel", function() {
+						api.confirm({
+						    title: '提示',
+						    msg: '是否取消订单?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doCancelOrder(api.pageParam.order_id);
+							}
+						});
+					});
+
+					/*立即支付*/
+					mui("body").on("tap", ".btn_pay", function() {
+						var param = "data_id=" + api.pageParam.order_id;
+						openWin("order_pay", param);
+					});
+					// document.querySelector(".btn_pay").addEventListener("tap", function() {
+					// 	var param = "data_id=" + api.pageParam.order_id;
+					// 	openWin("order_pay", param);
+					// });
+
+					/*评价*/
+					document.querySelector("#btn_comment").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.order_id;
+						openWin("user_evaluate_haggle", param);
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

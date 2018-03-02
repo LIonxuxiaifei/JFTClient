@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.hide {display: none;}
+			.show {display: block;}
+		</style>
+	</head>
+	<body class="home">
+		<div id="pageTop" class="mui-bar mui-bar-nav blue">
+			<div id="home" class="hide show">
+				<span class="btn-top-left iconfont icon-comiisdingwei"></span>
+				<span class="location-text user_location">定位</span><i class="iconfont icon-xiasanjiao"></i>
+				<!-- <span class="btn-top-right iconfont icon-search btn_home_search"></span> -->
+
+				<div class="search-bar btn_home_search">
+					<i class="iconfont icon-search"></i>
+					<span class="text">请输入查找内容</span>
+				</div>
+
+			</div>
+			<div id="message" class="hide">
+				<h1 class="mui-title">消息</h1>
+			</div>
+			<div id="order" class="hide">
+				<div class="top-bar-tab">
+					<span class="item left on" data-value="0">买入</span>
+					<span class="item right" data-value="1">卖出</span>
+				</div>
+			</div>
+			<div id="user" class="hide">
+				<h1 class="mui-title">我的</h1>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../script/api.js"></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript" src="../js/ajpush.js" ></script>
+		<script type="text/javascript" src="../js/chat.js" ></script>
+		<script type="text/javascript">
+			var activePageIndex = 0;
+			var NVTabBar;
+			var bMap;
+
+			apiready = function() {
+				thisPage.setPageTop(0);
+				appinit();
+				thisPage.init();
+				ajpush.run();
+				chat.autoShowNotice();
+			};
+
+			var thisPage = {
+				pageType: "home", //home message order user
+				pageTopControl: {
+					"0": {
+						type: "home"
+					},
+					"1": {
+						type: "message"
+					},
+					"3": {
+						type: "order"
+					},
+					"4": {
+						type: "user"
+					}
+				},
+				init: function() {
+					if (!bMap) {
+						bMap = api.require('bMap');
+					}
+
+					NVTabBar = api.require('NVTabBar');
+
+					thisPage.openPageGroup();
+					thisPage.openNVTabBar();
+					thisPage.getCurrentLocation();
+					thisPage.addEvent();
+
+					NVTabBar.bringToFront();
+				},
+				postLocation: function(lat, lon) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&member_last_login_lat=" + lat;
+					urlParam += "&member_last_login_lon=" + lon;
+
+					doAjax("Index", "save_distance", urlParam, "post", function(rs) {
+						if (rs.code == 1) {
+							console.log("========定位更新成功========");
+						} else {
+							//api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				getCurrentLocation: function() {
+					bMap.getLocation({
+					    accuracy: '100m',
+					    autoStop: true,
+					    filter: 1
+					}, function(ret, err) {
+					    if (ret.status) {
+					    	db2.setVal("location_lat", ret.lat);
+					        db2.setVal("location_lon", ret.lon);
+					        thisPage.postLocation(ret.lat, ret.lon);
+									alert("哈哈哈哈")
+									alert(ret.lat)
+					    } else {
+					        log("errorCode:"+err.code+"\n"+"errorMsg:"+err.msg);
+					    }
+					});
+				},
+				setPageTop: function(index) {
+					if (thisPage.pageTopControl[index].type == thisPage.pageType) return;
+
+					document.querySelector("#pageTop .show").classList.remove("show");
+					thisPage.pageType = thisPage.pageTopControl[index].type;
+					document.getElementById(thisPage.pageType).classList.add("show");
+				},
+				openNVTabBar: function() {
+					NVTabBar.open({
+					    styles: {
+					        bg: 'widget://img/bg-center.png',
+					        //bg: '#fff',
+					        h: 60,
+					        dividingLine: {
+					            width: 0.0,
+					            color: '#fff'
+					        },
+					        badge: {
+					            bgColor: '#f00',
+					            numColor: '#fff',
+					            size: 6.0,
+					            fontSize:10,
+					            centerX: 40.0,
+					            centerY: 6.0
+					        }
+					    },
+					    items: [{
+					        w: api.winWidth / 5.0,
+					        bg: {
+					            marginB: -5.0,
+					            image: 'rgba(0,0,0,0)'
+					        },
+					        iconRect: {
+					            w: 25.0,
+					            h: 25.0,
+					        },
+					        icon: {
+					            normal: 'widget://img/icon-home.png',
+					            highlight: 'widget://img/icon-home-s.png',
+					            selected: 'widget://img/icon-home-s.png'
+					        },
+					        title: {
+					            text: '首页',
+					            size: 11.0,
+					            normal: '#929292',
+					            selected: '#00aaf0',
+					            marginB: 4.0
+					        }
+					    }, {
+					        w: api.winWidth / 5.0,
+					        bg: {
+					            marginB: -5.0,
+					            image: 'rgba(0,0,0,0)'
+					        },
+					        iconRect: {
+					            w: 25.0,
+					            h: 25.0,
+					        },
+					        icon: {
+					            normal: 'widget://img/icon-msg.png',
+					            highlight: 'widget://img/icon-msg-s.png',
+					            selected: 'widget://img/icon-msg-s.png'
+					        },
+					        title: {
+					            text: '消息',
+					            size: 11.0,
+					            normal: '#929292',
+					            selected: '#00aaf0',
+					            marginB: 4.0
+					        }
+					    }, {
+					        w: api.winWidth / 5.0,
+					        bg: {
+					            marginB: 0,
+					            image: ''
+					        },
+					        iconRect: {
+					            w: 60.0,
+					            h: 60.0,
+					        },
+					        icon: {
+					            normal: 'widget://img/icon-center-2.png',
+					            highlight: 'widget://img/icon-center-2.png',
+					            selected: 'widget://img/icon-center-2.png'
+					        },
+					        title: {
+					            text: '',
+					            size: 0.0,
+					            normal: '#929292',
+					            selected: '#00aaf0',
+					            marginB: 0.0
+					        }
+					    }, {
+					        w: api.winWidth / 5.0,
+					        bg: {
+					            marginB: -5.0,
+					            image: 'rgba(0,0,0,0)'
+					        },
+					        iconRect: {
+					            w: 25.0,
+					            h: 25.0,
+					        },
+					        icon: {
+					            normal: 'widget://img/icon-order.png',
+					            highlight: 'widget://img/icon-order-s.png',
+					            selected: 'widget://img/icon-order-s.png'
+					        },
+					        title: {
+					            text: '订单',
+					            size: 11.0,
+					            normal: '#929292',
+					            selected: '#00aaf0',
+					            marginB: 4.0
+					        }
+					    }, {
+					        w: api.winWidth / 5.0,
+					        bg: {
+					            marginB: -5.0,
+					            image: 'rgba(0,0,0,0)'
+					        },
+					        iconRect: {
+					            w: 25.0,
+					            h: 25.0,
+					        },
+					        icon: {
+					            normal: 'widget://img/icon-user.png',
+					            highlight: 'widget://img/icon-user-s.png',
+					            selected: 'widget://img/icon-user-s.png'
+					        },
+					        title: {
+					            text: '我的',
+					            size: 11.0,
+					            normal: '#929292',
+					            selected: '#00aaf0',
+					            marginB: 4.0
+					        }
+					    }],
+					    selectedIndex: 0
+					}, function(ret, err) {
+					    if (ret) {
+					        switch (ret.index) {
+					    		case 0:
+					    			activePageIndex = 0;
+					    			thisPage.setPageTop(ret.index);
+						    		api.setFrameGroupIndex({
+									    name: 'group_page',
+									    index: 0
+									});
+					    			break;
+					    		case 1:
+					    			activePageIndex = 1;
+					    			thisPage.setPageTop(ret.index);
+					    			NVTabBar.setBadge({
+									    index: 1,
+									    badge: null
+									});
+						    		api.setFrameGroupIndex({
+									    name: 'group_page',
+									    index: 1
+									});
+					    			break;
+					    		case 2:
+					    			api.openWin({
+						    			name: "home_publish",
+						    			url: "./home_publish.html",
+						    			animation: {type:"none"},
+						    			vScrollBarEnabled: false,
+						                hScrollBarEnabled: false,
+						                slidBackEnabled: false,
+						                bounces: false
+						    		});
+					    			break;
+					    		case 3:
+					    			activePageIndex = 3;
+					    			thisPage.setPageTop(ret.index);
+						    		api.setFrameGroupIndex({
+									    name: 'group_page',
+									    index: 2
+									});
+					    			break;
+					    		case 4:
+					    			activePageIndex = 4;
+					    			thisPage.setPageTop(ret.index);
+						    		api.setFrameGroupIndex({
+									    name: 'group_page',
+									    index: 3
+									});
+					    			break;
+					    		default:
+					    			break;
+					    	}
+					    }
+					});
+				},
+				openPageGroup: function() { //加载子页面组
+					api.openFrameGroup({
+						name: "group_page",
+						scrollEnabled: false,
+						rect: {
+							x: 0,
+							y: 0,
+							w: "auto",
+							h: "auto",
+							marginTop: 44,
+							marginBottom: 50
+						},
+						index: 0,
+                		preload: 0,
+						frames: [{
+							name: "home",
+							url: "home.html",
+							vScrollBarEnabled: false,
+			                hScrollBarEnabled: false,
+			                bounces: false,
+			                pageParam: {name: "home"},
+							bgColor: "#f2f2f2"
+						},{
+							name: "message",
+							url: "message.html",
+							vScrollBarEnabled: false,
+			                hScrollBarEnabled: false,
+			                bounces: false,
+			                pageParam: {name: "message"},
+							bgColor: "#f2f2f2"
+						},{
+							name: "order",
+							url: "order.html",
+							vScrollBarEnabled: false,
+			                hScrollBarEnabled: false,
+			                bounces: false,
+			                pageParam: {name: "order"},
+							bgColor: "#f2f2f2"
+						},{
+							name: "user",
+							url: "user.html",
+							vScrollBarEnabled: false,
+			                hScrollBarEnabled: false,
+			                bounces: false,
+			                pageParam: {name: "user"},
+							bgColor: "#f2f2f2"
+						}]
+					}, function(ret, err) {
+						/* empty */
+					});
+				},
+				addEvent: function() { //页面事件监听
+					//记忆导航选项
+					api.addEventListener({
+						name: "setActiveNav"
+					}, function(ret, err) {
+						if (ret) {
+							NVTabBar.setSelect({
+							    index: activePageIndex
+							});
+						} else {
+							alert(JSON.stringify(err));
+						}
+					});
+
+					//跳转订单列表
+					api.addEventListener({
+						name: "gotoOrderList"
+					}, function(ret, err) {
+						if (ret) {
+							NVTabBar.setSelect({
+							    index: 3
+							});
+							api.setFrameGroupIndex({
+							    name: 'group_page',
+							    index: 2
+							});
+							thisPage.setPageTop("3");
+						} else {
+							//alert(JSON.stringify(err));
+						}
+					});
+
+					//监听新订单提醒事件
+			        api.addEventListener({
+					    name: 'remind'
+					}, function(ret, err) {
+						//刷新订单
+						api.execScript({
+						    frameName: 'order',
+						    script: 'thisPage.requestData();'
+						});
+
+						api.startPlay({
+						    path: 'widget://wgt/orders_new.mp3'
+						}, function(ret, err) {
+						    if (ret) {
+						        console.log('有新订单');
+						    } else {
+						        console.log(JSON.stringify(err));
+						    }
+						});
+					});
+
+					//监听订单状态更新提醒事件
+					api.addEventListener({
+					    name: "remind_order_update"
+					}, function(ret, err) {
+						//刷新订单
+						api.execScript({
+						    frameName: 'order',
+						    script: 'thisPage.requestData();'
+						});
+
+						api.startPlay({
+						    path: 'widget://wgt/order_update.mp3'
+						}, function(ret, err) {
+						    if (ret) {
+						        console.log('订单状态更新');
+						    } else {
+						        console.log(JSON.stringify(err));
+						    }
+						});
+					});
+
+					//监听其它消息提醒事件
+			        api.addEventListener({
+					    name: 'remind_other'
+					}, function(ret, err) {
+						api.startPlay({
+						    path: 'widget://wgt/new_message.mp3'
+						}, function(ret, err) {
+						    if (ret) {
+						        console.log('其它消息');
+						    } else {
+						        console.log(JSON.stringify(err));
+						    }
+						});
+					});
+
+					//请求更新位置
+			        api.addEventListener({
+			            name: 'updateLocation'
+			        }, function(ret, err) {
+			            thisPage.getCurrentLocation();
+			        });
+
+			        //监听新推送消息
+			        api.addEventListener({
+					    name: 'haveNewMessage'
+					}, function(ret, err) {
+						if (activePageIndex == 1) return;
+					   	NVTabBar.setBadge({
+						    index: 1,
+						    badge: ''
+						});
+					});
+
+			       	//头部事件
+			        mui(".mui-bar-nav").on("tap", ".btn_home_search", function() { //首页搜索
+						//openWin("search");
+			        	api.openFrame({
+						    name: 'search',
+						    url: './search.html',
+						    animation: {
+						    	type:"fade",
+						    	duration: 150
+						    },
+						    rect: {
+						        x: 0,
+						        y: 0,
+						        w: 'auto',
+						        h: 'auto'
+						    },
+						    pageParam: {
+						        name: 'test'
+						    }
+						});
+			        });
+
+			        mui(".mui-bar-nav").on("tap", ".user_location", function() { //首页定位
+			        	var param = "addr_type=home_location";
+						openWin("map_addr", param);
+			        });
+			        api.addEventListener({
+					    name: "mapSelectAddress"
+					}, function(ret, err) {
+						if (ret.value.addrType == "home_location") {
+							window.localStorage.userLocation = ret.value.info.addrName;
+							document.querySelector(".user_location").innerText = ret.value.info.addrName;
+						}
+					});
+
+			        mui(".mui-bar-nav").on("tap", ".top-bar-tab .item", function() { //订单切换
+						if (this.classList.contains("on")) return;
+
+						document.querySelector(".top-bar-tab .on").classList.remove("on");
+						this.classList.add("on");
+
+						api.sendEvent({
+							name: 'orderTypeSwitch',
+							extra: {
+								type: this.getAttribute("data-value")
+							}
+						});
+					});
+
+					//监听返回键
+					var count = 0;
+					api.addEventListener({
+						name: "keyback"
+					}, function() {
+						count ++;
+						if (count > 1) {
+							//api.closeWidget({silent:true});
+							api.toLauncher();
+						} else {
+							PubApp.toast("再按一次退出应用");
+						}
+						setTimeout(function() {count = 0;}, 2000);
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

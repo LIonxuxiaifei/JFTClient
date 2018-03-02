@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-content message">
+			<div id="system_msg" class="message-item">
+				<div class="inner">
+					<div class="msg-icon img-box" style="background: url(../img/icon-sys-msg.png);"></div>
+					<div class="msg-title">通知消息</div>
+					<div id="system_msg_content" class="msg-content">消息内容</div>
+					<span id="system_msg_time" class="msg-time">00:00</span>
+					<i class="badge"></i>
+				</div>
+			</div>
+			<ul id="pageList" class="chat-message-list">
+				<!-- <li class="message-item">
+					<div class="inner bot-line mui-table-view-cell" data-id="1">
+						<div class="mui-slider-right mui-disabled">
+		                    <a class="mui-btn mui-btn-red">删除</a>
+		                </div>
+		                <div class="mui-slider-handle" style="height:100%;">
+							<div class="msg-icon img-box" style="background: url(../img_temp/chat-avatar-1.png);"></div>
+							<div class="msg-title">李果果</div>
+							<div class="msg-content">可以的</div>
+							<span class="msg-time">09:33</span>
+							<span class="mui-badge mui-badge-danger">12</span>
+						</div>
+					</div>
+				</li>
+				<li class="message-item">
+					<div class="inner bot-line" data-id="2">
+						<div class="msg-icon img-box" style="background: url(../img_temp/chat-avatar-1.png);"></div>
+						<div class="msg-title">李果果</div>
+						<div class="msg-content">可以的</div>
+						<span class="msg-time">09:33</span>
+						<span class="mui-badge mui-badge-danger">12</span>
+					</div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() {
+					thisPage.requestData("history");
+					setTimeout(function() {
+						thisPage.requestData("new");
+					}, 350);
+
+					//pull refresh
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#eee",
+			            textColor: "#bbb",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData("new");
+			        });
+				},
+				requestData: function(dataFrom) {
+					if (isLogin() == false) { thisPage.fillData(""); return; }
+
+					setTimeout(function(){
+							thisPage.chatListInit();
+					},400);
+
+					window.cachename = api.frameName + api.winName + JSON.stringify(api.pageParam) + db2.getVal("user_token");
+
+					dataFrom = dataFrom || "all";
+
+					if (dataFrom != "new") {
+						db.getConfig(cachename, function(data) {
+							window.histroydata = data;
+							if (data != "" && (window.ajaxsuccess || 0) == 0) {
+								log("历史数据填充");
+								thisPage.fillData(JSON.parse(data));
+							}
+						});
+					}
+
+					if (dataFrom == "history") return false;
+
+					var urlParam = "token=" + db2.getVal("user_token");
+
+					doAjax("Message", "msgList", urlParam, "post", function(rs) {
+						window.ajaxsuccess = 1;
+						if (rs.code == 1) {
+							var stringifyData = JSON.stringify(rs.data);
+							if (window.histroydata != stringifyData || !rs.data) {
+								db.setConfig(cachename, stringifyData);
+								thisPage.fillData(rs.data);
+								log("使用最新数据渲染了");
+							} else {
+								log("与历史一致，不处理【" + window.histroydata + "】");
+							}
+						} else {
+							document.getElementById("pageList").innerHTML = '<div class="empty-list">'+rs.msg+'</div>';
+							//PubApp.toast(rs.msg);
+						}
+
+						//api.hideProgress();
+						api.refreshHeaderLoadDone();
+					});
+				},
+				fillData: function(data) {
+					if (isLogin() == true) {
+						//system message
+						var systemMsg = data.systemInfo;
+						if (isset(systemMsg)) {
+							document.getElementById("system_msg_content").innerText = systemMsg.ms_title;
+							document.getElementById("system_msg_time").innerText = systemMsg.pm_create_time;
+						} else {
+							document.getElementById("system_msg_content").innerText = "无";
+							document.getElementById("system_msg_time").innerText = "";
+						}
+
+
+					} else {
+						if (document.querySelector(".badge").classList.contains("unread")) {
+							document.querySelector(".badge").classList.remove("unread");
+						}
+						document.getElementById("system_msg_content").innerText = "无";
+						document.getElementById("system_msg_time").innerText = "";
+
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">请登录</div>';
+					}
+
+					api.hideProgress();
+					api.refreshHeaderLoadDone();
+				},
+				chatListInit:function(){
+						var urlParam = "token=" + db2.getVal("user_token");
+						doAjax("Message", "getuserlist", urlParam, "post", function(rs) {
+							// window.ajaxsuccess = 1;
+
+							if (rs.code == 1) {
+								// var stringifyData = JSON.stringify(rs.data);
+								// if (window.histroydata != stringifyData || !rs.data) {
+								// 	db.setConfig(cachename, stringifyData);
+									//chat list
+									var chatList = rs.data.lists;
+									var listHtml = "";
+									if (isset(chatList)) {
+										chatList.forEach(function(item) {
+											listHtml += '<li class="message-item" data-id="'+item.user_id+'">\
+															<div class="inner bot-line mui-table-view-cell" data-id="'+item.user_id+'">\
+																<div class="mui-slider-right mui-disabled">\
+																		<a class="mui-btn mui-btn-red" data-id="'+item.chat_record_id+'">删除</a>\
+																</div>\
+																<div class="mui-slider-handle">\
+																	<div class="msg-icon img-box" style="background: url('+toAbsUrl(item.user_headimg)+');"></div>\
+																	<div class="msg-title">'+item.user_nicename+'</div>\
+																	<div class="msg-content">'+item.lastchatrecord+'</div>\
+																	<span class="msg-time">'+item.lastchatrecordaddtime+'</span>\
+																	<span class="mui-badge mui-badge-danger" style="display:'+(item.noreadcount>0?"inline-block":"none")+'">&nbsp;&nbsp;</span>\
+																	</div>\
+																</div>\
+														</li>';
+										});
+										document.getElementById("pageList").innerHTML = listHtml;
+									} else {
+										document.getElementById("pageList").innerHTML = '<div class="empty-list">无消息记录</div>';
+									};
+									log("使用最新数据渲染了");
+								// } else {
+								// 	log("与历史一致，不处理【" + window.histroydata + "】");
+								// }
+							} else {
+								document.getElementById("pageList").innerHTML = '<div class="empty-list">'+rs.msg+'</div>';
+								//PubApp.toast(rs.msg);
+							}
+
+							//api.hideProgress();
+							api.refreshHeaderLoadDone();
+						});
+				},
+				removeChatItem:function(id){
+						var urlParam = "token=" + db2.getVal("user_token") + "&chat_record_id=" + id;
+						doAjax("Message", "deleteDuihua", urlParam, "post", function(rs) {
+							if (rs.code == 1) {
+									thisPage.chatListInit();
+							} else {
+									PubApp.toast(rs.msg);
+							}
+						});
+				},
+				addEvent: function() {
+					//listen user login or logout
+					api.addEventListener({
+						name: "userloginorout"
+					}, function(ret, err) {
+						if (isLogin() == false) {
+							window.histroydata = null;
+		                    db.setConfig(window.cachename,null);
+		                }
+						thisPage.requestData("new");
+					});
+
+					//listen new message
+					api.addEventListener({
+					    name: 'haveNewMessage'
+					}, function(ret, err) {
+					    document.getElementById("system_msg_content").innerText = ret.value.title;
+						document.getElementById("system_msg_time").innerText = ret.value.message_time;
+
+						if (!document.querySelector(".badge").classList.contains("unread")) {
+							document.querySelector(".badge").classList.add("unread");
+						}
+					});
+					//system message
+					document.getElementById("system_msg").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							if (document.querySelector(".badge").classList.contains("unread")) {
+								document.querySelector(".badge").classList.remove("unread");
+							}
+							openWin("message_system");
+						} else {
+							openWin('login');
+						}
+					});
+
+					mui("#pageList").on("tap", ".mui-btn-red", function() {
+							var user_id = this.getAttribute("data-id");
+							api.confirm({
+									title: '温馨提示？',
+									msg: '是否删除该用户对话？',
+									buttons: ['确定', '取消']
+							}, function(ret, err) {
+									if(ret.buttonIndex == "1"){
+											thisPage.removeChatItem(user_id);
+									};
+							});
+					});
+					//chat
+					mui("#pageList").on("tap", ".inner", function() {
+						var user_id = this.getAttribute("data-id");
+						openWin('chat', 'user_id=' + user_id);
+					});
+					api.addEventListener({
+							name: 'upFriendLists'
+					}, function(ret, err) {
+							thisPage.chatListInit();
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

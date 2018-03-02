@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style>
+				.mui-slider-item{position:relative;display:inline-block;padding-bottom:50%;overflow:hidden;height:100%;width:100%;}
+				.mui-slider-item img{display:block;position:absolute;right:0;left:0;top:50%;transform: translateY(-50%);-webkit-transform: translateY(-50%);width:100%!important;max-height:inherit!important;max-width:inherit;}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">看广告赚钱</h1>
+			<span class="btn-top-right iconfont icon-fenxiang"></span>
+		</div>
+		<div id="a_right" class="action-sheet-control ad-alert" style="display: none;">
+			<div class="dark"></div>
+			<div class="alert-box">
+				<div class="box-contant">
+					<span class="con-title">恭喜回答正确<i id="rightNum" style="color: #00aaf0;">0</i>题</span>
+					<span class="con-text">获得<i id="rewardNum">0.0</i>元</span>
+				</div>
+				<div class="box-btns double">
+					<div class="item btn_look">查看奖励</div>
+					<div class="item btn_continue">继续赚钱</div>
+				</div>
+			</div>
+		</div>
+		<div id="a_error" class="action-sheet-control ad-alert" style="display: none;">
+			<div class="dark"></div>
+			<div class="alert-box">
+				<div class="box-contant">
+					<span class="con-title">回答错误</span>
+					<span class="con-text">无法获得奖励</span>
+				</div>
+				<div class="box-btns">
+					<div class="item btn_continue">继续赚钱</div>
+				</div>
+			</div>
+		</div>
+		<div class="mui-content watch-detail">
+			<div class="home-banner">
+				<div class="mui-slider">
+					<div id="img_array" class="mui-slider-group mui-slider-loop">
+						<div class="mui-slider-item mui-slider-item-duplicate">
+							<!-- <p class="img-box" style="background-image: url();"></p> -->
+							<img src=""/>
+						</div>
+						<div class="mui-slider-item">
+							<!-- <p class="img-box" style="background-image: url();"></p> -->
+							<img src=""/>
+						</div>
+						<div class="mui-slider-item mui-slider-item-duplicate">
+							<!-- <p class="img-box" style="background-image: url();"></p> -->
+							<img src=""/>
+						</div>
+					</div>
+					<div id="img_circle" class="mui-slider-indicator">
+						<div class="mui-indicator mui-active"></div>
+					</div>
+				</div>
+			</div>
+			<div class="ad-list">
+				<div class="ad-item">
+					<div class="ad-info">
+						<b id="ad_name" class="ad-name">&nbsp;</b>
+						<p id="ad_intro" class="ad-desc">&nbsp;</p>
+						<strong class="ad-money">答题奖励: <i id="ad_money">&yen;0</i></strong>
+						<div class="ad-num"><i class="iconfont icon-caidan"></i><span>投放: <em id="deliveryNum">0</em>份</span></div>
+						<div class="ad-num"><i class="iconfont icon-yanjing"></i><span>剩余: <em id="surplusNum">0</em>份</span></div>
+					</div>
+					<div class="other-info"><span class="click-num">点击 : &nbsp;<i id="clickNum">0</i>次</span></div>
+				</div>
+			</div>
+			<div class="answer-block">
+				<h2>答题</h2>
+				<ul id="pageList" class="question-list">
+					<!-- <li>
+						<div class="topic">1.题目地球上水资源占地球表面的多少？</div>
+						<div class="item mui-input-row mui-radio mui-left">
+							<label>A.50%</label>
+							<input name="q_1" type="radio">
+						</div>
+						<div class="item mui-input-row mui-radio mui-left">
+							<label>B.60%</label>
+							<input name="q_1" type="radio">
+						</div>
+						<div class="item mui-input-row mui-radio mui-left">
+							<label>C.75%</label>
+							<input name="q_1" type="radio">
+						</div>
+						<div class="item mui-input-row mui-radio mui-left">
+							<label>D.80%</label>
+							<input name="q_1" type="radio">
+						</div>
+					</li>
+					<li>
+						<div class="topic">2.题目地球上水资源占地球表面的多少？</div>
+						<div class="item mui-input-row mui-radio mui-left">
+							<label>A.50%</label>
+							<input name="q_2" type="radio">
+						</div>
+						<div class="item mui-input-row mui-radio mui-left">
+							<label>B.60%</label>
+							<input name="q_2" type="radio">
+						</div>
+						<div class="item mui-input-row mui-radio mui-left">
+							<label>C.75%</label>
+							<input name="q_2" type="radio">
+						</div>
+						<div class="item mui-input-row mui-radio mui-left">
+							<label>D.80%</label>
+							<input name="q_2" type="radio">
+						</div>
+					</li> -->
+				</ul>
+				<div class="btn-submit">提交</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			var share_title = "邀请注册",
+				share_desc = "邀请注册答题赚钱",
+				share_pic = "Skin/img/share.png",
+				share_url = "http://jiafutong.iaapp.cn/index.php/app/Share/register/Pid/" + db2.getVal("user_pid");
+
+			apiready = function(){
+				thisPage.addClickNum();
+				thisPage.init();
+			};
+			var thisPage = {
+				pageId: "",
+				resultList: [],
+				tempCount: 0,
+				init: function() {
+					thisPage.requestData();
+					pageControl.winBack();
+					thisPage.addEvent();
+					PubApp.share();
+
+					thisPage.pageId = api.pageParam.ad_id;
+				},
+				addClickNum: function() {
+					var urlParam = "AdId=" + api.pageParam.ad_id;
+					doAjax("Client", "getClick", urlParam, "post", function(rs) {
+						if (rs.ErrorCode == 1) {
+
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "AdId=" + api.pageParam.ad_id;
+
+					doAjax("Client", "getAdDetail", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				fillData: function(data) {
+					var adDetail = data.ad_detail;
+					document.getElementById("ad_name").innerText = adDetail.AdName;
+					document.getElementById("ad_intro").innerText = adDetail.AdIntroduce;
+					document.getElementById("ad_money").innerText = adDetail.ReturnMoney;
+					document.getElementById("deliveryNum").innerText = adDetail.DeliveryNum;
+					document.getElementById("surplusNum").innerText = adDetail.SurplusNum;
+					document.getElementById("clickNum").innerText = adDetail.AdClick;
+					/*轮播图*/
+					var imgArray =  adDetail.AdPic;
+					var len = imgArray.length;
+					// setTimeout(function() {
+						var img_array = document.getElementById("img_array");
+						var img_circle = document.getElementById("img_circle");
+						var img_html = "";
+						var circle_html = "";
+
+						var first_img = '<div class="mui-slider-item mui-slider-item-duplicate">' +
+											// '<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[len-1])+');"></p>' +
+											'<img src="'+toAbsUrl(imgArray[len-1])+'"/>'+
+										'</div>';
+						var last_img = '<div class="mui-slider-item mui-slider-item-duplicate">' +
+											// '<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[0])+');"></p>' +
+											'<img src="'+toAbsUrl(imgArray[0])+'"/>'+
+										'</div>';
+
+						for (var i = 0; i < len; i++) {
+							img_html += '<div class="mui-slider-item">' +
+											// '<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[i])+');"></p>' +
+											'<img src="'+toAbsUrl(imgArray[i])+'"/>'+
+										'</div>';
+							circle_html += '<div class="mui-indicator '+(i==0?'mui-active':'')+'"></div>';
+						};
+						img_array.innerHTML = first_img + img_html + last_img;
+						img_circle.innerHTML = circle_html;
+						// setTimeout(function() {
+							if (imgArray.length > 1) { 
+								mui('.mui-slider').slider().gotoItem(0);
+								mui('.mui-slider').slider({interval: 4000});
+							};
+						// }, 25);
+					// }, 50);
+					var lists = data.question_list;
+					thisPage.tempCount = lists.length; //记录题目数量
+					var lists_html = "";
+					for (var i = 0; i < lists.length; i++) {
+						var problem = (i + 1) + "." + lists[i].Problem;
+						var subs = lists[i].QuestionOption;
+
+						lists_html += '<li data-index="'+i+'" data-id="'+lists[i].QuestionId+'"><div class="topic">'+problem+'</div>';
+
+						for (var m = 0; m < subs.length; m++) {
+							var item = String.fromCharCode(65 + m) + "." + subs[m];
+
+							lists_html += 	'<div class="item mui-input-row mui-radio mui-left" data-value="'+subs[m]+'">' +
+												'<label for="q_'+m+'">'+item+'</label>\n' +
+												'<input id="q_'+m+'" name="q_'+i+'" type="radio">' +
+											'</div>';
+						}
+
+						lists_html += '</li>';
+					}
+					document.getElementById("pageList").innerHTML = lists_html;
+				},
+				submit: function() {
+					if (thisPage.resultList.length < thisPage.tempCount) {
+						PubApp.toast("有题目没有选择");
+					} else {
+						/*Ajax请求*/
+						api.showProgress({
+						    title: "提交中...",
+						    text: "请稍候",
+						    modal: false
+						});
+
+						var urlParam = "Token=" + db2.getVal("user_token");
+						urlParam += "&AdId=" + api.pageParam.ad_id;
+						urlParam += "&Result=" + JSON.stringify(thisPage.resultList);
+
+						//alert(JSON.stringify(thisPage.resultList));
+						log(JSON.stringify(thisPage.resultList));
+
+						doAjax("Client", "updateUserAccount", urlParam, "post", function(rs) {
+							api.hideProgress();
+							if (rs.ErrorCode == 1) {
+								document.getElementById("rewardNum").innerText = rs.Data.ReturnMoney;
+								document.getElementById("rightNum").innerText = rs.Data.num;
+
+								//广播用户账户信息更新事件
+								api.sendEvent({
+			                        name: 'AlertUserInfo'
+			                    });
+
+								document.getElementById("a_right").style.display = 'block';
+							} else if (rs.ErrorCode == 2) {
+								document.getElementById("a_error").style.display = 'block';
+							} else {
+								api.toast({ msg: rs.ErrorMsg });
+							}
+						});
+					}
+				},
+				addEvent: function() {
+					/*选择答案*/
+					mui("#pageList").on("change", ".mui-radio", function() {
+						var index = this.parentNode.getAttribute("data-index");
+						var problem_id = this.parentNode.getAttribute("data-id");
+						var answer_value = this.getAttribute("data-value");
+
+						thisPage.resultList[index] = {"QuestionId": problem_id,"res": answer_value};
+					});
+
+					/*提交*/
+					document.querySelector(".btn-submit").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							thisPage.submit();
+						} else {
+							openWin("login");
+						}
+					});
+
+					/*继续赚钱*/
+					mui("body").on("tap", ".btn_continue", function() {
+						document.getElementById("a_right").style.display = 'none';
+
+						//刷新广告列表
+						setTimeout(function() {
+							api.execScript({
+								name: 'watch_ad_list',
+								script: 'thisPage.requestData("new");'
+							});
+						}, 350);
+
+						//关闭当前页面
+						api.closeWin();
+					});
+
+					/*查看奖励*/
+					mui("body").on("tap", ".btn_look", function() {
+						openWin('user_balance');
+					});
+
+					/*分享给朋友*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						mask.show();
+            			$api.removeCls($api.dom("#share_box"), "hide");
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

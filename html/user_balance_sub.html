@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-content balance">
+			<!-- <header>
+				<div class="price-box">
+					<i class="m-icon">&yen;</i><span id="user_balance" class="m-num">0.00</span>
+				</div>
+				<div class="btn-box">
+					<span id="btn_recharge" class="btn-item">充值</span>
+					<span id="btn_withdraw" class="btn-item">提现</span>
+				</div>
+			</header> -->
+			<div class="balance-sheets">
+				<div class="title">流水记录</div>
+				<ul id="pageList">
+					<!-- <li>
+						<span class="sheets-name">充值100</span>
+						<span class="sheets-time">2016-09-05 19:00</span>
+						<span class="sheets-money">+100</span>
+					</li> -->
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					thisPage.requestData("history");
+					setTimeout(function() {
+						api.showProgress({
+						    title: "加载中...",
+						    text: "请稍候",
+						    modal: false
+						});
+			            thisPage.requestData("new");
+			        }, 350);
+
+					/*初始化下拉刷新*/
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#fff",
+			            textColor: "#ccc",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData("new");
+									thisPage.sendRef();
+			        });
+				},
+				sendRef:function(){
+						api.sendEvent({
+						    name: 'updataUserInfo',
+						    extra: {}
+						});
+				},
+				requestData: function(dataFrom) {
+					window.cachename = api.frameName + api.winName + JSON.stringify(api.pageParam) + db2.getVal("user_token");
+
+					dataFrom = dataFrom || "all";
+
+					if (dataFrom != "new") {
+						db.getConfig(cachename, function(data) {
+							window.histroydata = data;
+							if (data != "" && (window.ajaxsuccess || 0) == 0) {
+								log("历史数据填充");
+								thisPage.fillData(JSON.parse(data));
+							}
+						});
+					}
+
+					if (dataFrom == "history") return false;
+
+					/*Ajax请求*/
+					var urlParam = "Token=" + db2.getVal("user_token");
+
+					doAjax("Member", "getAccountList", urlParam, "post", function(rs) {
+						window.ajaxsuccess = 1;
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							var stringifyData = JSON.stringify(rs.Data);
+							if (window.histroydata != stringifyData || !rs.Data) {
+								db.setConfig(cachename, stringifyData);
+								thisPage.fillData(rs.Data);
+								log("使用最新数据渲染了");
+							} else {
+								log("与历史一致，不处理【" + window.histroydata + "】");
+							}
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+
+						api.refreshHeaderLoadDone();
+					});
+				},
+				fillData: function(data) {
+					var lists = data.lists;
+					var lists_html = "";
+					if (isset(lists)) {
+						for (var i = 0; i < lists.length; i++) {
+							lists_html += '<li>' +
+											'<span class="sheets-name">'+lists[i].content+'</span>' +
+											'<span class="sheets-time">'+lists[i].ChangeTime+'</span>' +
+											'<span class="sheets-money">'+lists[i].ChangeMoney+'</span>' +
+										 '</li>';
+						}
+						document.getElementById("pageList").innerHTML = lists_html;
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">没有流水记录</div>';
+					}
+
+					api.hideProgress();
+					api.refreshHeaderLoadDone();
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body class="color-white">
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">看广告赚钱</h1>
+		</div>
+		<div class="mui-content watch-ad">
+			<ul id="pageList" class="ad-list">
+				<!-- <li class="ad-item" data-id="1">
+					<div class="ad-img img-box" style="background: url(../img_temp/ad-img1.png);"></div>
+					<div class="ad-info">
+						<b class="ad-name">广告名称</b>
+						<strong class="ad-money">答题奖励: <i>&yen;0.3</i></strong>
+						<div class="ad-num"><i class="iconfont icon-caidan"></i><span>投放: 29999份</span></div>
+						<div class="ad-num"><i class="iconfont icon-yanjing"></i><span>剩余: 5000份</span></div>
+					</div>
+					<div class="other-info">
+						<span class="distance">0.50km</span>
+						<span class="click-num">点击 : &nbsp;3200次</span>
+					</div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				lat: db2.getVal("location_lat"), //经度
+				lng: db2.getVal("location_lon"), //纬度
+				init: function() {
+					pageControl.winBack();
+					thisPage.addEvent();
+			
+					thisPage.requestData("history");
+					setTimeout(function() {
+			            thisPage.requestData("new");
+			        }, 350);
+			
+					/*初始化下拉刷新*/
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#eee",
+			            textColor: "#bbb",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData("new");
+			        });
+				},
+				requestData: function(dataFrom) {
+					//window.cachename = api.frameName + api.winName + JSON.stringify(api.pageParam) + db2.getVal("user_token");
+					window.cachename = api.frameName + api.winName + JSON.stringify(api.pageParam);
+			
+					dataFrom = dataFrom || "all";
+			
+					if (dataFrom != "new") {
+						db.getConfig(cachename, function(data) {
+							window.histroydata = data;
+							if (data != "" && (window.ajaxsuccess || 0) == 0) {
+								log("历史数据填充");
+								thisPage.fillData(JSON.parse(data));
+							}
+						});
+					}
+			
+					if (dataFrom == "history") return false;
+			
+					/*Ajax请求*/
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+			
+					var urlParam = "Lat=" + thisPage.lat;
+					urlParam += "&Lng=" + thisPage.lng;
+					urlParam += "&index=gd";
+					
+					doAjax("Client", "index", urlParam, "post", function(rs) {
+						window.ajaxsuccess = 1;
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							var stringifyData = JSON.stringify(rs.Data);
+							if (window.histroydata != stringifyData || !rs.Data) {
+								db.setConfig(cachename, stringifyData);
+								thisPage.fillData(rs.Data);
+								log("使用最新数据渲染了");
+							} else {
+								log("与历史一致，不处理【" + window.histroydata + "】");
+							}
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+			
+						api.refreshHeaderLoadDone();
+					});
+				},
+				fillData: function(data) {
+					var lists = data.lists;
+					var lists_html = "";
+
+					if (isset(lists)) {
+						for (var i = 0; i < lists.length; i++) {
+							lists_html += '<li class="ad-item" data-id="'+lists[i].AdId+'">' +
+											'<div class="ad-img img-box" style="background-image: url('+toAbsUrl(lists[i].AdPic[0])+');"></div>' +
+											'<div class="ad-info">' +
+												'<b class="ad-name">'+lists[i].AdName+'</b>' +
+												'<strong class="ad-money">答题奖励: <i>&yen;'+lists[i].ReturnMoney+'</i></strong>' +
+												'<div class="ad-num"><i class="iconfont icon-caidan"></i><span>投放: '+lists[i].DeliveryNum+'份</span></div>' +
+												'<div class="ad-num"><i class="iconfont icon-yanjing"></i><span>剩余: '+lists[i].SurplusNum+'份</span></div>' +
+											'</div>' +
+											'<div class="other-info">' +
+												'<span class="distance">'+lists[i].juli+'km</span>' +
+												'<span class="click-num">点击 : &nbsp;'+lists[i].AdClick+'次</span>' +
+											'</div>' +
+										 '</li>';
+						}
+						document.getElementById("pageList").innerHTML = lists_html;
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">没有记录</div>';
+					}
+				},
+				addClickNum: function(id) {
+					var urlParam = "AdId=" + id;
+					
+					doAjax("Client", "getClick", urlParam, "post", function(rs) {
+						if (rs.ErrorCode == 1) {
+							setTimeout(function() {
+					            thisPage.requestData("new");
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*广告详情*/
+					mui("#pageList").on("tap", "li", function() {
+						thisPage.addClickNum(this.getAttribute("data-id"));
+						var param = "ad_id=" + this.getAttribute("data-id");
+						openWin("watch_ad_detail", param);
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

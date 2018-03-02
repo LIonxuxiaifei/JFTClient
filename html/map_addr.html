@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav search">
+			<div class="mui-title">选择地址</div>
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<span class="btn-top-right iconfont icon-search"></span>
+		</div>
+		<div class="mui-content map-addr">
+			<div class="user-location">
+				<span class="text">当前位置: <i id="current_addresss"></i></span>
+				<div id="my_location" class="btn-location"><i class="iconfont icon-dizhi"></i><span>我的位置</span></div>
+			</div>
+			<div class="map-box"></div>
+			<ul id="addrList" class="addr-list mui-table-view-radio">
+				<!-- <li class="mui-radio">
+					<label>
+						<span class="addr-name">浙江省创意设计协会</span>
+						<span class="addr-detail">浙江省杭州市拱墅区祥园路99号运河广告大厦2号楼</span>
+						<input name="addr" type="radio">
+					</label>
+				</li>
+				<li class="mui-radio">
+					<label>
+						<span class="addr-name">中国智慧信息产业园</span>
+						<span class="addr-detail">浙江省杭州市拱墅区祥园路88号</span>
+						<input name="addr" type="radio">
+					</label>
+				</li>
+				<li class="mui-radio">
+					<label>
+						<span class="addr-name">杭州市北部软件园</span>
+						<span class="addr-detail">浙江省杭州市浙江省杭州市拱墅区祥园路33号拱墅区祥园路99号运河广告大厦2号楼</span>
+						<input name="addr" type="radio">
+					</label>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			var bMap;
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				city: "", //当前城市
+				init: function() {
+					pageControl.winBack();
+
+					if (!bMap) {
+						bMap = api.require('bMap');
+					}
+
+					//thisPage.getLocationServices();
+
+					/*打开地图*/
+					setTimeout(function() {
+		            	thisPage.openMap();
+		            }, 350);
+				},
+				/*getCurrentLocation: function() {
+					bMap.getLocation({
+					    accuracy: '100m',
+					    autoStop: true,
+					    filter: 1
+					}, function(ret, err) {
+					    if (ret.status) {
+					        thisPage.getLocationInfo(ret.lon, ret.lat);
+					    } else {
+					        log("errorCode:"+err.code+" "+"errorMsg:"+err.msg);
+					        mui.toast("获取位置失败");
+					    }
+					});
+				},*/
+				openMap: function() {
+					bMap.open({
+					    rect: {
+					        x: 0,
+					        y: 89,
+					        h: 157
+					    },
+					    zoomLevel: 18,
+					    showUserLocation: true,
+					    fixed: true
+					}, function(ret) {
+					    if (ret.status) {
+					    	//alert("getVal\n"+db2.getVal("location_lat")+'\n'+db2.getVal("location_lon"));
+					        thisPage.setCenter(db2.getVal("location_lat"), db2.getVal("location_lon"));
+					    }
+					});
+
+					/*监听地图视图改变*/
+					bMap.addEventListener({
+		                name: 'viewChange'
+		            }, function(ret) {
+		                if (ret.status) {
+		                	thisPage.getLocationInfo(ret.lat, ret.lon);
+		                }
+		            });
+				},
+				setCenter: function(lat, lon) {
+					//alert("setCenter\n"+lat+"\n"+lon);
+					bMap.setCenter({
+					    coords: {
+					        lon: lon,
+					        lat: lat
+					    },
+					    animation: false
+					});
+					thisPage.getLocationInfo(lat, lon);
+				},
+				getLocationInfo: function(lat, lon) {
+					api.showProgress({
+					    title: "获取定位中",
+					    text: "",
+					    modal: false
+					});
+
+					bMap.getNameFromCoords({
+					    lon: lon,
+					    lat: lat
+					}, function(ret, err) {
+					    if (ret.status) {
+					        document.getElementById("current_addresss").innerText = ret.address;
+
+					        thisPage.city = ret.city; //map_search传参
+
+					        var nearbyList = ret.poiList;
+					        var listHtml = "";
+					        nearbyList.forEach(function(item) {
+					        	/*listHtml += '<li class="mui-radio" data-lat="'+item.coord.lat+'" data-lon="'+item.coord.lon+'">' +
+												'<label>' +
+													'<span class="addr-name">'+item.name+'</span>' +
+													'<span class="addr-detail">'+item.address+'</span>' +
+													'<input name="addr" type="radio">' +
+												'</label>' +
+											'</li>';*/
+								listHtml += '<li data-lat="'+item.coord.lat+'" data-lon="'+item.coord.lon+'">' +
+												'<span class="addr-name">'+item.name+'</span>' +
+												'<span class="addr-detail">'+item.address+'</span>' +
+											'</li>';
+					        });
+					        document.getElementById("addrList").innerHTML = listHtml;
+					    }
+
+					    api.hideProgress();
+					});
+				},
+				getLocationServices: function() {
+					bMap.getLocationServices(function(ret, err) {
+					    if (ret.enable) {
+					        alert(JSON.stringify(ret));
+					    } else {
+					        mui.toast("未开启定位功能！");
+					    }
+					});
+				},
+				postLocation: function(lat, lon) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&member_last_login_lat=" + lat;
+					urlParam += "&member_last_login_lon=" + lon;
+					
+					doAjax("Index", "save_distance", urlParam, "post", function(rs) {
+						if (rs.code == 1) {
+							console.log("========定位更新成功========");
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*监听搜索地址选择*/
+					api.addEventListener({
+		                name: 'selectSarchAddr'
+		            }, function(ret, err) {
+		                if (ret) {
+		                	//alert(ret.value.lat+'\n'+ret.value.lon);
+		                    thisPage.setCenter(ret.value.lat, ret.value.lon);
+		                }
+		            });
+
+					/*选择地址*/
+					mui("#addrList").on("tap", "li", function() {
+						db2.setVal("location_lat", this.getAttribute("data-lat"));
+					    db2.setVal("location_lon", this.getAttribute("data-lon"));
+					    thisPage.postLocation(this.getAttribute("data-lat"), this.getAttribute("data-lon"));
+
+						//alert('select\n'+db2.getVal("location_lat")+'\n'+db2.getVal("location_lon"));
+
+						api.sendEvent({
+						    name: "mapSelectAddress",
+						    extra: {
+						    	addrType: api.pageParam.addr_type,
+						    	info: {
+						    		address: this.querySelector(".addr-detail").innerText,
+						    		addrName: this.querySelector(".addr-name").innerText,
+						        	addrDetail: this.querySelector(".addr-detail").innerText,
+						        	lat: this.getAttribute("data-lat"),
+						        	lng: this.getAttribute("data-lon")
+						    	}
+						    }
+						});
+
+						setTimeout(function() {
+							api.closeWin();
+						}, 350);
+					});
+
+					/*搜索地址*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						var param = "currentCity=" + thisPage.city;
+						openWin("map_search", param);			
+					});
+
+					/*我的位置*/
+					document.querySelector("#my_location").addEventListener("tap", function() {
+						bMap.showUserLocation({
+			                isShow: true,
+			                trackingMode: 'none'
+			            });		
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

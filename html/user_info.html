@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../css/mui.picker.css" />
+		<link rel="stylesheet" href="../css/mui.poppicker.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">个人资料</h1>
+			<span class="btn-top-right font">保存</span>
+		</div>
+		<div class="mui-content">
+			<div class="user-info">
+				<div id="select_avatar" class="info-row avatar special">
+					<b class="expla">头像</b>
+					<div id="user_avatar" class="user-avatar img-box" style="background: url();"></div>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div class="info-row">
+					<b class="expla">昵称</b>
+					<input id="user_nickname" type="text" placeholder="输入昵称" />
+				</div>
+				<div id="user_sex" class="info-row">
+					<b class="expla">性别</b>
+					<span class="content">选择性别</span>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div id="user_city" class="info-row">
+					<b class="expla">城市</b>
+					<span class="content">选择城市</span>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div id="user_tel" class="info-row special">
+					<b class="expla">手机号</b>
+					<span class="content"><!-- 15869173714 --></span>
+				</div>
+				<div class="info-row intro special">
+					<b class="expla">业余爱好</b>
+					<textarea id="user_intro" placeholder="输入爱好"></textarea>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.picker.js" ></script>
+		<script type="text/javascript" src="../js/mui.poppicker.js" ></script>
+		<script type="text/javascript" src="../js/city.data.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					var pageControl = new PageControl();
+					pageControl.winBack();
+
+					/*获取本地数据*/
+					window.user_avatar = db2.getVal("user_avatar");
+					window.user_nickname = db2.getVal("user_nickname");
+					window.user_sex = db2.getVal("user_sex");
+					window.user_city = db2.getVal("user_city");
+					window.user_tel = db2.getVal("user_tel");
+					window.user_intro = db2.getVal("user_intro");
+					window.user_province = db2.getVal("user_province");
+
+					document.getElementById("user_avatar").style.background = "url("+ toAbsUrl(window.user_avatar) +")";
+					document.getElementById("user_nickname").value = window.user_nickname;
+					switch (window.user_sex) {
+						case "0":
+							document.querySelector("#user_sex .content").innerText = "保密";
+							break;
+						case "1":
+							document.querySelector("#user_sex .content").innerText = "男";
+							break;
+						case "2":
+							document.querySelector("#user_sex .content").innerText = "女";
+							break;
+						default:
+							document.querySelector("#user_sex .content").innerText = "选择性别";
+							break;
+					}
+					document.querySelector("#user_city .content").innerText = (window.user_city=="0"?"选择城市":window.user_city);
+					document.querySelector("#user_tel .content").innerText = window.user_tel;
+					document.getElementById("user_intro").value = window.user_intro;
+
+					/*初始化性别选择器*/
+					window.picker_sex = new mui.PopPicker();
+					window.picker_sex.setData([{value:"0",text:"保密"},{value:"1",text:"男"},{value:"2",text:"女"}]);
+					/*初始化城市选择器*/
+					window.picker_city = new mui.PopPicker({layer: 2});
+					window.picker_city.setData(cityData);
+
+					thisPage.addEvent();
+				},
+				submit: function() {
+					if (document.getElementById("user_nickname").value == "") {
+						PubApp.toast("昵称不能为空");
+            			return false;
+					}
+					// if (document.getElementById("user_intro").value == "") {
+					// 	PubApp.toast("简介内容不能为空");
+          //   			return false;
+					// }
+
+					api.showProgress({
+					    title: "保存中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&UserSex=" + window.user_sex;
+					urlParam += "&City=" + window.user_city;
+					urlParam += "&Province=" + window.user_province;
+					urlParam += "&UserIntroduce=" + document.getElementById("user_intro").value;
+					urlParam += "&NickName=" + document.getElementById("user_nickname").value;
+					urlParam += "&UserHead=" + window.user_avatar;
+
+					console.log(urlParam);
+
+					doAjax("Member", "setUserInfo", urlParam, "post", function(rs) {
+						if (rs.ErrorCode == 1) {
+							api.hideProgress();
+							PubApp.toast("保存成功");
+							api.sendEvent({
+		                        name: 'AlertUserInfo'
+		                    });
+
+		                    setTimeout(function() {
+		                    	api.closeWin();
+		                    }, 350);
+						} else {
+							api.hideProgress();
+							PubApp.toast(rs.ErrorMsg);
+						}
+					});
+				},
+				addEvent: function() {
+					/*修改头像*/
+					document.querySelector("#select_avatar").addEventListener("tap", function() {
+						getImgAndCrop(function(locationImgPath) {
+			                uploadimg(locationImgPath, function(remateurl) {
+			                    window.user_avatar = remateurl;
+			                    document.querySelector("#user_avatar").style.background = 'url(' + toAbsUrl(remateurl) + ')';
+			                });
+			            }, 500, 500);
+					});
+					/*选择性别*/
+					document.querySelector("#user_sex").addEventListener("tap", function() {
+						window.picker_sex.show(function (selectItems) {
+							document.querySelector("#user_sex .content").innerText = selectItems[0].text;
+							window.user_sex = selectItems[0].value;
+						});
+					});
+					/*选择城市*/
+					document.querySelector("#user_city").addEventListener("tap", function() {
+						window.picker_city.show(function (selectItems) {
+							document.querySelector("#user_city .content").innerText = selectItems[1].text;
+							window.user_city = selectItems[1].text;
+							window.user_province = selectItems[0].text;
+						});
+					});
+					/*保存*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						thisPage.submit();
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

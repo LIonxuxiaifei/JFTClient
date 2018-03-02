@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">修改登录密码</h1>
+			<span class="btn-top-right font">提交</span>
+		</div>
+		<div class="mui-content alter-paypwd">
+			<div class="input-area">
+				<div class="input-block">
+					<input id="old_pwd" type="password" placeholder="输入原登录密码" />
+					<span class="forget">忘记密码?</span>
+				</div>
+				<div class="input-block">
+					<input id="new_pwd" type="password" placeholder="输入新登录密码" />
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+
+					thisPage.addEvent();
+				},
+				submit: function() {
+					var old_pwd = document.getElementById("old_pwd").value,
+						new_pwd = document.getElementById("new_pwd").value;
+
+					if (old_pwd == "") {
+						api.toast({
+						    msg: "请输入原登录密码"
+						});
+						return false;
+					}
+					if (new_pwd.length < 6) {
+						api.toast({
+						    msg: "密码长度不能小于6"
+						});
+						return false;
+					}
+
+					api.showProgress({
+					    title: "提交中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					/*Ajax请求*/
+					var urlParam = "Token=" + db2.getVal("user_token");
+					urlParam += "&UserPass=" + old_pwd;
+					urlParam += "&NewUserPass=" + new_pwd;
+
+					doAjax("Member", "saveUserLoginPass", urlParam, "post", function(rs) {
+						if (rs.ErrorCode == 1) {
+							api.hideProgress();
+							api.toast({
+							    msg: "密码修改成功"
+							});
+							setTimeout(function() {
+								api.closeWin();
+							}, 800);
+						} else {
+							api.hideProgress();
+							api.toast({
+							    msg: rs.ErrorMsg
+							});
+						}
+					});
+				},
+				addEvent: function() {
+					/*提交*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						thisPage.submit();
+					});
+
+					/*忘记密码*/
+					document.querySelector(".forget").addEventListener("tap", function() {
+						openWin("forget");
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

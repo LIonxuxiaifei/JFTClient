@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body class="color-white">
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">退款</h1>
+			<span class="btn-top-right font">提交</span>
+		</div>
+		<div class="mui-content order-refund">
+			<div class="top-info">
+				<b>退款金额</b>
+				<span><i id="money">0</i>元 &nbsp;(系统默认)</span>
+			</div>
+			<div class="publish-item normal">
+				<div class="upload-imgs">
+					<input id="refundReason" class="desc" type="text" placeholder="请输入退款理由" />
+					<div id="imgBox" style="display: inline-block"></div>
+					<div id="btn_upload" class="btn-upload">
+						<i class="iconfont icon-jiahao1"></i>
+						<span>上传图片</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				imgIndex: 0,
+				imgArray: [],
+				init: function() {
+					pageControl.winBack();
+			
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "",
+					    text: "",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + api.pageParam.order_id;
+					
+					doAjax("Client", "order_apply_refund", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					document.getElementById("money").innerText = data.info.order_total;
+				},
+				submit: function() {
+					var content = document.getElementById("refundReason").value;
+
+					if (content == "") {
+						PubApp.toast("请输入退款理由");
+						return false;
+					}
+
+					api.showProgress({
+					    title: "提交中...",
+					    text: "请稍候",
+					    modal: true
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + api.pageParam.order_id;
+					urlParam += "&act=submit";
+					urlParam += "&refund_refund_reason=" + content;
+					urlParam += "&refund_picture=" + imgSet.value;
+					
+					doAjax("Client", "order_apply_refund", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							api.toast({ msg: "提交申请成功" });
+
+							api.execScript({
+							    name: 'order_detail_tao',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+								api.closeWin();
+							}, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					//提交
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						thisPage.submit();
+					});
+
+					/*upload image*/
+					window.imgSet = new Set();
+					var addImgView = function(imgurl) {
+						var imgNode = document.createElement("div");
+						imgNode.setAttribute("class","item img-box");
+						imgNode.style.backgroundImage = 'url('+imgurl+')';
+						imgNode.innerHTML = '<i data-value="'+imgurl+'" class="iconfont icon-cha btn_remove"></i>';
+						document.getElementById("imgBox").appendChild(imgNode);
+					};
+					document.getElementById("btn_upload").addEventListener("tap", function() {
+						if (imgSet.value.length == 3) {
+							mui.toast('最多上传3张图片');
+							return false;
+						}
+						getImgAndCrop(function(locationImgPath) {
+			                if (typeof locationImgPath == 'string') {
+			                	uploadimg(locationImgPath, function(remateurl) {
+						        	imgSet.add(remateurl);
+						        	addImgView(locationImgPath);
+				                });
+			                } else if (typeof locationImgPath == 'object') {
+			                	locationImgPath.forEach(function(item) {
+			     					uploadimg(item.path, function(remateurl) {
+							        	imgSet.add(remateurl);
+			     						addImgView(item.thumbPath);
+					                });
+			     				});
+			                }
+			            }, 500, 500, imgSet.value.length);
+					});
+					/*remove image*/
+					mui("#imgBox").on("tap", ".btn_remove", function() {
+						imgSet.remove(this.getAttribute("data-value"));
+						var parent = this.parentNode;
+						parent.parentNode.removeChild(parent);
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-content">
+			<ul id="pageList" class="ticket-list">
+				<!-- <li>
+					<div class="main-content">
+						<div class="title">无门槛</div>
+						<div class="date">有效期至2016-09-11</div>
+						<span class="explain">限服务类</span>
+						<div class="price-info">
+							<div class="price-box">
+								<i class="m-icon">&yen;</i>
+								<span class="m-num">12</span>
+							</div>
+						</div>	
+					</div>
+					<div class="bot-line"></div>
+				</li>
+				<li class="invalid">
+					<div class="main-content">
+						<div class="title">无门槛</div>
+						<div class="date">有效期至2016-09-11</div>
+						<span class="explain">限服务类</span>
+						<span class="explain status">已使用</span>
+						<div class="price-info">
+							<div class="price-box">
+								<i class="m-icon">&yen;</i>
+								<span class="m-num">12</span>
+							</div>
+						</div>	
+					</div>
+					<div class="bot-line"></div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+
+					thisPage.requestData("history");
+					setTimeout(function() {
+			            thisPage.requestData("new");
+			        }, 350);
+			
+					/*初始化下拉刷新*/
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#fff",
+			            textColor: "#ccc",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData("new");
+			        });
+				},
+				requestData: function(dataFrom) {
+					window.cachename = api.frameName + api.winName + JSON.stringify(api.pageParam) + db2.getVal("user_token");
+			
+					dataFrom = dataFrom || "all";
+			
+					if (dataFrom != "new") {
+						db.getConfig(cachename, function(data) {
+							window.histroydata = data;
+							if (data != "" && (window.ajaxsuccess || 0) == 0) {
+								log("历史数据填充");
+								thisPage.fillData(JSON.parse(data));
+							}
+						});
+					}
+			
+					if (dataFrom == "history") return false;
+			
+					/*Ajax请求*/
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+			
+					var urlParam = "Token=" + db2.getVal("user_token");
+					
+					doAjax("Member", "getUserCouponList", urlParam, "post", function(rs) {
+						window.ajaxsuccess = 1;
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							var stringifyData = JSON.stringify(rs.Data);
+							if (window.histroydata != stringifyData || !rs.Data) {
+								db.setConfig(cachename, stringifyData);
+								thisPage.fillData(rs.Data);
+								log("使用最新数据渲染了");
+							} else {
+								log("与历史一致，不处理【" + window.histroydata + "】");
+							}
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+			
+						api.refreshHeaderLoadDone();
+					});
+				},
+				fillData: function(data) {
+					var lists = data.lists;
+					var lists_html = "";
+					var isValid = 0; //是否有效
+					if (isset(lists)) {
+						for (var i = 0; i < lists.length; i++) {
+							switch (lists[i].Status) {
+								case "1":
+									isValid = 1;
+									break;
+								case "2":
+									isValid = 0;
+									break;
+								default:
+									break;
+							}
+							lists_html += '<li class="'+(isValid?'':'invalid')+'">' +
+											'<div class="main-content">' +
+												'<div class="title">'+lists[i].CouponName+'</div>' +
+												'<div class="date">有效期至'+lists[i].UseEndTime+'</div>' +
+												(isValid?'':'<span class="explain status">已使用或过期</span>') +
+												'<div class="price-info">' +
+													'<div class="price-box">' +
+														'<i class="m-icon">&yen;</i>' +
+														'<span class="m-num">'+lists[i].Money+'</span>' +
+													'</div>' +
+												'</div>' +	
+											'</div>' +
+											'<div class="bot-line"></div>' +
+										 '</li>';
+						}
+						document.getElementById("pageList").innerHTML = lists_html;
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">空空如也</div>';
+					}
+				}
+			};
+		</script>
+	</body>
+</html>

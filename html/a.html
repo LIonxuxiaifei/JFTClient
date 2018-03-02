@@ -1,0 +1,67 @@
+var map;
+	apiready = function() {
+
+		map = api.require('bMap');
+
+		map.open({
+			rect: {
+				x: 0,
+				y: 0,
+				w: api.windowWith,
+				h: api.windowHeight
+			},
+			center: {
+				lon: 120.114613,
+				lat: 30.342675
+			},
+			zoomLevel: 16,
+			showUserLocation: true,
+			fixed: true
+		}, function(ret) {
+			if (ret.status) {
+
+				map.searchRoute({
+					id: 1,
+					type: 'drive',
+					policy: 'ecar_fee_first',
+					start: {
+						lon: 120.125694,
+						lat: 30.337419
+					},
+					end: {
+						lon: 120.106079,
+						lat: 30.340229
+					}
+				}, function(ret, err) {
+
+					if (ret.status) {
+						map.drawRoute({
+							id: 1,
+							autoresizing: false,
+							index: 0,
+							styles: {
+								start: {
+									icon: 'widget://image/bmap_start.png'
+								},
+								end: {
+									icon: 'widget://image/bmap_end.png'
+								}
+							}
+						}, function(ret) {
+							api.alert({
+								msg: JSON.stringify(ret)
+							});
+						});
+					} else {
+						api.alert({
+							msg: JSON.stringify(err)
+						});
+					}
+
+				});
+			}
+		});
+
+
+
+	};

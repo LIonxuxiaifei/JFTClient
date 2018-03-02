@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../css/mui.picker.css" />
+		<link rel="stylesheet" href="../css/mui.poppicker.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">编辑地址</h1>
+			<span class="btn-top-right font">保存</span>
+		</div>
+		<div class="mui-content address-manage">
+			<div class="teamwork-info">
+				<div class="info-row">
+					<b class="info-name">姓名</b>
+					<input id="user_name" type="text" placeholder="输入姓名" />
+				</div>
+				<div class="info-row">
+					<b class="info-name">手机号</b>
+					<input id="user_tel" type="text" placeholder="输入手机号" />
+				</div>
+				<div id="select_addr" class="info-row">
+					<b class="info-name">所在地区</b>
+					<span class="info-con">选择省市区</span>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div class="info-row text-area">
+					<textarea id="user_addr" placeholder="填写详细地址"></textarea>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.picker.js" ></script>
+		<script type="text/javascript" src="../js/mui.poppicker.js" ></script>
+		<script type="text/javascript" src="../js/city.data-3.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				addressId: "",
+				province: "",
+				city: "",
+				area: "",
+				init: function() {
+					pageControl.winBack();
+					thisPage.addEvent();
+
+					/*初始化省市区选择器*/
+					window.picker_addr = new mui.PopPicker({layer: 3});
+					window.picker_addr.setData(cityData3);
+
+					var page_param = api.pageParam;
+					thisPage.addressId = api.pageParam.addressId;
+					thisPage.province = api.pageParam.province;
+					thisPage.city = api.pageParam.city;
+					thisPage.area = api.pageParam.area;
+					document.getElementById("user_name").value = page_param.consignee;
+					document.getElementById("user_tel").value = page_param.tel;
+					document.getElementById("user_addr").value = page_param.addrDetail;
+					document.querySelector("#select_addr .info-con").innerText = thisPage.province+" "+thisPage.city+" "+thisPage.area;
+
+				},
+				submit: function() {
+					var user_name = document.getElementById("user_name").value,
+						user_tel = document.getElementById("user_tel").value,
+						user_addr = document.getElementById("user_addr").value;
+
+					if (user_name == "") {
+						api.toast({ msg: "请输入姓名" });
+						return false;
+					}
+
+					var rule_phone = new RegExp(/^(1[0-9]{2})+\d{8}$/i);
+					if (!rule_phone.test(user_tel)) {
+						api.toast({ msg: "手机号不正确" });
+						return false;
+					}
+
+					// if (thisPage.province == "" || thisPage.city == "" || thisPage.area == "") {
+					// 	api.toast({ msg: "请选择省市区" });
+					// 	return false;
+					// }
+
+					if (user_addr == "") {
+						api.toast({ msg: "请填写详细地址" });
+						return false;
+					}
+
+					api.showProgress({
+					    title: "保存中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "Token=" + db2.getVal("user_token");
+					urlParam += "&AddressId=" + thisPage.addressId;
+					urlParam += "&Tel=" + user_tel;
+					urlParam += "&Consignee=" + user_name;
+					urlParam += "&Province=" + thisPage.province;
+					urlParam += "&City=" + thisPage.city;
+					urlParam += "&Area=" + thisPage.area;
+					urlParam += "&Address=" + user_addr;
+
+					doAjax("Member", "editUserAddress", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							PubApp.toast("编辑成功");
+
+							//更新地址列表
+							api.execScript({
+							    name: 'user_setting_address_manage',
+							    script: 'thisPage.requestData("new");'
+							});
+
+							setTimeout(function() {
+								api.closeWin();
+							}, 800);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*保存*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						thisPage.submit();					
+					});
+
+					/*选择省市区*/
+					document.querySelector("#select_addr").addEventListener("tap", function() {
+						window.picker_addr.show(function (selectItems) {
+							thisPage.province = selectItems[0].text;
+							thisPage.city = selectItems[1].text;
+							thisPage.area = selectItems[2].text;
+
+							var addrText = selectItems[0].text + " " + selectItems[1].text + " " + selectItems[2].text;
+							document.querySelector("#select_addr .info-con").innerText = addrText;
+						});				
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

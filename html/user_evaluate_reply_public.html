@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.feedback {
+				padding-left: 15px;
+				padding-right: 15px;
+			}
+			#evaluate_content {
+				background: #fff;
+				width: 100%;
+				margin-top: 20px;
+				border-radius: 5px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">留言</h1>
+			<span class="btn-top-right font">发表</span>
+		</div>
+		<div class="mui-content feedback">
+			<textarea id="evaluate_content" class="content" placeholder="请输入留言内容"></textarea>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+				},
+				submit: function() {
+					var evaluate_content = document.getElementById("evaluate_content").value;
+
+					if (evaluate_content == "") {
+						PubApp.toast("请输入留言内容");
+						return false;
+					}
+
+					api.showProgress({
+					    title: "发表中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&commen_content=" + evaluate_content;
+
+					if (api.pageParam.type == "public") {
+						urlParam += "&papply_id=" + api.pageParam.data_id;
+
+						doAjax("Goods", "publicApply_comment", urlParam, "post", function(rs) {
+							api.hideProgress();
+							if (rs.code == 1) {
+								PubApp.toast(rs.msg);
+
+								api.execScript({
+								    name: 'user_public',
+								    frameName: 'user_public_own',
+								    script: 'thisPage.requestData();'
+								});
+
+								api.execScript({
+								    name: 'user_public',
+								    frameName: 'user_public_person',
+								    script: 'thisPage.requestData();'
+								});
+
+								setTimeout(function() {
+									api.closeToWin({
+									    name: "user_public"
+									});
+								}, 350);
+							} else {
+								api.toast({ msg: rs.msg });
+							}
+						});
+					} else {
+						urlParam += "&order_id=" + api.pageParam.data_id;
+
+						doAjax("Client", "order_comment", urlParam, "post", function(rs) {
+							api.hideProgress();
+							if (rs.code == 1) {
+								PubApp.toast(rs.msg);
+
+								api.execScript({
+								    name: 'root',
+								    frameName: 'order',
+								    script: 'thisPage.requestData();'
+								});
+
+								setTimeout(function() {
+									api.closeToWin({
+									    name: "root"
+									});
+								}, 350);
+							} else {
+								api.toast({ msg: rs.msg });
+							}
+						});
+					}
+				},
+				addEvent: function() {
+					/*submit*/
+				  	document.querySelector(".btn-top-right").addEventListener("tap", function() {
+				  		thisPage.submit();						
+				  	});
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">继续出价</h1>
+		</div>
+		<div class="mui-content user-bid">
+			<div class="top-info">
+				<!-- <b>大床房</b>
+				<strong>大床|无早餐</strong>
+				<strong>入住 : 11-26 (周六) 离店 : 11-27 (周日) 1晚</strong>
+				<strong>我的出价 : <i>90元</i></strong>
+				<strong>店家回复 : <i>100元</i></strong>
+				<div class="collect-item-goods">
+					<div class="price-info">
+						<div class="price-box">
+							<i class="m-icon">&yen;</i>
+							<span class="m-num">109</span>
+						</div>
+						<div class="old-price">原价 &yen; 300</div>
+					</div>
+				</div> -->
+			</div>
+			<div class="tips">
+				<!-- <i class="iconfont icon-tips"></i>
+				<strong>您出价后，酒店根据您的出价和其他情况为您报价，如果不满意，可以重新出价；还价过程需要等待，但比直订便宜许多！</strong> -->
+			</div>
+			<div class="order-info-block">
+				<!-- <div class="item">订单编号：<i>1234567890</i></div>
+				<div class="item">下单时间：<i>2016-12-10 15:30:10</i></div>
+				<div class="item">数量：<i>1晚1间</i></div>
+				<div class="item">总价：<i>109元</i></div>
+				<div class="item">入住人：<i>张飞</i></div>
+				<div class="item">联系电话：<i>13838383855</i></div>
+				<div class="item">入住说明：<i>商家12:00开始办理入住,如需提早办理请联商家</i></div> -->
+			</div>
+			<div class="info-in">
+				<div class="item inpt">
+					<b class="item-name">我的出价</b>
+					<input id="price_ipt" type="number" placeholder="请输入您的价格" />
+				</div>
+			</div>
+			<div class="btn-submit atbot invalid">提交</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".btn-submit"));
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "Token=" + db2.getVal("user_token");
+					urlParam += "&order_number=" + api.pageParam.order_number;
+					
+					doAjax("Hotel", "getOfferDetail", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: "获取网络失败" });
+							//api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				fillData: function(data) {
+					/*房间信息*/
+					var roomHtml = 	'<b>'+data.room_type+'</b>' +
+									'<strong>入住时间：'+data.order_start_time+'</strong>' +
+									'<strong>离店时间：'+data.order_end_time+'</strong>' +
+									'<strong>我的出价：<i>'+parseInt(data.order_price_p1)+'元</i></strong>' +
+									(parseInt(data.order_price_p2) > 0 ? '<strong>店家回复：<i>'+parseInt(data.order_price_p2)+'元</i></strong>' : '') +
+									(parseInt(data.order_price_p3) > 0 ? '<strong>我的出价：<i>'+parseInt(data.order_price_p3)+'元</i></strong>' : '') +
+									(parseInt(data.order_price_p4) > 0 ? '<strong>店家回复：<i>'+parseInt(data.order_price_p4)+'元</i></strong>' : '') +
+									'<div class="collect-item-goods">' +
+										'<div class="price-info">' +
+											'<div class="price-box">' +
+												'<i class="m-icon">&yen;</i>' +
+												'<span class="m-num">'+parseInt(data.room_price)+'</span>' +
+											'</div>' +
+											'<div class="old-price">原价 &yen; '+parseInt(data.room_original_price)+'</div>' +
+										'</div>' +
+									'</div>';
+
+					document.querySelector(".top-info").innerHTML = roomHtml;
+
+					/*说明*/
+					document.querySelector(".tips").innerHTML = '<i class="iconfont icon-tips"></i>\n' +
+																'<strong>您出价后，酒店根据您的出价和其他情况为您报价，如果不满意，可以重新出价；还价过程需要等待，但比直订便宜许多！</strong>';
+
+					/*订单信息*/
+					document.querySelector(".order-info-block").innerHTML = '<div class="item">订单编号：<i>'+data.order_number+'</i></div>' +
+																			'<div class="item">下单时间：<i>'+data.order_create_time+'</i></div>' +
+																			'<div class="item">数量：<i>'+data.order_num+'间</i></div>' +
+																			'<div class="item">总价：<i>'+parseInt(data.order_total)+'元</i></div>' +
+																			'<div class="item">入住人：<i>'+data.order_contacts+'</i></div>' +
+																			'<div class="item">联系电话：<i>'+data.order_phone+'</i></div>' +
+																			'<div class="item">入住说明：<i>'+(data.order_message==null?'暂无':data.order_message)+'</i></div>';
+				},
+				submit: function() {
+					var user_price = document.getElementById("price_ipt").value;
+
+					if (user_price == "") {
+						api.toast({ msg: "请输入您的价格" });
+						return false;
+					}
+
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "Token=" + db2.getVal("user_token");
+					urlParam += "&order_number=" + api.pageParam.order_number;
+					urlParam += "&order_price_p3=" + user_price;
+					
+					doAjax("Hotel", "addOffer2", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							PubApp.toast("出价成功");
+							// //刷新详情页
+							// api.execScript({
+							//     name: 'order_detail_haggle',
+							//     script: 'thisPage.requestData();'
+							// });
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+							
+							//关闭当前页面
+							setTimeout(function() {
+								api.closeToWin({
+								    name: "root"
+								});
+							}, 350);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*监听价格输入框*/
+					document.querySelector("#price_ipt").addEventListener("input", function() {
+						if (this.value.length > 0) {
+							document.querySelector(".btn-submit").classList.remove("invalid");
+						} else {
+							document.querySelector(".btn-submit").classList.add("invalid");
+						}			
+					});
+
+					/*提交*/
+					document.querySelector(".btn-submit").addEventListener("tap", function() {
+						if (!this.classList.contains("invalid")) {
+							thisPage.submit();
+						}			
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

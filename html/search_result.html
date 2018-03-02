@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav search">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<div class="top-search">
+				<span class="mui-icon mui-icon-search"></span>
+				<input id="pageSearch" type="text" placeholder="请输入查找内容" />
+			</div>
+			<span id="btnSearch" class="btn-search">搜索</span>
+		</div>
+		<div class="search-top-tab">
+			<div class="item" data-value="serve">服务</div>
+			<div class="item" data-value="goods">商品</div>
+			<div class="item" data-value="taojiahuanjia">酒店</div>
+			<div class="item" data-value="weigongyi">公益</div>
+			<div class="item" data-value="zhuanqian">广告</div>
+			<div class="item" data-value="xinwenzixun">资讯</div>
+		</div>
+		<div class="mui-content has-top-tab">
+			<ul id="pageList" class="serach-list news-list">
+				<!-- <li class="list-item">
+					<div class="top-info">
+						<div class="img-box avatar" style="background: url(../img_temp/list-avatar.png);"></div>
+						<div class="user-info">
+							<div class="row">
+								<div class="name-info">李果果<i class="lv">LV1</i></div>
+								<div class="skill-info"><span class="skill-name">保洁</span><span class="skill-lv">训1</span></div>
+							</div>
+							<div class="row">
+								<div class="star-level">
+									<div class="bot-bg"><div class="top-bg level-4"></div></div>
+									<span>4.0</span>
+								</div>
+								<div class="order-num">1100单</div>
+								<div class="distance">0.1km</div>
+							</div>
+						</div>
+						<div class="btn-box">
+							<span class="iconfont icon-chakantieziguanzhu on"></span>
+							<span class="iconfont icon-rexian"></span>
+						</div>
+					</div>
+					<div class="main-content">
+						<span class="con-title">上门保洁</span>
+						<span class="con-text">酒店保洁</span>
+						<div class="pics">
+							<p class="pic-item img-box" style="background: url(../img_temp/list-pic1.png);"></p>
+							<p class="pic-item img-box" style="background: url(../img_temp/list-pic2.png);"></p>
+							<p class="pic-item img-box" style="background: url(../img_temp/list-pic3.png);"></p>
+						</div>
+					</div>
+					<div class="bot-info">
+						<div class="price-box">
+							<i class="m-icon">&yen;</i><span class="m-num">199</span><span class="m-end">/天</span>
+						</div>
+					</div>
+					<div class="btn-block">立即下单</div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				searchType: "",
+				keyWords: "",
+				timerCount: 1,
+				init: function() {
+					pageControl.winBack();
+					thisPage.setPageAttr();
+					thisPage.addEvent();
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				setPageAttr: function() {
+					thisPage.searchType = api.pageParam.search_type;
+					thisPage.keyWords = api.pageParam.search_value;
+
+					//init toptab selected and input value
+					document.querySelector(".search-top-tab .item[data-value="+thisPage.searchType+"]").classList.add("tab-on");
+					document.getElementById("pageSearch").value = thisPage.keyWords;
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "",
+					    text: "",
+					    modal: false
+					});
+
+					var urlParam = "type_key=" + thisPage.searchType;
+					urlParam += "&keywords=" + thisPage.keyWords;
+					urlParam += "&lat=" + db2.getVal("location_lat");
+					urlParam += "&lon=" + db2.getVal("location_lon");
+					urlParam += "&token=" + (isLogin() == true ? db2.getVal("user_token") : "");
+
+					doAjax("Client", "search", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					var pageList = document.getElementById("pageList");
+					var itemHtml = "";
+					if (isset(data.list)) {
+						data.list.forEach(function(item) {
+							if (thisPage.searchType == "serve" || thisPage.searchType == "goods" || thisPage.searchType == "weigongyi") {
+								//grade
+								var count = Number(item.CommentAveStar);
+								var starClass = 'level-' + Math.round(count);
+								var score = count.toFixed(1);
+								//picture
+								var picHtml = "";
+								item.picture.forEach(function(img) {
+									picHtml += '<p class="pic-item img-box" style="background-image: url('+toAbsUrl(img)+');"></p>';
+								});
+								//price
+								var priceHtml = "";
+								if (item.type_key != "weigongyi") {
+									priceHtml += 	'<div class="price-box">\
+														<i class="m-icon">&yen;</i><span class="m-num">'+parseInt(item.price)+'</span><span class="m-end">/'+item.unit+'</span>\
+													</div>';
+								}
+								//other info
+								var otherInfoHtml = "";
+								var buttonStr = "";
+								switch (item.type_key) {
+									case "taosihuo":
+										buttonStr = "立即下单";
+										otherInfoHtml = '<div class="remain"><div class="old-price">原价 &yen; '+parseInt(item.price)+'</div>库存 : &nbsp;<i>'+item.goods_num+'</i>件 <span class="g-info">'+item.degree+'成新</span><span class="g-info">'+item.goods_freight_mode+'</span></div>';
+										break;
+									case "huanhuo":
+										buttonStr = "我要换";
+										otherInfoHtml = '<div class="remain">库存 : &nbsp;<i>'+item.goods_num+'</i>件 <span class="g-info">'+item.degree+'成新</span></div>';
+										break;
+									case "weigongyi":
+										buttonStr = "立即申请";
+										otherInfoHtml = '<div class="remain">剩余数量 : &nbsp;<i>'+item.goods_num+'</i>件</div>';
+										break;
+									default:
+										buttonStr = "立即下单";
+										otherInfoHtml = "";
+										break;
+								}
+
+								itemHtml += '<li class="list-item" data-id="'+item.id+'" data-value="'+item.type_key+'" data-type="'+item.cat_type+'">\
+												<div class="top-info">\
+													<div class="img-box avatar" data-id="'+item.uid+'" style="background-image: url('+toAbsUrl(item.UserHead)+');"></div>\
+													<div class="user-info">\
+														<div class="row">\
+															<div class="name-info">'+item.NickName+'<i class="lv">LV'+item.lv+'</i></div>\
+														</div>\
+														<div class="row">\
+															<div class="star-level">\
+																<div class="bot-bg"><div class="top-bg '+starClass+'"></div></div>\
+																<span>'+score+'</span>\
+															</div>\
+															<div class="order-num">'+item.SellerOrderCount+'单</div>\
+															<div class="distance">'+item.range+'km</div>\
+														</div>\
+													</div>\
+													<div class="btn-box">\
+														<span class="iconfont icon-chakantieziguanzhu btn_follow '+(item.is_follow=='0'?'':'on')+'" data-id="'+item.uid+'"></span>\
+														<span class="iconfont icon-rexian btn_call" data-value="'+item.telephone+'"></span>\
+													</div>\
+												</div>\
+												<div class="main-content">\
+													<div class="pics">'+picHtml+'</div>\
+													<span class="con-title">'+item.goodsname+'</span>\
+													<span class="con-text">'+item.content+'</span>\
+												</div>\
+												<div class="bot-info">\
+													'+priceHtml+'\
+													'+otherInfoHtml+'\
+												</div>\
+												<div class="btn-block btn_chat" style="right:110px;"  data-id="'+item.uid+'">私聊</div>\
+												<div class="btn-block btn_orders">'+buttonStr+'</div>\
+											</li>';
+							} else if (thisPage.searchType == "taojiahuanjia") {
+								var rankStr = "";
+								switch (item.HotelRank) {
+									case "1":
+										rankStr = "经济型";
+										break;
+									case "2":
+										rankStr = "两星";
+										break;
+									case "3":
+										rankStr = "三星";
+										break;
+									case "4":
+										rankStr = "四星";
+										break;
+									case "5":
+										rankStr = "五星";
+										break;
+									default:
+										rankStr = "普通型"
+										break;
+								}
+
+								//grade
+								var count = Number(item.CommentAveStar);
+								var score = count.toFixed(1);
+								var starHtml = 	'<div class="bot-bg"><div class="top-bg level-'+Math.round(count)+'"></div></div>\n<span>'+score+'</span>';
+
+								itemHtml += 	'<li class="collect-item-shops" data-id="'+item.SellerId+'">' +
+													'<p class="shops-pic img-box" style="background-image: url('+toAbsUrl(item.HotelPic[0])+');"></p>' +
+													'<div class="shops-info">' +
+														'<div class="shops-name">'+item.ShopName+'</div>' +
+														'<div class="shops-info-row">' +
+															'<div class="star-level">'+starHtml+'</div>' +
+															'<span class="com-num">'+item.CommentNum+'条评论</span>' +
+														'</div>' +
+														'<div class="other-info-row">' +
+															'<span>'+rankStr+'</span>\n' +
+															'<span>'+item.OrderCount+'单</span>' +
+														'</div>' +
+														'<div class="other-info-row">' +
+															'<span class="location">'+item.Address+'</span>' +
+														'</div>' +
+													'</div>' +
+													'<div class="price-info">' +
+														'<div class="price-box">' +
+															'<i class="m-icon">&yen;</i>\n' +
+															'<span class="m-num">'+parseInt(item.HotelPrice)+'</span>\n' +
+															'<span class="m-end">起</span>' +
+														'</div>' +
+													'</div>' +
+												'</li>';
+							} else if (thisPage.searchType == "zhuanqian") {
+								itemHtml += '<li class="ad-item" data-id="'+item.AdId+'">' +
+												'<div class="ad-img img-box" style="background-image: url('+toAbsUrl(item.AdPic[0])+');"></div>' +
+												'<div class="ad-info">' +
+													'<b class="ad-name">'+item.AdName+'</b>' +
+													'<strong class="ad-money">答题奖励: <i>&yen;'+item.ReturnMoney+'</i></strong>' +
+													'<div class="ad-num"><i class="iconfont icon-caidan"></i><span>投放: '+item.DeliveryNum+'份</span></div>' +
+													'<div class="ad-num"><i class="iconfont icon-yanjing"></i><span>剩余: '+item.SurplusNum+'份</span></div>' +
+												'</div>' +
+												'<div class="other-info">' +
+													'<span class="distance">'+item.juli+'km</span>' +
+													'<span class="click-num">点击 : &nbsp;'+item.AdClick+'次</span>' +
+												'</div>' +
+											 '</li>';
+							} else if (thisPage.searchType == "xinwenzixun") {
+								var typeStr = {
+									"1": "招投标",
+									"2": "政策新闻",
+									"3": "公告",
+								};
+								itemHtml += '<li class="news-item" data-id="'+item.Id+'">' +
+												'<div class="news-info">' +
+													'<b class="news-title">'+item.Title+'</b>' +
+													'<strong class="news-con">'+item.Content+'</strong>' +
+													'<span class="news-time">'+item.AddTime+'  &nbsp;'+typeStr[item.TypeId]+'</span>' +
+												'</div>' +
+											'</li>';
+							}
+						});
+						pageList.innerHTML = itemHtml;
+					} else {
+						pageList.innerHTML = '<div class="empty-list">未搜索到您想要的信息</div>';
+					}
+				},
+				addFollow: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&follow_mid=" + control.getAttribute("data-id");
+
+					doAjax("Index", "addFollow", urlParam, "post", function(rs) {
+						if (rs.code == 1) {
+							//control.classList.add("on");
+							PubApp.toast(rs.msg);
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				cancelFollow: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&follow_mid=" + control.getAttribute("data-id");
+
+					doAjax("Index", "cancelFollow", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							//control.classList.remove("on");
+							PubApp.toast(rs.msg);
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					//result type switch
+					mui(".search-top-tab").on("tap", ".item", function() {
+						if (this.classList.contains("tab-on")) return;
+
+						thisPage.searchType = this.getAttribute("data-value");
+
+						document.querySelector(".search-top-tab .tab-on").classList.remove("tab-on");
+						this.classList.add("tab-on");
+
+						setTimeout(function() {
+				            thisPage.requestData();
+				        }, 350);
+					});
+
+					//top search
+					document.getElementById("btnSearch").addEventListener("tap", function() {
+						thisPage.keyWords = document.getElementById("pageSearch").value;
+						setTimeout(function() {
+				            thisPage.requestData();
+				        }, 350);
+					});
+
+					//call
+					mui("#pageList").on("tap", ".btn_call", function() {
+						var tel_number = this.getAttribute("data-value");
+						api.confirm({
+						    title: '提示',
+						    msg: '是否拨打' + tel_number,
+						    buttons: ['拨打', '取消']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								api.call({
+								    type: 'tel',
+								    number: tel_number
+								});
+							}
+						});
+						return false;
+					});
+
+					//add follow or cancel
+					mui("#pageList").on("tap", ".btn_follow", function() {
+						var self = this;
+						if (isLogin() == true) {
+							if (this.classList.contains("on")) { //cancel
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									setTimeout(function(){thisPage.timerCount = 1;}, 2000);
+									thisPage.cancelFollow(self);
+								}
+							} else { //add
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									setTimeout(function(){thisPage.timerCount = 1;}, 2000);
+									thisPage.addFollow(self);
+								}
+							}
+						} else {
+							PubApp.toast("请先登录");
+						}
+						return false;
+					});
+
+					//btn orders
+					mui("#pageList").on("tap", ".btn_orders", function() {
+						if (isLogin() == true) {
+							var param = "";
+							switch (thisPage.searchType) {
+								case "serve":
+									param = "data_id=" + this.parentNode.getAttribute("data-id");
+									param += "&ser_type=" + this.parentNode.getAttribute("data-type");
+									openWin("service_orders", param);
+									break;
+								case "goods":
+									param = "data_id=" + this.parentNode.getAttribute("data-id");
+									if (this.parentNode.getAttribute("data-value") == "taosihuo") {
+										openWin("list_tao_orders", param);
+									} else if (this.parentNode.getAttribute("data-value") == "huanhuo") {
+										openWin("list_exchange_wantchange", param);
+									}
+									break;
+								case "weigongyi":
+									param = "data_id=" + this.parentNode.getAttribute("data-id");
+									openWin("list_public_apply", param);
+									break;
+								default:
+									break;
+							}
+						} else {
+							PubApp.toast("请先登录");
+						}
+						return false;
+					});
+					/*聊天*/
+					mui("#pageList").on("tap", ".btn_chat", function() {
+						if (isLogin() == true) {
+								var id = this.getAttribute("data-id");
+								openWin('chat', 'user_id=' + id);
+						} else {
+							openWin('login');
+						}
+						return false;
+					});
+					//list details
+					mui("#pageList").on("tap", "li", function() {
+						var param = "";
+						switch (thisPage.searchType) {
+							case "serve":
+								param = "id=" + this.getAttribute("data-id");
+								param += "&type_key=" + this.getAttribute("data-value");
+								param += "&ser_type=" + this.getAttribute("data-type");
+								openWin("service_detail", param);
+								break;
+							case "goods":
+								param = "page_id=" + this.getAttribute("data-id");
+								if (this.getAttribute("data-value") == "taosihuo") {
+									openWin("list_tao_detail", param);
+								} else if (this.getAttribute("data-value") == "huanhuo") {
+									openWin("list_exchange_detail", param);
+								}
+								break;
+							case "taojiahuanjia":
+								param = "hotal_id=" + this.getAttribute("data-id");
+								openWin("haggle_detail", param);
+								break;
+							case "weigongyi":
+								param = "page_id=" + this.getAttribute("data-id");
+								openWin("list_public_detail", param);
+								break;
+							case "zhuanqian":
+								param = "ad_id=" + this.getAttribute("data-id");
+								openWin("watch_ad_detail", param);
+								break;
+							case "xinwenzixun":
+								param = "data_id=" + this.getAttribute("data-id");
+								openWin("news_detail", param);
+								break;
+							default:
+								break;
+						}
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

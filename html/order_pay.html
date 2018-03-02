@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<!-- 支付密码 -->
+		<div class="pay-password">
+			<div class="top-block">
+				<div class="password-box">
+					<i class="mui-icon mui-icon-closeempty btn_close"></i>
+					<div class="title"><!--请输入支付密码--></div>
+					<div class="content">
+						<ul class="grid">
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="keyboard">
+				<div class="key number" data-value="1">1</div>
+				<div class="key number" data-value="2">2</div>
+				<div class="key number" data-value="3">3</div>
+				<div class="key number" data-value="4">4</div>
+				<div class="key number" data-value="5">5</div>
+				<div class="key number" data-value="6">6</div>
+				<div class="key number" data-value="7">7</div>
+				<div class="key number" data-value="8">8</div>
+				<div class="key number" data-value="9">9</div>
+				<div class="key action"></div>
+				<div class="key number" data-value="0">0</div>
+				<div class="key delete action iconfont icon-key-delete"></div>
+			</div>
+		</div>
+		<!-- 支付密码结束 -->
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">确认下单</h1>
+		</div>
+		<!-- 优惠券列表 -->
+		<div id="ticketBox" class="action-sheet-control full">
+			<div class="dark"></div>
+			<ul id="ticketList" class="list bot">
+				<!-- <li class="on" data-value="5"><i class="iconfont icon-gouxuan"></i>5元</li>
+				<li data-value="10c"><i class="iconfont icon-gouxuan"></i>10元</li> -->
+			</ul>
+		</div>
+		<!-- 优惠券列表 -->
+		<div id="setPayWord" class="action-sheet-control pay-alert" style="display: none;">
+			<div class="dark"></div>
+			<div class="alert-box">
+				<div class="box-contant">
+					<div class="inner">
+						<input id="setpwd" type="password" placeholder="设置6位支付密码" maxlength="6" />
+					</div>
+				</div>
+				<div class="box-btns double">
+					<div class="item btn_cancle">取消</div>
+					<div id="btnSet" class="item warning">确定</div>
+				</div>
+			</div>
+		</div>
+		<div id="putPayWord" class="action-sheet-control pay-alert" style="display: none;">
+			<div class="dark"></div>
+			<div class="alert-box">
+				<div class="box-contant">
+					<input id="userpwd" type="password" placeholder="请输入6位支付密码" maxlength="6" />
+				</div>
+				<div class="box-btns double">
+					<div class="item btn_cancle">取消</div>
+					<div id="btnSubmit" class="item warning">确定</div>
+				</div>
+			</div>
+		</div>
+		<div class="bot-control">
+			<div class="btn-item total">
+				<span class="total-text">还需支付 : <i id="page_total">0</i>元</span>
+			</div>
+			<div id="btn_pay" class="btn-item warning">立即支付</div>
+		</div>
+		<div class="mui-content recharge money service-orders-pay">
+			<div class="top-info">
+				<div class="info-item">订单名称 : &nbsp;<span id="order_name"><!-- 上门保洁家庭保洁 --></span></div>
+				<div class="info-item">订单金额 : &nbsp;<span id="order_money">0.00</span>元</div>
+			</div>
+			<div id="select_ticket" class="discount">
+				<b>优惠券</b>
+				<i class="iconfont icon-xiangyou arrow-right"></i>
+				<span id="discount_money"><!-- 6元 --></span>
+			</div>
+			<div class="headline">请选择支付方式</div>
+			<div class="input-radios">
+				<div class="radio-item mui-radio mui-right" data-value="4">
+					<span class="pay-icon iconfont icon-yue"></span>
+					<label class="pay-name" for="balance">
+						我的余额
+						<div class="price-box">
+							<span class="m-icon">&yen;</span>
+							<span id="user_balance" class="m-num">0.00</span><!-- <span class="m-icon">.00</span> -->
+						</div>
+					</label>
+					<input id="balance" name="pay" value="" type="radio" checked="checked" />
+				</div>
+				<div class="radio-item mui-radio mui-right" data-value="1">
+					<span class="pay-icon iconfont icon-alipay"></span>
+					<label class="pay-name" for="alipay">支付宝</label>
+					<input id="alipay" name="pay" value="" type="radio" />
+				</div>
+				<div class="radio-item mui-radio mui-right" data-value="3">
+					<span class="pay-icon iconfont icon-wechat"></span>
+					<label class="pay-name" for="wechat">微信</label>
+					<input id="wechat" name="pay" value="" type="radio" />
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var payPasswordType = 'setting';
+			var payPassword = {
+				value: [],
+				numberInput: function(value) {
+					this.value.push(value);
+					return this;
+				},
+				numberDelete: function() {
+					this.value.splice(this.value.length - 1, 1);
+					return this;
+				},
+				getValue: function() {
+					return this.value.join('');
+				},
+				clear: function() {
+					this.value = [];
+					var tempEl = document.querySelectorAll('.grid li.on'),maxLen = tempEl.length;
+					for(var i = 0;i < maxLen;i ++){
+						tempEl[i].classList.remove('on');
+					};
+					return this;
+				}
+			};
+			//打开
+			function openPayPassword(type) {
+				var passwordContainer = document.querySelector('.pay-password');
+				var title = '请设置支付密码';
+
+				payPasswordType = type;
+
+				if (type == 'setting') {
+					title = '请设置支付密码';
+				} else if (type == 'verify') {
+					title = '请输入支付密码';
+				}
+
+				document.querySelector('.password-box .title').innerText = title;
+
+				if (!passwordContainer.classList.contains('show')) {
+					passwordContainer.classList.add('show');
+				}
+			}
+			//输入
+			mui('.keyboard').on('mousedown', '.key.number', function() {
+				if (payPassword.value.length < 6) {
+					payPassword.numberInput(this.getAttribute('data-value'));
+					document.querySelector('.grid li:nth-child('+payPassword.value.length+')').classList.add('on');
+				}
+				if (payPassword.value.length == 6) { //输入完成
+					console.log(payPassword.getValue());
+					if (payPasswordType == 'setting') { //设置支付密码
+						thisPage.setPayPwd(payPassword.getValue());
+					} else { //验证支付密码
+						thisPage.verifyPayPwd(payPassword.getValue());
+					}
+				}
+			});
+			//删除
+			document.querySelector('.keyboard .key.delete').addEventListener('mousedown', function() {
+				if (payPassword.value.length > 0) {
+					document.querySelector('.grid li:nth-child('+payPassword.value.length+')').classList.remove('on');
+					payPassword.numberDelete();
+				}
+				return false;
+			});
+			//关闭
+			document.querySelector('.password-box .btn_close').addEventListener('mousedown', function() {
+				payPassword.clear();
+				document.querySelector('.pay-password').classList.remove('show');
+			});
+
+			var haveTicket = 0; //是否有优惠券
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				payType: "4", //支付方式 1-支付宝，3-微信，4-余额
+				orderMoney: 0, //订单金额
+				couponId: null, //优惠券id
+				init: function() {
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".bot-control"));
+
+					api.setWinAttr({
+					    softInputMode: 'resize'
+					});
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + api.pageParam.data_id;
+
+					doAjax("Client", "finance", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					var dataInfo = data.info;
+
+					document.getElementById("order_name").innerText = dataInfo.order_goodsname;
+					document.getElementById("order_money").innerText = dataInfo.order_total;
+					thisPage.orderMoney = dataInfo.payable;
+					document.getElementById("user_balance").innerText = dataInfo.UserMoney;
+
+					//优惠券列表
+					var couponList = data.couponList;
+					if (isset(couponList) && couponList.length > 0) {
+						haveTicket = 1;
+
+						//显示默认优惠券
+						document.getElementById("discount_money").innerText = couponList[0].CouponName;
+
+						var finalMoney = thisPage.orderMoney - couponList[0].Money;
+						document.getElementById("page_total").innerText = finalMoney < 0 ? 0 : finalMoney;
+
+						//加载优惠券列表
+						var html = "";
+						couponList.forEach(function(item, index) {
+							html += '<li class="'+(index==0?"on":"")+'" data-id="'+item.Id+'" data-value="'+item.Money+'" data-name="'+item.CouponName+'">\
+									<i class="iconfont icon-gouxuan"></i>'+item.CouponName+'</li>';
+						});
+						document.getElementById("ticketList").innerHTML = html;
+					} else {
+						haveTicket = 0;
+
+						document.getElementById("discount_money").innerText = '无';
+						document.getElementById("page_total").innerText = thisPage.orderMoney;
+					}
+				},
+				toPayAli: function(info) {
+					var aliPayPlus = api.require('aliPayPlus');
+
+					//alert(info);
+
+					aliPayPlus.payOrder({
+					    orderInfo: info
+					}, function(ret, err) {
+						//广播用户信息修改事件（余额）
+						api.sendEvent({
+	                        name: 'AlertUserInfo'
+	                    });
+
+						var result_msg = '';
+						if (ret.code == "9000") {
+							result_msg = '支付成功';
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+							setTimeout(function() {
+								api.closeToWin({
+								    name: "root"
+								});
+							}, 350);
+						} else {
+							result_msg = ret.code;
+						}
+					    api.alert({
+					        title: '支付结果',
+					        msg: result_msg,
+					        buttons: ['确定']
+					    });
+					});
+				},
+				toPayWx: function(info) {
+					var wxPay = api.require('wxPay');
+
+					wxPay.payOrder({
+					    apiKey: info.appid,
+					    orderId: info.prepayid,
+					    mchId: info.partnerid,
+					    nonceStr: info.noncestr,
+					    timeStamp: info.timestamp,
+					    package: 'Sign=WXPay',
+					    sign: info.sign
+					}, function(ret, err) {
+					    if (ret.status) { //支付成功
+					        //广播用户信息修改事件（余额）
+							api.sendEvent({
+		                        name: 'AlertUserInfo'
+		                    });
+
+							api.alert({
+						        title: '支付结果',
+						        msg: '支付成功',
+						        buttons: ['确定']
+						    });
+
+						    api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+							setTimeout(function() {
+								api.closeToWin({
+								    name: "root"
+								});
+							}, 350);
+					    } else {
+					    	var emsg = '支付失败';
+					        if (err.code == 1) {
+					        	emsg = '支付失败';
+					        } else if (err.code == -2) {
+					        	emsg = '支付取消';
+					        } else if (err.code == -1) {
+					        	emsg = '未知错误';
+					        }
+
+					        api.alert({
+						        title: '支付结果',
+						        msg: emsg,
+						        buttons: ['确定']
+						    });
+					    }
+					});
+				},
+				doPay: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + api.pageParam.data_id;
+					urlParam += "&pay_type=" + thisPage.payType;
+					urlParam += "&coupon_id=" + thisPage.couponId;
+
+					doAjax("Client", "order_pay", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							if (rs.data.pay_type == "1") { //支付宝支付
+								thisPage.toPayAli(rs.data.sign);
+							} else if (rs.data.pay_type == "3") { //微信支付
+								thisPage.toPayWx(rs.data.sign);
+							} else if (rs.data.pay_type == "4") {
+								PubApp.toast(rs.msg);
+								api.execScript({
+								    name: 'root',
+								    frameName: 'order',
+								    script: 'thisPage.requestData();'
+								});
+								setTimeout(function() {
+									api.closeToWin({
+									    name: "root"
+									});
+								}, 350);
+							}
+						} else {
+							payPassword.clear();
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				setPayPwd: function(value) {
+					api.showProgress({
+					    title: "设置中",
+					    text: "请稍后...",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&PaidPass=" + value;
+
+					doAjax("Member", "setPaidPass", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							api.sendEvent({
+		                        name: 'AlertUserInfo'
+		                    });
+
+							PubApp.toast("设置成功");
+
+							payPassword.clear();
+							openPayPassword('verify');
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				verifyPayPwd: function(value) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&PaidPass=" + value;
+
+					doAjax("Member", "verifyPaidPass", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.doPay();
+						} else {
+							payPassword.clear();
+							api.toast({
+								msg: rs.ErrorMsg,
+								location: 'middle'
+							});
+						}
+					});
+				},
+				submit: function() {
+					if (thisPage.payType == 4) {
+						if (db2.getVal("user_issetpaypwd") == 0) { //未设置支付密码
+							openPayPassword('setting');
+						} else {
+							openPayPassword('verify');
+						}
+					} else {
+						thisPage.doPay();
+					}
+				},
+				addEvent: function() {
+					/*选择支付方式*/
+					mui(".input-radios").on("change", ".radio-item", function() {
+						var data_value = this.getAttribute("data-value");
+						thisPage.payType = data_value;
+					});
+
+					/*立即支付*/
+					document.querySelector("#btn_pay").addEventListener("tap", function() {
+						thisPage.submit();
+					});
+
+					/*支付密码设置*/
+					mui("body").on("tap", ".btn_cancle", function() { //取消
+						var parents = this.parentNode.parentNode.parentNode;
+						parents.style.display = 'none';
+						parents.querySelector("input").value = "";
+					});
+
+					document.getElementById("btnSet").addEventListener("tap", function() { //设置
+						thisPage.setPayPwd(document.getElementById("setpwd").value);
+					});
+
+					/*支付密码验证*/
+					document.getElementById("btnSubmit").addEventListener("tap", function() { //验证
+						thisPage.verifyPayPwd(document.getElementById("userpwd").value);
+					});
+
+					/*优惠券选择*/
+					var ticketBox = document.getElementById("ticketBox");
+					document.getElementById("select_ticket").addEventListener("tap", function() {
+						if (haveTicket) {
+							ticketBox.style.display = 'block';
+						}
+					});
+					mui("#ticketList").on("tap", "li", function() {
+						document.querySelector("#ticketList .on").classList.remove("on");
+						this.classList.add("on");
+
+						document.getElementById("discount_money").innerText = this.getAttribute("data-name");
+						thisPage.couponId = this.getAttribute("data-id");;
+
+						ticketBox.style.display = 'none';
+					});
+
+					/*遮罩关闭*/
+					mui("body").on("tap", ".dark", function() {
+						this.parentNode.style.display = 'none';
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

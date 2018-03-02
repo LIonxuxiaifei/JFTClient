@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body class="color-white">
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">帮助</h1>
+		</div>
+		<div class="mui-content">
+			<pre id="content" style="padding:0 12px;margin:0;white-space:initial;"></pre>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+
+					thisPage.requestData("history");
+					setTimeout(function() {
+			            thisPage.requestData("new");
+			        }, 350);
+				},
+				requestData: function(dataFrom) {
+					window.cachename = api.frameName + api.winName;
+
+					dataFrom = dataFrom || "all";
+
+					if (dataFrom != "new") {
+						db.getConfig(cachename, function(data) {
+							window.histroydata = data;
+							if (data != "" && (window.ajaxsuccess || 0) == 0) {
+								log("历史数据填充");
+								thisPage.fillData(JSON.parse(data));
+							}
+						});
+					}
+
+					if (dataFrom == "history") return false;
+
+					api.showProgress({
+					    title: "",
+					    text: "",
+					    modal: false
+					});
+
+					var urlParam = "";
+
+					doAjax("Index", "help", urlParam, "post", function(rs) {
+						window.ajaxsuccess = 1;
+						if (rs.code == 1) {
+							var stringifyData = JSON.stringify(rs.data);
+							if (window.histroydata != stringifyData || !rs.data) {
+								db.setConfig(cachename, stringifyData);
+								thisPage.fillData(rs.data);
+								log("使用最新数据渲染了");
+							} else {
+								log("与历史一致，不处理【" + window.histroydata + "】");
+							}
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+
+						api.hideProgress();
+						api.refreshHeaderLoadDone();
+					});
+				},
+				htmlEscape: function(string) {
+					var div = document.createElement("div");
+					div.innerHTML = string;
+					var result = div.innerText;
+					return result;
+				},
+				fillData: function(data) {
+					document.getElementById("content").innerHTML = data.info;
+				}
+			};
+		</script>
+	</body>
+</html>

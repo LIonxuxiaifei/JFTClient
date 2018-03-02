@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../css/mui.picker.css" />
+		<link rel="stylesheet" href="../css/mui.poppicker.css" />
+		<link rel="stylesheet" href="../css/mui.dtpicker.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			#serviceTime{display: none;}
+			#serviceWay{display: none;}
+			#userAddr{display: none;}
+			#contactAddr{display: none;}
+			#contactAddrDetail{display: none;}
+			#addrStart,#addrEnd{display: none;}
+			#startAddrDetail,#endAddrDetail{display: none;}
+
+
+			.service-publish.type_0 #serviceTime,
+			.service-publish.type_0 #contactAddr,
+			.service-publish.type_0 #contactAddrDetail{display: block;}
+
+			.service-publish.type_1 #userName{display: block;}
+
+			.service-publish.type_2 #serviceTime,
+			.service-publish.type_2 #addrStart,
+			.service-publish.type_2 #startAddrDetail,
+			.service-publish.type_2 #addrEnd,
+			.service-publish.type_2 #endAddrDetail,
+			.service-publish.type_2 #userName{display: block;}
+
+			.service-publish.type_3 #serviceTime,
+			.service-publish.type_3 #serviceWay,
+			.service-publish.type_3 #contactAddr,
+			.service-publish.type_3 #contactAddrDetail{display: block;}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">发布我的需求</h1>
+		</div>
+		<div class="mui-content has-bot-tab">
+			<div id="publishMod" class="service-publish">
+				<div id="select_type" class="publish-item select">
+					<b class="item-name">分类</b>
+					<span class="item-text">请选择分类</span>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div class="publish-item inpt">
+					<b class="item-name">标题</b>
+					<input id="service_name" type="text" placeholder="请输入发布标题" />
+				</div>
+				<div id="serviceTime" class="publish-item select">
+					<b class="item-name">服务时间</b>
+					<span class="item-text">请选择服务时间</span>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div id="serviceWay" class="publish-item select">
+					<b class="item-name">服务方式</b>
+					<span class="item-text" style="color: #333">对方上门</span>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div id="contactAddr" class="publish-item select addr">
+					<b class="item-name">联系地址</b>
+					<div id="serviceAddr">
+						<span class="item-text">请选择地址</span>
+						<!-- <div class="addr-text">
+							<span>浙江省杭州市拱墅区丰登街341</span>
+							<span>某某小区20栋1单元302</span>
+						</div> -->
+					</div>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div id="contactAddrDetail" class="publish-item inpt">
+					<b class="item-name">详细地址</b>
+					<input id="ipt_serviceAddr" type="text" placeholder="输入详细地址" />
+				</div>
+				<div id="addrStart" class="publish-item select addr">
+					<b class="item-name">出发地址</b>
+					<div id="startAddr">
+						<span class="item-text">请选择地址</span>
+						<!-- <div class="addr-text">
+							<span>浙江省杭州市拱墅区丰登街341</span>
+							<span>某某小区20栋1单元302</span>
+						</div> -->
+					</div>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div id="startAddrDetail" class="publish-item inpt">
+					<b class="item-name">详细地址</b>
+					<input id="ipt_startAddr" type="text" placeholder="输入详细地址" />
+				</div>
+				<div id="addrEnd" class="publish-item select addr">
+					<b class="item-name">结束地址</b>
+					<div id="endAddr">
+						<span class="item-text">请选择地址</span>
+						<!-- <div class="addr-text">
+							<span>浙江省杭州市拱墅区丰登街341</span>
+							<span>某某小区20栋1单元302</span>
+						</div> -->
+					</div>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div id="endAddrDetail" class="publish-item inpt">
+					<b class="item-name">详细地址</b>
+					<input id="ipt_endAddr" type="text" placeholder="输入详细地址" />
+				</div>
+				<div class="publish-item inpt">
+					<b class="item-name">联系方式</b>
+					<input id="user_phone" type="text" placeholder="请输入联系方式" />
+				</div>
+				<div id="userName" class="publish-item inpt">
+					<b class="item-name">姓名</b>
+					<input id="user_name" type="text" placeholder="请输入姓名(选填)" />
+				</div>
+				<div class="publish-item inpt">
+					<b class="item-name">留言</b>
+					<input id="leave_word" type="text" placeholder="请输入留言(选填)" />
+				</div>
+			</div>
+			<div class="btn-submit atbot">确认发布</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.picker.js" ></script>
+		<script type="text/javascript" src="../js/mui.poppicker.js" ></script>
+		<script type="text/javascript" src="../js/mui.dtpicker.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				pageType: "-1",
+				pid: "0", //主类id
+				sid: "0", //子类id
+				serviceWay: 1, //服务方式 默认1 上门
+				serviceTime: "", //服务时间
+				serviceAddr: {
+					isEmpty: 1,
+					params: {
+						address: "",
+						addrName: "",
+			        	addrDetail: "",
+			        	lat: "0",
+			        	lng: "0"
+					},
+					container: document.getElementById("contactAddr")
+				},
+				startAddr: {
+					isEmpty: 1,
+					params: {
+						address: "",
+						addrName: "",
+			        	addrDetail: "",
+			        	lat: "0",
+			        	lng: "0"
+					},
+					container: document.getElementById("addrStart")
+				},
+				endAddr: {
+					isEmpty: 1,
+					params: {
+						address: "",
+						addrName: "",
+			        	addrDetail: "",
+			        	lat: "0",
+			        	lng: "0"
+					},
+					container: document.getElementById("addrEnd")
+				},
+				init: function() {
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".btn-submit"));
+
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍后",
+					    modal: true
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+
+					doAjax("Client", "addDemandInfo", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					/*初始化分类*/
+					window.typePicker = new mui.PopPicker({ layer: 2 });
+					window.typePicker.setData(data.category);
+
+					/*初始化服务时间选择器*/
+					window.dtpicker = new mui.DtPicker({
+					    type: "datetime",
+					    beginDate: new Date()
+					});
+
+					/*初始化服务方式选择器*/
+					window.servicePicker = new mui.PopPicker();
+					window.servicePicker.setData([{
+						value: 1,
+						text: "对方上门"
+					}, {
+						value: 2,
+						text: "去店里"
+					}]);
+
+					/*获取默认联系方式*/
+					document.getElementById("user_phone").value = data.sdemand_phone;
+				},
+				setControl: function(type) {
+					thisPage.pageType = type;
+
+					typeClass = "service-publish type_" + (type - 1);
+					var typeMod = document.getElementById('publishMod');
+					typeMod.setAttribute("class", typeClass);
+				},
+				getServiceType: function(id, sid, text) {
+					api.showProgress({
+					    title: "",
+					    text: "",
+					    modal: false
+					});
+
+					var urlParam = "cat_id=" + id;
+
+					doAjax("Index", "get_cat_type", urlParam, "post", function(rs) {
+						if (rs.code == 1) {
+							document.querySelector("#select_type .item-text").innerText = text;
+							document.querySelector("#select_type .item-text").style.color = '#333';
+
+							thisPage.pid = id;
+							thisPage.sid = (sid==undefined?'0':sid);
+
+							thisPage.setControl(rs.data.cat_type);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+						api.hideProgress();
+					});
+				},
+				submit: function() {
+					var service_name = document.getElementById("service_name").value;
+					var leave_word = document.getElementById("leave_word").value;
+					var user_name = document.getElementById("user_name").value;
+					var user_phone = document.getElementById("user_phone").value;
+
+					if (thisPage.pageType == "-1") {
+						PubApp.toast("请选择分类");
+						return false;
+					}
+
+					if (service_name == "") {
+						PubApp.toast("请输入发布标题");
+						return false;
+					}
+
+					api.showProgress({
+					    title: "提交中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+
+					urlParam += "&sdemand_catpid=" + thisPage.pid;
+					urlParam += "&sdemand_catid=" + thisPage.sid;
+					urlParam += "&sdemand_servename=" + service_name;
+
+					urlParam += "&sdemand_phone=" + user_phone;
+					urlParam += "&sdemand_message=" + leave_word;
+					urlParam += "&sdemand_truename=" + user_name;
+
+					if (thisPage.pageType == "1") {
+						urlParam += "&sdemand_serve_time=" + thisPage.serviceTime;
+
+						urlParam += "&sdemand_address1=" + document.getElementById("ipt_serviceAddr").value;
+
+						urlParam += "&sdemand_last_login_lat=" + thisPage.serviceAddr.params.lat;
+						urlParam += "&sdemand_last_login_lon=" + thisPage.serviceAddr.params.lng;
+					} else if (thisPage.pageType == "2") {
+						urlParam += "&sdemand_last_login_lat=" + db2.getVal("location_lat");
+						urlParam += "&sdemand_last_login_lon=" + db2.getVal("location_lon");
+					} else if (thisPage.pageType == "3") {
+						urlParam += "&sdemand_serve_time=" + thisPage.serviceTime;
+
+						urlParam += "&sdemand_address1=" + document.getElementById("ipt_startAddr").value;
+						urlParam += "&sdemand_address2=" + document.getElementById("ipt_endAddr").value;
+
+						urlParam += "&sdemand_start_login_lat=" + thisPage.startAddr.params.lat;
+						urlParam += "&sdemand_start_login_lon=" + thisPage.startAddr.params.lng;
+
+						urlParam += "&sdemand_last_login_lat=" + thisPage.endAddr.params.lat;
+						urlParam += "&sdemand_last_login_lon=" + thisPage.endAddr.params.lng;
+					} else if (thisPage.pageType == "4") {
+						urlParam += "&sdemand_serve_time=" + thisPage.serviceTime;
+						urlParam += "&sdemand_serve_way=" + thisPage.serviceWay;
+
+						urlParam += "&sdemand_address1=" + document.getElementById("ipt_serviceAddr").value;
+
+						urlParam += "&sdemand_last_login_lat=" + thisPage.serviceAddr.params.lat;
+						urlParam += "&sdemand_last_login_lon=" + thisPage.serviceAddr.params.lng;
+					}
+
+					doAjax("Client", "addDemand", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast("发布成功", true);
+							setTimeout(function() {
+					            api.closeWin();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*选择分类*/
+					document.querySelector("#select_type").addEventListener("tap", function() {
+						window.typePicker.show(function(items) {
+							var text = items[0].text + " " + (items[1].text==undefined?'':items[1].text);
+							thisPage.getServiceType(items[0].value, items[1].value, text);
+						});
+					});
+
+					/*服务时间选择*/
+					document.querySelector("#serviceTime").addEventListener("tap", function() {
+						window.dtpicker.show(function(selectItems) {
+							thisPage.serviceTime = selectItems.text;
+
+							document.querySelector("#serviceTime span").style.color = '#333';
+							document.querySelector("#serviceTime span").innerText = selectItems.text;
+						});
+					});
+
+					/*服务方式选择*/
+					document.querySelector("#serviceWay").addEventListener("tap", function() {
+						window.servicePicker.show(function(selectItems) {
+							thisPage.serviceWay = selectItems[0].value;
+
+							document.querySelector("#serviceWay span").style.color = '#333';
+							document.querySelector("#serviceWay span").innerText = selectItems[0].text;
+						});
+					});
+
+					/*选择联系地址*/
+					document.querySelector("#contactAddr").addEventListener("tap", function() {
+						var param = "addr_type=serviceAddr";
+						openWin("map_addr", param);
+						return false;
+					});
+
+					/*选择出发地址*/
+					document.querySelector("#addrStart").addEventListener("tap", function() {
+						var param = "addr_type=startAddr";
+						openWin("map_addr", param);
+						return false;
+					});
+
+					/*选择结束地址*/
+					document.querySelector("#addrEnd").addEventListener("tap", function() {
+						var param = "addr_type=endAddr";
+						openWin("map_addr", param);
+						return false;
+					});
+
+					/*监听地址选择事件*/
+					api.addEventListener({
+					    name: "mapSelectAddress"
+					}, function(ret, err) {
+						thisPage[ret.value.addrType].isEmpty = 0;
+						thisPage[ret.value.addrType].params = ret.value.info;
+					    var htmlStr = 	'<div class="addr-text">' +
+											'<span>'+ret.value.info.address+'</span>' +
+										'</div>';
+					    document.getElementById(ret.value.addrType).innerHTML = htmlStr;
+					    document.getElementById('ipt_'+ret.value.addrType).value = ret.value.info.address;
+					});
+
+					/*确认发布*/
+					document.querySelector(".btn-submit").addEventListener("tap", function() {
+						thisPage.submit();
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

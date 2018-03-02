@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+	<link rel="stylesheet" href="../css/mui.min.css" />
+	<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+	<link rel="stylesheet" href="../css/style.css" />
+	<style type="text/css">
+		#tips_text {
+			-webkit-user-select: all;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="mui-bar mui-bar-nav">
+		<span class="btn-top-left iconfont icon-houtui"></span>
+		<h1 class="mui-title">入驻平台</h1>
+	</div>
+	<div class="mui-content teamwork recharge money">
+		<div class="headline">请选择类型</div>
+		<div class="input-radios">
+			<div class="radio-item mui-radio mui-right">
+				<label class="pay-name" for="hotal">酒店/家庭旅馆入驻</label>
+				<input id="hotal" name="project" value="hotal" type="radio" checked="checked" />
+			</div>
+			<div class="radio-item mui-radio mui-right">
+				<label class="pay-name" for="ad">广告商入驻</label>
+				<input id="ad" name="project" value="ad" type="radio" />
+			</div>
+		</div>
+		<div class="tips-content">
+			<i class="iconfont icon-tips"></i>
+			<span id="tips_text"></span>
+		</div>
+		<div class="btn-submit">下一步</div>
+	</div>
+	<script type="text/javascript" src="../js/mui.min.js"></script>
+	<script type="text/javascript" src="../js/db.js"></script>
+	<script type="text/javascript">
+		var pageControl = new PageControl();
+		apiready = function() {
+			thisPage.init();
+		};
+		var thisPage = {
+			type: "hotal",
+			init: function() {
+				thisPage.setStr();
+				pageControl.winBack();
+				thisPage.addEvent();
+			},
+			addEvent: function() {
+				/*选择合作项目*/
+				mui(".input-radios").on("change", "input", function() {
+					thisPage.type = this.value;
+				});
+
+				/*下一步*/
+				document.querySelector(".btn-submit").addEventListener("tap", function() {
+					if (thisPage.type == "hotal") {
+						openWin("user_teamwork_hotal");
+					} else {
+						openWin("user_teamwork_ad");
+					}
+				});
+			},
+			setStr: function() {
+					doAjax("Member", "shopWInfo", '', "post", function(rs) {
+							if (rs.code == 1) {
+								document.getElementById("tips_text").innerText = rs.data.info;
+							} else { 
+								api.toast({ msg: rs.msg });
+							}
+					});
+			},
+		};
+	</script>
+</body>
+
+</html>

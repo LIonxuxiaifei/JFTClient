@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../css/mui.dtpicker.css" />
+		<link rel="stylesheet" href="../css/mui.picker.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.mui-dtpicker-title{display: block;background-color: #fff;}
+			.mui-dtpicker-title h5{background-color: #fff;}
+
+			.publish-item input{padding: 0;font-size: 0.875em;}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">讨价还价</h1>
+		</div>
+		<div id="levelBox" class="action-sheet-control con" style="display: none;">
+			<div class="dark"></div>
+			<div class="filter-list bot">
+				<h2 class="filter-name">星级</h2>
+				<ul class="items list_star">
+					<li class="on" data-value="0">不限</li>
+					<li data-value="1">经济</li>
+					<li data-value="2">二星</li>
+					<li data-value="3">三星</li>
+					<li data-value="4">四星</li>
+					<li data-value="5">五星</li>
+				</ul>
+				<h2 class="filter-name">价格</h2>
+				<ul class="items list_price">
+					<li class="on" data-value="0">不限</li>
+					<li data-value="200">200以下</li>
+					<li data-value="200-500">200-500</li>
+					<li data-value="500">500以上</li>
+				</ul>
+				<div id="btn_confirm" class="btn-submit">确定</div>
+			</div>
+		</div>
+		<div class="mui-content haggle-home">
+			<div class="home-banner">
+				<div id="homeBanner" class="mui-slider">
+					<div id="img_array" class="mui-slider-group mui-slider-loop">
+						<div class="mui-slider-item mui-slider-item-duplicate">
+							<p class="img-box" style="background-image: url();"></p>
+						</div>
+						<!-- <div class="mui-slider-item">
+							<p class="img-box" style="background: url(../img_temp/haggle-banner.png);"></p>
+						</div>
+						<div class="mui-slider-item">
+							<p class="img-box" style="background: url(../img_temp/haggle-banner.png);"></p>
+						</div>
+						<div class="mui-slider-item">
+							<p class="img-box" style="background: url(../img_temp/haggle-banner.png);"></p>
+						</div>
+						<div class="mui-slider-item mui-slider-item-duplicate">
+							<p class="img-box" style="background: url(../img_temp/haggle-banner.png);"></p>
+						</div> -->
+					</div>
+					<div id="img_circle" class="mui-slider-indicator">
+						<div class="mui-indicator mui-active"></div>
+						<!-- <div class="mui-indicator"></div>
+						<div class="mui-indicator"></div> -->
+					</div>
+				</div>
+			</div>
+			<div class="serach-block">
+				<div class="top-tab">
+					<div class="item after-line tab-on" data-value="1">酒店/宾馆</div>
+					<div class="item" data-value="2">家庭旅馆</div>
+				</div>
+				<div class="main-info">
+					<div id="btn_select_location" class="publish-item location">
+						<span id="user_location" class="item-text">&nbsp;</span>
+						<!--<i class="mui-icon mui-icon-arrowright arrow-right"></i>-->
+						<div class="user-location">
+							<span class="iconfont icon-dizhi"></span>
+							<span class="text">我的位置</span>
+						</div>
+					</div>
+					<div class="publish-item location" style="display:none">
+						<!--<i class="mui-icon mui-icon-arrowright arrow-right"></i>-->
+						<div class="date">
+							<span>
+								入店时间&nbsp;
+								<em id="date_checkin">请选择</em>&nbsp;
+								<strong id="week_checkin"><!--周六--></strong>
+								&nbsp;~&nbsp;
+								离店时间&nbsp;
+								<em id="date_leave">请选择</em>&nbsp;
+								<strong id="week_leave"><!--周日--></strong>
+							</span>
+						</div>
+						<span class="date-all">共<b id="nightNum">0</b>晚</span>
+					</div>
+					<div class="publish-item">
+						<input id="searchValue" type="text" placeholder="关键词/酒店/地名" />
+					</div>
+					<!--家庭旅馆不显示-->
+					<div id="levelItem" class="publish-item" style="display: block;">
+						<span class="item-text">价格/星级</span>
+						<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+					</div>
+					<!--家庭旅馆不显示-->
+				</div>
+				<div id="btn_search" class="btn-submit">开始搜索</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.dtpicker.js" ></script>
+		<script type="text/javascript" src="../js/mui.picker.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				dateCheckin: new Date(), //入店日期
+				dateLeave: new Date(new Date().getTime() + 24*60*60*1000), //离店日期
+				hotalType: "1", //酒店类型 1-酒店 2-家庭旅馆
+				hotalPrice: "0", //默认不限
+				hotalRank: "0", //默认不限
+				lat: db2.getVal("location_lat"),
+				lng: db2.getVal("location_lon"),
+				init: function() {
+					pageControl.winBack();
+
+					api.setWinAttr({
+					    softInputMode: 'resize'
+					});
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+
+			        thisPage.setLocation();
+
+					/*设置默认日期*/
+					var curDate = new Date();
+					var nextDate = new Date(curDate.getTime() + 24*60*60*1000);
+					document.getElementById("date_checkin").innerText = (curDate.getMonth() + 1) + "." + curDate.getDate();
+					document.getElementById("week_checkin").innerText = thisPage.getDayStr(curDate.getDay());
+					document.getElementById("date_leave").innerText = (nextDate.getMonth() + 1) + "." + nextDate.getDate();
+					document.getElementById("week_leave").innerText = thisPage.getDayStr(nextDate.getDay());
+
+					thisPage.setNightNum();
+				},
+				setLocation: function() {
+					var map = api.require('bMap');
+					map.getNameFromCoords({
+					    lon: db2.getVal("location_lon"),
+					    lat: db2.getVal("location_lat")
+					}, function(ret, err) {
+					    if (ret.status) {
+					        document.getElementById("user_location").innerText = ret.address;
+					    } else {
+					    	mui.toast("获取位置信息失败");
+					    }
+					});
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "",
+					    text: "",
+					    modal: false
+					});
+
+					doAjax("Hotel", "index", '', "post", function(rs) {
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.hideProgress();
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					/*初始化日期选择器*/
+					window.picker_checkin = new mui.DtPicker({
+					    type: "monthday",
+					    beginDate: new Date()
+					});
+					window.picker_leave = new mui.DtPicker({
+					    type: "monthday",
+					    beginDate: new Date()
+					});
+
+					/*banner*/
+					var imgArray =  data.banner;
+					if (isset(imgArray)) {
+						var len = imgArray.length;
+						setTimeout(function() {
+							var img_array = document.getElementById("img_array");
+							var img_circle = document.getElementById("img_circle");
+							var img_html = "";
+							var circle_html = "";
+
+							var first_img = '<div class="mui-slider-item mui-slider-item-duplicate">' +
+												'<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[len-1].Pic)+');"></p>' +
+											'</div>';
+							var last_img = '<div class="mui-slider-item mui-slider-item-duplicate">' +
+												'<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[0].Pic)+');"></p>' +
+											'</div>';
+
+							for (var i = 0; i < len; i++) {
+								img_html += '<div class="mui-slider-item mui-slider-item-duplicate">' +
+												'<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[i].Pic)+');"></p>' +
+											'</div>';
+								if (i == 0) {
+									circle_html += '<div class="mui-indicator mui-active"></div>';
+								} else {
+									circle_html += '<div class="mui-indicator"></div>';
+								}
+							}
+
+							img_array.innerHTML = first_img + img_html + last_img;
+							img_circle.innerHTML = circle_html;
+
+							setTimeout(function(){
+								if (imgArray.length > 1) {
+									mui('#homeBanner').slider({interval: 5000});
+								}
+							}, 350);
+						}, 100);
+					}
+
+					api.hideProgress();
+				},
+				getDayStr: function(getDayNum) {
+					var weekStr = "";
+					switch(getDayNum) {
+						case 0:
+							weekStr = "周日";
+							break;
+						case 1:
+							weekStr = "周一";
+							break;
+						case 2:
+							weekStr = "周二";
+							break;
+						case 3:
+							weekStr = "周三";
+							break;
+						case 4:
+							weekStr = "周四";
+							break;
+						case 5:
+							weekStr = "周五";
+							break;
+						case 6:
+							weekStr = "周六";
+							break;
+						default:
+							break;
+					}
+					return weekStr;
+				},
+				setNightNum: function() {
+					var nightNum = thisPage.dateLeave.getDate() -  thisPage.dateCheckin.getDate();
+					if (nightNum > 0) {
+						document.getElementById("nightNum").innerText = nightNum;
+					} else {
+						document.getElementById("nightNum").innerText = 0;
+					}
+				},
+				addEvent: function() {
+					/*选择位置*/
+					document.getElementById("btn_select_location").addEventListener("tap", function() {
+						var param = "addr_type=haggle_location";
+						openWin("map_addr", param);
+					});
+
+					api.addEventListener({
+					    name: "mapSelectAddress"
+					}, function(ret, err) {
+						if (ret.value.addrType == "haggle_location") {
+							document.getElementById("user_location").innerText = ret.value.info.addrName;
+							thisPage.lat = ret.value.info.lat;
+							thisPage.lng = ret.value.info.lng;
+						}
+					});
+
+					/*选择入店时间*/
+					var curDate = new Date();
+					document.getElementById("date_checkin").addEventListener("tap", function() {
+						window.picker_checkin.show(function(items) {
+						    var dateStr = curDate.getFullYear() + "-" + items.value;
+						    var selectDate = new Date(dateStr);
+						    var selectDateWeek = thisPage.getDayStr(selectDate.getDay());
+
+						    thisPage.dateCheckin = selectDate;
+
+						    document.getElementById("date_checkin").innerText = Number(items.m.text) + "." + Number(items.d.text);
+						    document.getElementById("week_checkin").innerText = selectDateWeek;
+
+						   	thisPage.setNightNum();
+						});
+					});
+
+					/*选择离店日期*/
+					document.getElementById("date_leave").addEventListener("tap", function() {
+						window.picker_leave.show(function(items) {
+						    var dateStr = curDate.getFullYear() + "-" + items.value;
+						    var selectDate = new Date(dateStr);
+						    var selectDateWeek = thisPage.getDayStr(selectDate.getDay());
+
+						    thisPage.dateLeave = selectDate;
+
+						    document.getElementById("date_leave").innerText = Number(items.m.text) + "." + Number(items.d.text);
+						    document.getElementById("week_leave").innerText = selectDateWeek;
+
+						    thisPage.setNightNum();
+						});
+					});
+
+					/*选项卡切换*/
+					mui(".top-tab").on("tap", ".item", function() {
+						if (this.classList.contains("tab-on")) return;
+
+						document.querySelector(".top-tab .tab-on").classList.remove("tab-on");
+						this.classList.add("tab-on");
+
+						var data_value = this.getAttribute("data-value");
+						thisPage.hotalType = data_value;
+
+						if (data_value == 1) {
+							thisPage.hotalType = "1";
+							document.getElementById("levelItem").style.display = 'block';
+						} else {
+							thisPage.hotalType = "2";
+							document.getElementById("levelItem").style.display = 'none';
+						}
+					});
+
+					/*选择价格星级*/
+					document.querySelector("#levelItem").addEventListener("tap", function() { //显示筛选控件
+						document.getElementById("levelBox").style.display = 'block';
+					});
+
+					mui(".items.list_star").on("tap", "li", function() { //选择星级
+						if (this.classList.contains("on")) return;
+
+						document.querySelector(".items.list_star .on").classList.remove("on");
+						this.classList.add("on");
+					});
+
+					mui(".items.list_price").on("tap", "li", function() { //选择价格
+						if (this.classList.contains("on")) return;
+
+						document.querySelector(".items.list_price .on").classList.remove("on");
+						this.classList.add("on");
+					});
+
+					document.querySelector("#btn_confirm").addEventListener("tap", function() { //确定
+						var starValue = document.querySelector(".items.list_star .on").getAttribute("data-value");
+						var priceValue = document.querySelector(".items.list_price .on").getAttribute("data-value");
+						//alert(starValue + "&" + priceValue);
+						thisPage.hotalRank = starValue;
+						thisPage.hotalPrice = priceValue;
+
+						document.getElementById("levelBox").style.display = 'none';
+					});
+
+					/*开始搜索*/
+					document.querySelector("#btn_search").addEventListener("tap", function() {
+						// var nightNum = document.getElementById("nightNum").innerText;
+						// if (nightNum == 0) {
+						// 	api.toast({ msg: "离店时间有误" });
+						// } else {
+							var param = "lat=" + thisPage.lat;
+							param += "&lng=" + thisPage.lng;
+							param += "&hotal_type=" + thisPage.hotalType;
+							param += "&hotal_price=" + thisPage.hotalPrice;
+							param += "&hotal_rank=" + thisPage.hotalRank;
+							param += "&search_value=" + document.getElementById("searchValue").value;
+
+							openWin("haggle_list", param);
+						// }
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

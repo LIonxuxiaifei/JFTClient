@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">历史提现帐号</h1>
+		</div>
+		<div class="mui-content has-bot-tab">
+			<ul id="pageList" class="address-list">
+				<!-- <li>
+					<div class="box-info">
+						<span class="name">李雷</span>
+						<span class="address">浙江省杭州市拱墅区祥园路38号</span>
+						<span class="phone">15869173714</span>
+					</div>
+					<div class="box-btns">
+						<div class="mui-radio mui-left">
+							<label for="item1">设为默认</label>
+							<input id="item1" type="radio" name="default" checked />
+						</div>
+						<div class="btn-other">
+							<div class="item"><i class="iconfont icon-bianji2"></i><span>编辑</span></div>
+							<div class="item"><i class="iconfont icon-shanchu"></i><span>删除</span></div>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="box-info">
+						<span class="name">李雷</span>
+						<span class="address">浙江省杭州市拱墅区祥园路38号</span>
+						<span class="phone">15869173714</span>
+					</div>
+					<div class="box-btns">
+						<div class="mui-radio mui-left">
+							<label for="item2">设为默认</label>
+							<input id="item2" type="radio" name="default" />
+						</div>
+						<div class="btn-other">
+							<div class="item"><i class="iconfont icon-bianji2"></i><span>编辑</span></div>
+							<div class="item"><i class="iconfont icon-shanchu"></i><span>删除</span></div>
+						</div>
+					</div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+					thisPage.addEvent();
+			
+					thisPage.requestData("history");
+					setTimeout(function() {
+			            thisPage.requestData("new");
+			        }, 350);
+				},
+				requestData: function(dataFrom) {
+					window.cachename = api.frameName + api.winName + JSON.stringify(api.pageParam) + db2.getVal("user_token");
+			
+					dataFrom = dataFrom || "all";
+			
+					if (dataFrom != "new") {
+						db.getConfig(cachename, function(data) {
+							window.histroydata = data;
+							if (data != "" && (window.ajaxsuccess || 0) == 0) {
+								log("历史数据填充");
+								thisPage.fillData(JSON.parse(data));
+							}
+						});
+					}
+			
+					if (dataFrom == "history") return false;
+			
+					/*Ajax请求*/
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+			
+					var urlParam = "Token=" + db2.getVal("user_token");
+					urlParam += "&bank_type=" + api.pageParam.bank_type;
+					
+					doAjax("member", "getBankList", urlParam, "post", function(rs) {
+						window.ajaxsuccess = 1;
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							var stringifyData = JSON.stringify(rs.Data);
+							if (window.histroydata != stringifyData || !rs.Data) {
+								db.setConfig(cachename, stringifyData);
+								thisPage.fillData(rs.Data);
+								log("使用最新数据渲染了");
+							} else {
+								log("与历史一致，不处理【" + window.histroydata + "】");
+							}
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				fillData: function(data) {
+					var lists = data.lists;
+					var lists_html = "";
+					if (isset(lists)) {
+						lists.forEach(function(item) {
+							lists_html += 	'<li data-json=\''+JSON.stringify(item)+'\'>\
+												<div class="box-info">\
+													<span class="name">'+item.bank_username+'</span>\
+													<span class="address">'+item.bank_sheng+item.bank_shi+item.bank_qu+" "+item.bank_name+'</span>\
+													<span class="phone">'+item.bank_number+'</span>\
+												</div>\
+											</li>';
+						});
+						document.getElementById("pageList").innerHTML = lists_html;
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">没有历史提现帐号记录哦</div>';
+					}
+				},
+				addEvent: function() {
+					/*选择*/
+					mui("#pageList").on("tap", "li", function() {
+						api.sendEvent({
+							name: 'select_history_account',
+							extra: JSON.parse(this.getAttribute("data-json"))
+						});
+
+						api.closeWin();
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">系统消息</h1>
+		</div>
+		<div class="mui-content">
+			<ul id="pageList" class="system-message-list">
+				<!-- <li>
+					<div class="msg-time"><span>09:01</span></div>
+					<div class="msg-main">
+						<div class="msg-info">
+							<span class="msg-content">恭喜您获得10元优惠券</span>
+						</div>
+						<div class="msg-link">
+							<span>查看详情</span>
+							<i class="iconfont icon-xiangyou arrow-right"></i>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="msg-time"><span>昨天20:28</span></div>
+					<div class="msg-main">
+						<div class="msg-info">
+							<span class="msg-content">厉害了word哥，速来领取大礼包</span>
+						</div>
+						<div class="msg-link">
+							<span>查看详情</span>
+							<i class="iconfont icon-xiangyou arrow-right"></i>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="msg-time"><span>2016年8月15日</span></div>
+					<div class="msg-main">
+						<div class="msg-info order">
+							<span class="msg-content">保温杯75新</span>
+							<span class="other-info">李果果</span>
+							<span class="status warning">待支付</span>
+						</div>
+						<div class="msg-link">
+							<span>查看详情</span>
+							<i class="iconfont icon-xiangyou arrow-right"></i>
+						</div>
+					</div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+			
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "",
+					    text: "",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					
+					doAjax("Message", "informationList", urlParam, "post", function(rs) {
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.hideProgress();
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					var listHtml = "";
+					var dataList = data.list;
+
+					if (isset(dataList)) {
+						dataList.forEach(function(item) {
+							var liNode = document.createElement("li");
+							liNode.setAttribute("data-value", item.pm_pageparam);
+							liNode.setAttribute("data-url", item.pm_pagename);
+							liNode.innerHTML = '<div class="msg-time"><span>'+item.pm_create_time+'</span></div>\
+												<div class="msg-main">\
+													<div class="msg-info">\
+														<span class="msg-content">'+item.pm_title+'</span>\
+													</div>\
+													<div class="msg-link">\
+														<span>查看详情</span>\
+														<i class="iconfont icon-xiangyou arrow-right"></i>\
+													</div>\
+												</div>';
+							document.getElementById("pageList").appendChild(liNode);
+						});
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">无消息记录</div>';
+					}
+
+					api.hideProgress();
+				},
+				getParamString: function(extra) {
+					var result = [];
+	                for (var key in extra) {
+	                    result.push(key + "=" + extra[key]);
+	                }
+	                return result.join("&");
+				},
+				addEvent: function() {
+					mui("#pageList").on("tap", "li", function() {
+						var extra = "";
+						if (this.getAttribute("data-value") != "") {
+							extra = JSON.parse(this.getAttribute("data-value"));
+							extra = thisPage.getParamString(extra);
+						}
+						var pageUrl = this.getAttribute("data-url");
+						openWin(pageUrl, extra);
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body class="color-white">
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">资讯详情</h1>
+			<span id="btn_share" class="btn-top-right iconfont icon-fenxiang"></span>
+		</div>
+		<div class="mui-content news-detail">
+			<!-- <div class="news-title">标题</div>
+			<div class="news-info">2016-11-30&nbsp;&nbsp;时政新闻</div>
+			<div class="news-content">1111</div> -->
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			var share_title = "邀请注册",
+				share_desc = "邀请注册",
+				share_pic = "Skin/img/share.png",
+				share_url = "http://jiafutong.iaapp.cn/index.php/app/Share/register/Pid/" + db2.getVal("user_pid");
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+					PubApp.share();
+			
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "ArticleId=" + api.pageParam.data_id;
+					
+					doAjax("Client", "getNewsDetail", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				fillData: function(data) {
+					var typeStr = {
+						"1": "招投标",
+						"2": "政策新闻",
+						"3": "公告",
+					};
+
+					var pageHtml = 	'<div class="news-title">'+data.Title+'</div>' +
+									'<div class="news-info">'+data.AddTime+'&nbsp;&nbsp;'+typeStr[data.TypeId]+'</div>' +
+									'<div class="news-content">'+data.Content+'</div>';
+
+					document.querySelector(".news-detail").innerHTML = pageHtml;
+				},
+				addEvent: function() {
+					/*分享给朋友*/
+					document.querySelector("#btn_share").addEventListener("tap", function() {
+						mask.show();
+            			$api.removeCls($api.dom("#share_box"), "hide");
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

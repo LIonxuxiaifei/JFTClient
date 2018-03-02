@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-cha"></span>
+			<h1 class="mui-title">登录</h1>
+		</div>
+		<div class="mui-content login">
+			<div class="input-row">
+				<input id="user_phone_number" type="number" placeholder="请输入手机号" />
+			</div>
+			<div class="input-row">
+				<input id="user_password" type="password" placeholder="请输入密码" />
+			</div>
+			<div class="btn-submit">确认登录</div>
+			<div class="btns">
+				<span id="btnForget" class="btns-left">忘记密码?</span>
+				<span id="btnRegister" class="btns-right">没有帐号?<i>注册</i></span>
+			</div>
+			<div class="third-login">
+				<div class="top-line"><span>或</span></div>
+				<div class="third-btns">
+					<span id="btn_qq" class="btn-item img-box" style="background: url(../img/third-qq.png);"></span>
+					<span id="btn_wechat" class="btn-item img-box" style="background: url(../img/third-wechat.png);display:none;"></span>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+
+			var pageControl = new PageControl();
+			var wx, qq;
+			apiready = function(){
+			    thisPage.init();
+			    thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() { //页面初始化
+					pageControl.fixedHide(document.querySelector(".third-login"));
+
+					wx = api.require('wx');
+					qq = api.require('QQPlus');
+					wx.isInstalled(function(ret, err) {
+							if (ret.installed) {
+									document.querySelector('#btn_wechat').style.display = "inline-block";
+							} else {
+									document.querySelector('#btn_wechat').style.display = "none";
+							}
+					});
+				},
+				submit: function() { //页面数据提交
+					var user_phone_number = document.getElementById("user_phone_number").value,
+						user_password = document.getElementById("user_password").value;
+
+					/*验证手机号格式*/
+					var rule_phone = new RegExp(/^(1[0-9]{2})+\d{8}$/i);
+					if (!rule_phone.test(user_phone_number)) {
+						api.toast({
+						    msg: "手机号不正确"
+						});
+						return false;
+					}
+
+					/*验证密码格式(密码长度不小于6)*/
+					if (user_password.length < 6) {
+						api.toast({
+						    msg: "密码长度不能小于6位"
+						});
+						return false;
+					}
+
+					/*显示进度提示框*/
+					api.showProgress({
+					    title: "登录中...",
+					    text: "请稍候",
+					    modal: true
+					});
+
+					/*Ajax请求*/
+					var urlParam = "UserTel=" + user_phone_number;
+					urlParam += "&UserPass=" + user_password;
+					urlParam += "&clientid=" + db2.getVal("ajpushid");
+					// urlParam += "&mobileSystem=" + api.systemType;
+
+					console.log(urlParam);
+
+					doAjax("Member", "userLogin", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							//保存数据
+							db2.setVal("user_token", rs.Data.token);
+							db2.setVal("user_pid", rs.Data.userid);
+
+							PubApp.toast("登录成功", true);
+
+							api.sendEvent({
+		                        name: 'userloginorout'
+		                    });
+
+							api.sendEvent({
+		                        name: 'updateLocation'
+		                    });
+
+							setTimeout(function() {
+								api.closeWin();
+							}, 550);
+						} else {
+							PubApp.toast(rs.ErrorMsg);
+						}
+					});
+
+				},
+				wxGetToken: function(code) {
+					api.showProgress({
+			            title: "",
+			            text: "正在发起登录",
+			            modal: false
+			        });
+
+					wx.getToken({
+					    apiKey: '',
+					    apiSecret: '',
+					    code: code
+					},function(ret, err){
+					    if(ret.status){
+					        thisPage.wxGetUserInfo(ret.openId, ret.accessToken);
+					    }else{
+					    	api.hideProgress();
+					    	api.toast({msg: '登录失败' });
+					        //alert(err.code);
+					    }
+					});
+				},
+				wxGetUserInfo: function(openid, token) {
+					wx.getUserInfo({
+					    accessToken: token,
+					    openId: openid
+					}, function(ret, err){
+					    if(ret.status){
+					        var urlParam = "regType=wx";
+					        urlParam += "&clientid=" + db2.getVal("ajpushid");
+					        urlParam += "&mobileSystem=" + api.systemType;
+					        urlParam += "&datajson=" + JSON.stringify(ret);
+
+					        doAjax("Member", "userLogin", urlParam, "post", function(rs) {
+					        	api.hideProgress();
+					        	if (rs.ErrorCode == 1) {
+					        		if (rs.Data.status == 0) { //未绑定手机
+					        			var param = "openid=" + rs.Data.openid;
+					        			param += "&reg_type=wx";
+					        			setTimeout(function() {
+					        				openWin("binding_phone", param);
+					        			}, 350);
+					        		} else { //已绑定手机直接登录
+					        			db2.setVal("user_token", rs.Data.token);
+					        			db2.setVal("user_pid", rs.Data.userid);
+
+					        			PubApp.toast("登录成功");
+
+										api.sendEvent({
+					                        name: 'userloginorout'
+					                    });
+					                    api.sendEvent({
+					                        name: 'updateLocation'
+					                    });
+										setTimeout(function() {
+											api.closeToWin({
+				                                name: "root",
+				                            });
+										}, 800);
+					        		}
+					        	} else {
+					        		api.toast({ msg: rs.ErrorMsg });
+					        	}
+					        });
+					    }else{
+					    	api.hideProgress();
+					    	api.toast({msg: '登录失败' });
+					        //alert(err.code);
+					    }
+					});
+				},
+				qqGetUserInfo: function(data) {
+					var urlParam = "regType=qq";
+			        urlParam += "&clientid=" + db2.getVal("ajpushid");
+			        urlParam += "&mobileSystem=" + api.systemType;
+			        urlParam += "&datajson=" + JSON.stringify(data);
+
+			        doAjax("Member", "userLogin", urlParam, "post", function(rs) {
+			        	//api.hideProgress();
+			        	if (rs.ErrorCode == 1) {
+			        		if (rs.Data.status == 0) { //未绑定手机
+			        			var param = "openid=" + rs.Data.openid;
+			        			param += "&reg_type=qq";
+			        			setTimeout(function() {
+			        				openWin("binding_phone", param);
+			        			}, 350);
+			        		} else { //已绑定手机直接登录
+			        			db2.setVal("user_token", rs.Data.token);
+			        			db2.setVal("user_pid", rs.Data.userid);
+
+			        			PubApp.toast("登录成功");
+
+								api.sendEvent({
+			                        name: 'userloginorout'
+			                    });
+			                    api.sendEvent({
+			                        name: 'updateLocation'
+			                    });
+								setTimeout(function() {
+									api.closeToWin({
+		                                name: "root",
+		                            });
+								}, 800);
+			        		}
+			        	} else {
+			        		api.toast({ msg: rs.ErrorMsg });
+			        	}
+			        });
+				},
+				addEvent: function() {
+					/*关闭页面*/
+					document.querySelector('.btn-top-left').addEventListener("tap", function() {
+			            api.closeWin();
+			        });
+
+					/*确认登录*/
+					document.querySelector('.btn-submit').addEventListener("tap", function() {
+			            thisPage.submit();
+			        });
+
+			        /*忘记密码*/
+			        document.getElementById('btnForget').addEventListener("tap", function() {
+			            openWin("forget");
+			        });
+
+			        /*注册*/
+			        document.getElementById('btnRegister').addEventListener("tap", function() {
+			            openWin("register");
+			        });
+
+			        /*微信登录*/
+			        document.getElementById("btn_wechat").addEventListener("tap", function() {
+			        	wx.isInstalled(function(ret, err) {
+			        		if (ret.installed) {
+					        			wx.auth({
+										    apiKey: ''
+										}, function(ret, err) {
+										    if (ret.status) {
+										        thisPage.wxGetToken(ret.code);
+										    } else {
+										    	api.toast({msg: '登录失败' });
+										        alert(err.code);
+										    }
+										});
+			        		} else {
+			        			//api.toast({msg: '当前设备未安装微信' });
+			        		}
+			        	});
+			        });
+
+			        /*QQ登录*/
+			        document.getElementById("btn_qq").addEventListener("tap", function() {
+			         	qq.installed(function(ret, err) {
+						    if (ret.status) {
+						        qq.login(function(ret, err) {
+						        	var openId = ret.openId;
+									qq.getUserInfo(function(ret, err) {
+									    if (ret.status) {
+									    	var info = JSON.parse(ret.info);
+									        thisPage.qqGetUserInfo({
+									        	openid: openId,
+									        	headimgurl: info.figureurl_qq_2,
+									        	sex: (info.gender == '男' ? 1 : 2),
+									        	nickname: info.nickname
+									        });
+									    } else {
+									        api.toast({ msg: err.msg });
+									    }
+									});
+								});
+						    } else {
+						        //api.toast({msg: '当前设备未安装QQ' });
+						    }
+						});
+			        });
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">订单详情</h1>
+			<span class="btn-top-right font">投诉</span>
+		</div>
+		<div id="unpaid" class="bot-control haggle" style="display: none;">
+			<div class="btn-item btn_cancel">取消订单</div>
+			<div class="btn-item warning btn_pay">立即支付</div>
+		</div>
+		<div class="mui-content order-detail-service">
+			<div class="order-list">
+				<div class="item">
+					<div class="order-top-info bot-line">
+						<div id="user_avatar" class="user-avatar img-box" style="background-image: url();"></div>
+						<b id="user_name" class="user-name"><!--李果果 (家政)--></b>
+						<span id="order_status_name" class="order-status warning"><!--待支付--></span>
+					</div>
+					<div class="order-mid-info bot-line">
+						<div class="outer-box">
+							<div class="order-pic img-box" style="background-image: url();"></div>
+							<div class="order-main">
+								<div class="order-name"><!-- 上门保洁 --></div>
+								<!-- <div class="number">数量 : &nbsp;<i>1</i></div> -->
+							</div>
+							<div class="price-info">
+								<!--<div class="price-box">
+									<i class="m-icon">&yen;</i>
+									<span class="m-num">200</span>
+									<i class="m-icon">/天</i>
+								</div>-->
+							</div>	
+						</div>
+					</div>
+					<div id="pageTotal">
+						<!-- <div class="order-price-info">
+							<div class="total">合计 : &nbsp;<i id="order_total">0.00</i>元</div>
+						</div> -->
+					</div>
+					<div id="btn_call" class="order-bot-tel">
+						<i class="iconfont icon-rexian"></i>
+						<span>联系卖家</span>
+					</div>
+				</div>
+			</div>
+			<div id="order_info_block">
+				<!-- <div class="order-info-block">
+					<div class="item">订单编号：<i>1234567890</i></div>
+					<div class="item">下单时间：<i>2016-12-10 15:30:10</i></div>
+					<div class="item">服务时间：<i>2016-12-10 08:00 ~ 11:00</i></div>
+					<div class="item">姓名：<i>张飞</i></div>
+					<div class="item">联系电话：<i>13838383855</i></div>
+					<div class="item">联系地址：<i>浙江省杭州市拱墅区丰登街333号</i></div>
+					<div class="item">留言：<i>尽快到达</i></div>
+				</div> -->
+			</div>
+			<div id="commentContainer" class="user-center" style="margin-top: 10px;"></div>
+			<div id="btn_confirm_service" class="btn-submit atbot" style="display: none;">确认服务</div>
+			<div id="btn_comment" class="btn-submit atbot" style="display: none;">评价</div>
+			<div id="btn_cancel_singe" class="btn-submit atbot btn_cancel" style="display: none;">取消订单</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				sellerTel: "", //卖家（服务者）联系方式
+				order_id: 0,
+				serve_type: 0,
+				order_type_key: "",
+				init: function() {
+					pageControl.winBack();
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + api.pageParam.order_id;
+					urlParam += "&type_key=" + api.pageParam.order_type;
+					
+					doAjax("Client", "orderDetails", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: "获取网络失败" });
+							//api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					/*重置按钮显示*/
+					document.getElementById("unpaid").style.display = 'none';
+					document.getElementById("btn_confirm_service").style.display = 'none';
+					document.getElementById("btn_comment").style.display = 'none';
+					document.getElementById("btn_cancel_singe").style.display = 'none';
+
+					var orderInfo = data.orderInfo;
+					thisPage.order_id = orderInfo.order_gid;
+					thisPage.order_type_key = orderInfo.order_type_key;
+					thisPage.serve_type = orderInfo.cat_type;
+					thisPage.order_is_rob = orderInfo.order_is_rob;
+
+					/*服务者信息 & 订单状态*/
+					thisPage.sellerTel = orderInfo.order_username; //卖家联系电话
+					document.getElementById("user_avatar").style.backgroundImage = 'url('+toAbsUrl(orderInfo.UserHead)+')';
+					document.getElementById("user_avatar").setAttribute("data-id", orderInfo.Mid);
+					document.getElementById("user_name").innerHTML = orderInfo.NickName + '('+orderInfo.order_typename+')';
+					document.getElementById("order_status_name").innerText = orderInfo.order_vstatus_name;
+
+					/*服务内容信息*/
+					var picHtml = "";
+					if (orderInfo.order_is_rob == 1) {
+						picHtml = '<div class="order-pic img-box" style="background-image: url('+toAbsUrl(orderInfo.order_picture)+');"></div>';
+					}
+
+					var priceHtml = "";
+					if (orderInfo.order_is_rob == 2 && orderInfo.order_is_setcost == 0) { //待出价
+						priceHtml = "";
+					} else {
+						priceHtml = '<div class="price-box">' +
+										'<i class="m-icon">&yen;</i>' +
+										'<span class="m-num">'+orderInfo.order_price.split(".")[0]+'</span><span class="m-num-deci">.'+orderInfo.order_price.split(".")[1]+'</span>' +
+										'<i class="m-icon">/'+orderInfo.order_unit+'</i>' +
+									'</div>';
+					}
+
+					var numHtml = "";
+					if (orderInfo.order_num > 0) {
+						numHtml = '<div class="number">数量 : &nbsp;<i>'+orderInfo.order_num+'</i></div>';
+					}
+
+					document.querySelector(".order-mid-info").innerHTML = 	'<div class="outer-box">' +
+																				picHtml +
+																				'<div class="order-main">' +
+																					'<div class="order-name">'+orderInfo.order_goodsname+'</div>' +
+																					numHtml +
+																				'</div>' +
+																				'<div class="price-info">'+priceHtml+'</div>' +
+																			'</div>';
+
+					/*合计*/
+					var totalHtml = "";
+					if (orderInfo.order_is_rob == 2 && orderInfo.order_is_setcost != 0) {
+						totalHtml = '<div class="order-price-info bot-line">' +
+										'<div class="total">合计 : &nbsp;<i id="order_total">'+orderInfo.order_total+'</i>元</div>' +
+									'</div>';
+					}
+					document.getElementById("pageTotal").innerHTML = totalHtml;
+
+					/*订单信息*/
+					//服务方式
+					var serviceWay = "";
+					switch (orderInfo.order_serve_way) {
+						case "0":
+							serviceWay = "";
+							break;
+						case "1":
+							serviceWay = '<div class="item">服务方式：<i>对方上门</i></div>';
+							break;
+						case "2":
+							serviceWay = '<div class="item">服务方式：<i>去店里</i></div>';
+							break;
+						default:
+							break;
+					}
+
+					//服务者信息
+					var serverInfo = "";
+					var ser_type = orderInfo.cat_type;
+					if (ser_type == 4) {
+						serverInfo = 	'<div class="item">卖家姓名：<i>'+orderInfo.RealName+'</i></div>' +
+										'<div class="item">联系电话：<i>'+orderInfo.order_username+'</i></div>' +
+										'<div class="item">联系地址：<i>'+orderInfo.order_seller_address+'</i></div>';
+					}
+
+					var buyerName = "";
+					if (orderInfo.order_truename && orderInfo.order_truename != "") {
+						buyerName = '<div class="item">姓名：<i>'+orderInfo.order_truename+'</i></div>';
+					}
+
+					var serviceAddr = "";
+					if (ser_type == 1 || ser_type == 4) {
+						serviceAddr = '<div class="item">联系地址：<i>'+orderInfo.order_address+'</i></div>';
+					} else if (ser_type == 3) {
+						serviceAddr = 	'<div class="item">出发地址：<i>'+orderInfo.order_address+'</i></div>' +
+										'<div class="item">终点地址：<i>'+orderInfo.order_address2+'</i></div>';
+					}
+
+					//服务时间
+					var serviceTime = "";
+					if (ser_type != 2) {
+						serviceTime = '<div class="item">服务时间：<i>'+orderInfo.order_start_time+'</i></div>';
+					}
+
+					document.getElementById("order_info_block").innerHTML = '<div class="order-info-block">' +
+																				'<div class="item">订单编号：<i>'+orderInfo.order_number+'</i></div>' +
+																				'<div class="item">下单时间：<i>'+orderInfo.order_create_time+'</i></div>' +
+																				serviceTime +
+																				serviceWay +
+																				serverInfo +
+																				buyerName +
+																				'<div class="item">联系电话：<i>'+orderInfo.order_phone+'</i></div>' +
+																				serviceAddr +
+																				'<div class="item">留言：<i>'+orderInfo.order_message+'</i></div>' +
+																			'</div>';
+
+					/*按钮模块（根据订单状态显示对应模块）*/
+					if (orderInfo.order_is_rob == 1) {
+						switch (orderInfo.order_status) {
+							case "1": //待支付
+								document.getElementById("unpaid").style.display = 'block';
+								break;
+							case "2": //待服务
+								document.getElementById("btn_confirm_service").style.display = 'block';
+								break;
+							case "3": //已出发
+								document.getElementById("btn_confirm_service").style.display = 'block';
+								break;
+							case "4": //完成待评价
+								if (orderInfo.order_is_comment == 0) { //待评价
+									document.getElementById("btn_comment").style.display = 'block';
+								}
+								break;
+							default:
+								break;
+						}
+					} else if (orderInfo.order_is_rob == 2) {
+						switch (orderInfo.order_status) {
+							case "1": 
+								if (orderInfo.order_is_setcost == 0) { //待出价
+									document.getElementById("btn_cancel_singe").style.display = 'block';
+								} else { //待支付
+									document.getElementById("unpaid").style.display = 'block';
+								}
+								break;
+							case "2": //待服务
+								document.getElementById("btn_confirm_service").style.display = 'block';
+								break;
+							case "3": //已出发
+								document.getElementById("btn_confirm_service").style.display = 'block';
+								break;
+							case "4": //已完成
+								if (orderInfo.order_is_comment == 0) { //待评价
+									document.getElementById("btn_comment").style.display = 'block';
+								}
+								break;
+							default:
+								break;
+						}
+					}
+
+					//评论信息
+					var commentInfo = data.comment;
+					if (isset(commentInfo)) {
+						var commentContainer = document.getElementById('commentContainer');
+						//评分
+						var scoreNum = Number(commentInfo.commen_score);
+						var starHtml = '<div class="bot-bg"><div class="top-bg level-'+Math.round(scoreNum)+'"></div></div>';
+
+						//图片
+						var comPicList = commentInfo.commen_picture;
+						var comPicHtml = "";
+						comPicList.forEach(function(item) {
+							comPicHtml += '<p class="pic-item img-box" style="background-image: url('+toAbsUrl(item)+');"></p>'
+						});
+
+						//回复
+						var replyHtml = "";
+						if (commentInfo.reply && commentInfo.reply != '') {
+							replyHtml = '<div class="reply">\
+											<i class="iconfont icon-07"></i>\
+											<div class="reply-info">\
+												<span class="reply-person">回复 : </span>\
+												<span class="reply-content">'+commentInfo.reply+'</span>\
+											</div>\
+										</div>';
+						}
+
+						commentContainer.innerHTML = '<ul class="comment-list active">\
+														<li>\
+															<div class="user-avatar img-box" style="background-image: url('+toAbsUrl(commentInfo.UserHead)+');"></div>\
+															<div class="com-time">'+commentInfo.commen_create_time+'</div>\
+															<div class="com-info">\
+																<div class="com-person">'+commentInfo.commen_username+'</div>\
+																<div class="grade">\
+																	<span>打分</span>\
+																	<div class="star-level">'+starHtml+'</div>\
+																</div>\
+																<p class="com-content">'+commentInfo.commen_content+'</p>\
+																<div class="pics">'+comPicHtml+'</div>\
+															</div>\
+															'+replyHtml+'\
+														</li>\
+													</ul>';
+					}
+				},
+				doCancelOrder: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+					
+					doAjax("Client", "order_cancel", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				doFinishOrder: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+					
+					doAjax("Client", "order_finish", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+							
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*投诉*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						var param = "order_id=" + api.pageParam.order_id;
+						openWin("user_complaint", param);			
+					});
+
+					/*联系卖家*/
+					document.querySelector("#btn_call").addEventListener("tap", function() {
+						if (thisPage.sellerTel != "") {
+							var tel_number = thisPage.sellerTel;
+							api.confirm({
+							    title: '提示',
+							    msg: '是否拨打' + tel_number,
+							    buttons: ['拨打', '取消']
+							}, function(ret, err) {
+								if (ret.buttonIndex == 1) {
+									api.call({
+									    type: 'tel',
+									    number: tel_number
+									});
+								}
+							});
+						}			
+					});
+
+					/*取消订单*/
+					mui("body").on("tap", ".btn_cancel", function() {
+						api.confirm({
+						    title: '提示',
+						    msg: '是否取消订单?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doCancelOrder(api.pageParam.order_id);
+							}
+						});
+					});
+
+					/*立即支付*/
+					document.querySelector(".btn_pay").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.order_id;
+						openWin("order_pay", param);		
+					});
+
+					/*确认服务*/
+					document.querySelector("#btn_confirm_service").addEventListener("tap", function() {
+						api.confirm({
+						    title: '提示',
+						    msg: '是否确认服务?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doFinishOrder(api.pageParam.order_id);	
+							}
+						});
+					});
+
+					/*评价*/
+					document.querySelector("#btn_comment").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.order_id;
+						openWin("user_evaluate", param);		
+					});
+
+					/*头像*/
+					document.getElementById("user_avatar").addEventListener("tap", function() {
+						var dataId = this.getAttribute("data-id");
+						api.openWin({
+						    name: 'user_center_'+dataId,
+						    url: './user_center_person.html',
+						    pageParam: {
+						        user_id: dataId
+						    }
+						});
+					});
+
+					/*商品详情*/
+					document.querySelector(".order-mid-info").addEventListener("tap", function() {
+						if (thisPage.order_is_rob == 2) return;
+
+						var param = "id=" + thisPage.order_id;
+						param += "&type_key=" + thisPage.order_type_key;
+						param += "&ser_type=" + thisPage.serve_type;
+						openWin("service_detail", param);
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

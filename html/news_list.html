@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.bot-control{border-top: 1px solid #eee;}
+			.bot-control .btn-item{width: 33.3%;}
+		</style>
+	</head>
+	<body class="color-white">
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">最新资讯</h1>
+		</div>
+		<!--<div class="top-tab-control news">
+			<div class="top-tab-item on">头条</div>
+			<div class="top-tab-item">党政新闻</div>
+		</div>-->
+		<div class="bot-control">
+			<div class="btn-item" data-value="1">招投标</div>
+			<div class="btn-item" data-value="2">政策新闻</div>
+			<div class="btn-item" data-value="3">公告</div>
+		</div>
+		<div class="mui-content has-bot-tab">
+			<ul id="newsList" class="news-list">
+				<!-- <li>
+					<div class="news-info">
+						<b class="news-title">资讯名称</b>
+						<strong class="news-con">广告的详细介绍广告的详细介绍广告的详细介绍详细介绍详细介绍</strong>
+						<span class="news-time">2016-11-30  &nbsp;时政新闻</span>
+					</div>
+				</li>
+				<li>
+					<div class="news-info">
+						<b class="news-title">资讯名称</b>
+						<strong class="news-con">广告的详细介绍广告的详细介绍广告的详细介绍详细介绍详细介绍</strong>
+						<span class="news-time">2016-11-30  &nbsp;时政新闻</span>
+					</div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				lat: "0", //经度
+				lng: "0", //纬度
+				init: function() {
+					pageControl.winBack();
+			
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "Lat=" + thisPage.lat;
+					urlParam += "&Lng=" + thisPage.lng;
+					urlParam += "&newsIndex=gd";
+					
+					doAjax("Client", "index", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				getData: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "Lat=" + thisPage.lat;
+					urlParam += "&Lng=" + thisPage.lng;
+					urlParam += "&newsIndex=gd";
+					urlParam += "&TypeId=" + id;
+					
+					doAjax("Client", "index", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				fillData: function(data) {
+					var newsList = data.news_list;
+					var newsHtml = "";
+					var typeStr = {
+						"1": "招投标",
+						"2": "政策新闻",
+						"3": "公告",
+					};
+					if (isset(newsList)) {
+						newsList.forEach(function(item) {
+							newsHtml += '<li data-id="'+item.Id+'">' +
+											'<div class="news-info">' +
+												'<b class="news-title">'+item.Title+'</b>' +
+												'<strong class="news-con">'+item.Content+'</strong>' +
+												'<span class="news-time">'+item.AddTime+'  &nbsp;'+typeStr[item.TypeId]+'</span>' +
+											'</div>' +
+										'</li>';
+						});
+						document.getElementById("newsList").innerHTML = newsHtml;
+					} else {
+						document.getElementById("newsList").innerHTML = '<div class="empty-list">没有内容</div>';
+					}
+				},
+				addEvent: function() {
+					/*切换类型*/
+					mui(".bot-control").on("tap", ".btn-item", function() {
+						if (this.classList.contains("warning")) return;
+
+						if (document.querySelector(".bot-control .warning")) {
+							document.querySelector(".bot-control .warning").classList.remove("warning");
+						}
+						this.classList.add("warning");
+
+						var data_value = this.getAttribute("data-value");
+						thisPage.getData(data_value);
+					});
+
+					/*资讯详情*/
+					mui("#newsList").on("tap", "li", function() {
+						var param = "data_id=" + this.getAttribute("data-id");
+						openWin("news_detail", param);
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+		<div class="mui-content">
+			<ul id="pageList" class="publish-list">
+				<!-- <li class="collect-item-goods">
+					<div class="goods-info">
+						<p class="goods-pic img-box" style="background: url(../img_temp/collect-goods.png);"></p>
+						<strong class="goods-name">iphone7数据线</strong>
+						<span class="remain">还剩 : &nbsp;<i>2</i>件</span>
+						<div class="price-info">
+							<div class="price-box">
+								<i class="m-icon">&yen;</i>
+								<span class="m-num">209</span>
+							</div>
+							<div class="old-price">原价 &yen; 300</div>
+						</div>
+						<div class="added-time">上架时间：2016年12月10日</div>
+					</div>
+					<div class="bot-row collect-list">
+						<span class="btn-cancel-collect warning">下架</span>
+					</div>
+				</li>
+				<li class="collect-item-goods">
+					<div class="top-row">
+						<b class="user-name">上门保洁</b>
+						<div class="added-time">上架时间：2016年12月10日</div>
+					</div>
+					<div class="bot-row collect-list">
+						<span class="btn-cancel-collect warning">下架</span>
+					</div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				pageType: "1", //已上架列表
+				init: function() {
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+
+			        /*初始化下拉刷新*/
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#eee",
+			            textColor: "#bbb",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData();
+			        });
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&status=" + thisPage.pageType;
+
+					doAjax("Client", "myRelease", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+
+						api.refreshHeaderLoadDone();
+					});
+				},
+				fillData: function(data) {
+					var dataList = data.list;
+					var pageHtml = "";
+					if (isset(dataList)) {
+						dataList.forEach(function(item) {
+							var priceHtml = "";
+							var picHtml = "";
+							var numHtml = "";
+							if (item.is_goods == 1) {
+								picHtml = '<p class="goods-pic img-box" style="background-image: url('+toAbsUrl(item.picture)+');"></p>';
+
+								if (item.type_key != "weigongyi") {
+									numHtml = '<span class="remain">还剩 : &nbsp;<i>'+item.num+'</i>'+item.unit+'</span>';
+								}
+
+								if (item.type_key == "taosihuo") {
+									priceHtml = '<div class="price-box">' +
+													'<i class="m-icon">&yen;</i>\n' +
+													'<span class="m-num">'+parseInt(item.discount_price)+'</span>' +
+												'</div>' +
+												'<div class="old-price">原价 &yen; '+parseInt(item.price)+'</div>';
+								}
+
+								if (item.type_key == "huanhuo") {
+									priceHtml = '<div class="price-box">' +
+													'<i class="m-icon">&yen;</i>\n' +
+													'<span class="m-num">'+parseInt(item.current_price)+'</span>' +
+												'</div>';
+								}
+							}
+
+							pageHtml += '<li class="collect-item-goods" data-type="'+item.is_goods+'" data-id="'+item.id+'" data-value="'+item.type_key+'">' +
+											'<div class="goods-info">' +
+												picHtml +
+												'<strong class="goods-name">'+item.title+'</strong>' +
+												numHtml +
+												'<div class="price-info">'+priceHtml+'</div>' +
+												'<div class="added-time">上架时间：'+item.up_time+'</div>' +
+											'</div>' +
+											'<div class="bot-row collect-list">' +
+												'<span class="btn-cancel-collect warning btn_down">下架</span>' +
+												'<span class="btn-cancel-collect btn_show">预览</span>' +
+											'</div>' +
+										'</li>';
+						});
+						document.getElementById("pageList").innerHTML = pageHtml;
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">空空如也</div>';
+					}
+
+					api.refreshHeaderLoadDone();
+				},
+				doDown: function(control) {
+					var id = control.getAttribute("data-id");
+					var is_goods = control.getAttribute("data-type");
+
+					// api.showProgress({
+					//     title: "加载中...",
+					//     text: "请稍候",
+					//     modal: false
+					// });
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&id=" + id;
+					urlParam += "&is_goods=" + is_goods;
+					urlParam += "&status=2"; //下架
+
+					doAjax("Client", "myReleaseDo", urlParam, "post", function(rs) {
+						//api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'user_publish',
+							    frameName: 'user_publish_down',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*下架*/
+						mui("#pageList").on("tap", ".btn_down", function() {
+							var parents = this.parentNode.parentNode;
+							api.confirm({
+							    title: '提示',
+							    msg: '是否确认下架',
+							    buttons: ['是', '否']
+							}, function(ret, err) {
+							 	if (ret.buttonIndex == 1) {
+							 		thisPage.doDown(parents);
+							 	}
+							});
+						});
+					/*编辑*/
+						mui("#pageList").on("tap", ".btn_show", function() {
+								var parents = this.parentNode.parentNode;
+								var isGoods = parents.getAttribute("data-type");
+								var type_value = parents.getAttribute("data-value");
+								var param = "data_id=" + parents.getAttribute("data-id");
+								if (isGoods == "1") {
+									switch (type_value) {
+										case "taosihuo":
+											openWin("user_publish_edit_goods_news", param);
+											break;
+										case "huanhuo":
+											openWin("user_publish_edit_exchange_news", param);
+											break;
+										case "weigongyi":
+											openWin("user_publish_edit_public_news", param);
+											break;
+										default:
+											break;
+									}
+								}
+						});
+					},
+			};
+		</script>
+	</body>
+</html>

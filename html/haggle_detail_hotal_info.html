@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">酒店详情</h1>
+		</div>
+		<div class="mui-content hotal-info">
+			<div class="top-info">
+				<div class="info-main">
+					<b id="hotel_name"><!-- 海外海纳川大酒店 --></b>
+					<strong id="hotel_tel"><!-- 酒店电话  0571-8898751 --></strong>
+				</div>
+				<span id="btn_call" class="btn-call"></span>
+			</div>
+			<div class="hotal-intro">
+				<h2>酒店介绍</h2>
+				<p id="hotel_intro"></p>
+			</div>
+			<div class="hotal-fac">
+				<h2>酒店设施</h2>
+				<ul id="fac_list" class="fac-list">
+					<!-- <li>免费wifi</li>
+					<li>免费停车场</li>
+					<li>健身房</li>
+					<li>咖啡厅</li>
+					<li>棋牌室</li>
+					<li>叫醒服务</li>
+					<li>洗衣服务</li>
+					<li>餐厅</li>
+					<li>电梯</li>
+					<li>行李寄存</li>
+					<li>早餐服务</li>
+					<li>送餐服务</li>
+					<li>24小时前台</li>
+					<li>商务中心</li>
+					<li>接待外宾</li> -->
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+
+					setTimeout(function() {
+			            thisPage.fillData();
+			        }, 350);
+				},
+				fillData: function() {
+					document.getElementById("hotel_name").innerText = api.pageParam.name;
+					document.getElementById("hotel_tel").innerText = '酒店电话 ' + api.pageParam.tel;
+					document.getElementById("hotel_intro").innerText = api.pageParam.desc;
+
+					/*酒店设施*/
+					var facilityArray = api.pageParam.sheshi.split("|");
+					var facilityHtml = "";
+					facilityArray.forEach(function(item) {
+						facilityHtml += '<li>'+item+'</li>';
+					});
+					document.getElementById("fac_list").innerHTML = facilityHtml;
+				},
+				addEvent: function() {
+					/*拨打酒店电话*/
+					document.querySelector("#btn_call").addEventListener("tap", function() {
+						var tel_number = api.pageParam.tel;
+						api.confirm({
+						    title: '提示',
+						    msg: '是否拨打' + tel_number,
+						    buttons: ['拨打', '取消']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								api.call({
+								    type: 'tel',
+								    number: tel_number
+								});
+							}
+						});			
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

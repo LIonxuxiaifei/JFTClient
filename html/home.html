@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.mui-slider .mui-segmented-control.mui-segmented-control-inverted~.mui-slider-group .mui-slider-item {
+				border-top: none;
+				border-bottom: none;
+			}
+			.mui-control-content .mui-loading {
+				margin-top: 35px;
+			}
+			.mui-control-content {
+				overflow-y: auto;
+			}
+			#slider .mui-slider-item .news-list {
+				height: 360px;
+			}
+			#slider .mui-slider-item .news-list li {
+				min-height: auto;
+			}
+			.mui-segmented-control {
+				font-size: 13px;
+			}
+			.mui-segmented-control.mui-segmented-control-inverted .mui-control-item.mui-active {
+				color: #00aaf0;
+			}
+			.mui-segmented-control.mui-segmented-control-inverted~.mui-slider-progress-bar {
+				background-color: #00aaf0;
+			}
+			.home-banner .mui-slider-item{position:relative;display:inline-block;padding-bottom:40%;overflow:hidden;height:100%;width:100%;}
+			.home-banner .mui-slider-item img{display:block;position:absolute;right:0;left:0;top:50%;transform: translateY(-50%);-webkit-transform: translateY(-50%);width:100%!important;max-height:inherit!important;max-width:inherit;}
+		</style>
+	</head>
+	<body class="home">
+		<!-- <div class="mui-bar mui-bar-nav blue">
+			<span class="btn-top-left iconfont icon-comiisdingwei"></span>
+			<span id="user_location" class="location-text">定位</span><i class="iconfont icon-xiasanjiao"></i>
+			<span class="btn-top-right iconfont icon-search"></span>
+		</div> -->
+		<div class="mui-content" style="padding-bottom: 30px;">
+			<div class="home-banner">
+				<div id="homeBanner" class="mui-slider bot-line">
+					<div id="img_array" class="mui-slider-group mui-slider-loop">
+						<div class="mui-slider-item mui-slider-item-duplicate">
+							<img src=""/>
+							<!-- <p class="img-box" style="background-image: url();"></p> -->
+						</div>
+						<!-- <div class="mui-slider-item">
+							<p class="img-box" style="background: url(../img_temp/home-banner-img.png);"></p>
+						</div>
+						<div class="mui-slider-item">
+							<p class="img-box" style="background: url(../img_temp/home-banner-img.png);"></p>
+						</div>
+						<div class="mui-slider-item">
+							<p class="img-box" style="background: url(../img_temp/home-banner-img.png);"></p>
+						</div>
+						<div class="mui-slider-item mui-slider-item-duplicate">
+							<p class="img-box" style="background: url(../img_temp/home-banner-img.png);"></p>
+						</div> -->
+					</div>
+					<div id="img_circle" class="mui-slider-indicator">
+						<!-- <div class="mui-indicator mui-active"></div>
+						<div class="mui-indicator"></div>
+						<div class="mui-indicator"></div> -->
+					</div>
+				</div>
+			</div>
+			<div class="home-nav-block">
+				<div class="mui-slider">
+				  	<div id="itemGroup" class="mui-slider-group">
+					    <div class="mui-slider-item">
+					    	<div class="inner-box">
+					    		<ul id="navList" class="nav-list">
+					    			<li>
+					    				<i class="img-box" style="background-image: url();"></i>
+					    				<span>&nbsp;</span>
+					    			</li>
+					    			<li>
+					    				<i class="img-box" style="background-image: url();"></i>
+					    				<span>&nbsp;</span>
+					    			</li>
+					    			<li>
+					    				<i class="img-box" style="background-image: url();"></i>
+					    				<span>&nbsp;</span>
+					    			</li>
+					    			<li>
+					    				<i class="img-box" style="background-image: url();"></i>
+					    				<span>&nbsp;</span>
+					    			</li>
+					    			<li>
+					    				<i class="img-box" style="background-image: url();"></i>
+					    				<span>&nbsp;</span>
+					    			</li>
+					    			<li>
+					    				<i class="img-box" style="background-image: url();"></i>
+					    				<span>&nbsp;</span>
+					    			</li>
+					    			<li>
+					    				<i class="img-box" style="background-image: url();"></i>
+					    				<span>&nbsp;</span>
+					    			</li>
+					    			<li>
+					    				<i class="img-box" style="background-image: url();"></i>
+					    				<span>&nbsp;</span>
+					    			</li>
+					    			<li>
+					    				<i class="img-box" style="background-image: url();"></i>
+					    				<span>&nbsp;</span>
+					    			</li>
+					    			<li>
+					    				<i class="img-box" style="background-image: url();"></i>
+					    				<span>&nbsp;</span>
+					    			</li>
+					    		</ul>
+					    	</div>
+					    </div>
+				  	</div>
+				  	<div id="indicatorGroup" class="mui-slider-indicator">
+						<div class="mui-indicator mui-active"></div>
+					</div>
+				</div>
+			</div>
+			<div id="homeModFour" class="home-item-block">
+				<!-- <div id="module_hotal" class="item img-box" style="background: url();">
+					<div class="info-block">
+						<b>讨价还价</b>
+						<span>低价入住</span>
+					</div>
+				</div>
+				<div id="module_tao" class="item img-box" style="background: url();">
+					<div class="info-block">
+						<b>淘私货</b>
+						<span>闲置转手</span>
+					</div>
+				</div>
+				<div id="module_exchange" class="item img-box" style="background: url();">
+					<div class="info-block">
+						<b>换货</b>
+						<span>以物换物</span>
+					</div>
+				</div>
+				<div id="module_public" class="item img-box" style="background: url();">
+					<div class="info-block">
+						<b>微公益</b>
+						<span>捐赠免费领</span>
+					</div>
+				</div> -->
+			</div>
+			<!-- 广告 -->
+			<div class="home-list ad">
+				<h2 class="list-top">
+					<span class="title">看广告赚钱</span>
+					<span id="more_ad" class="link-more">更多</span>
+				</h2>
+				<ul id="pageList" class="ad-list">
+					<!-- <li class="ad-item">
+						<div class="ad-img img-box" style="background: url(../img_temp/ad-img1.png);"></div>
+						<div class="ad-info">
+							<b class="ad-name">广告名称</b>
+							<strong class="ad-money">答题奖励: <i>&yen;0.3</i></strong>
+							<div class="ad-num"><i class="iconfont icon-caidan"></i><span>投放: 29999份</span></div>
+							<div class="ad-num"><i class="iconfont icon-yanjing"></i><span>剩余: 5000份</span></div>
+						</div>
+						<div class="other-info">
+							<span class="distance">0.50km</span>
+							<span class="click-num">点击 : &nbsp;3200次</span>
+						</div>
+					</li>
+					<li class="ad-item">
+						<div class="ad-img img-box" style="background: url(../img_temp/ad-im2.png);"></div>
+						<div class="ad-info">
+							<b class="ad-name">广告名称</b>
+							<strong class="ad-money">答题奖励: <i>&yen;0.3</i></strong>
+							<div class="ad-num"><i class="iconfont icon-caidan"></i><span>投放: 29999份</span></div>
+							<div class="ad-num"><i class="iconfont icon-yanjing"></i><span>剩余: 5000份</span></div>
+						</div>
+						<div class="other-info">
+							<span class="distance">0.50km</span>
+							<span class="click-num">点击 : &nbsp;3200次</span>
+						</div>
+					</li>
+					<li class="ad-item">
+						<div class="ad-img img-box" style="background: url(../img_temp/ad-img1.png);"></div>
+						<div class="ad-info">
+							<b class="ad-name">广告名称</b>
+							<strong class="ad-money">答题奖励: <i>&yen;0.3</i></strong>
+							<div class="ad-num"><i class="iconfont icon-caidan"></i><span>投放: 29999份</span></div>
+							<div class="ad-num"><i class="iconfont icon-yanjing"></i><span>剩余: 5000份</span></div>
+						</div>
+						<div class="other-info">
+							<span class="distance">0.50km</span>
+							<span class="click-num">点击 : &nbsp;3200次</span>
+						</div>
+					</li> -->
+				</ul>
+			</div>
+			<!-- 资讯 -->
+			<!-- <div id="slider" class="mui-slider" style="margin-top: 10px;">
+				<div id="sliderSegmentedControl" class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted" style="background-color: #fff;">
+					<a class="mui-control-item mui-active" href="#item1mobile" data-value="0">推荐</a>
+					<a class="mui-control-item" href="#item2mobile" data-value="1">招投标</a>
+					<a class="mui-control-item" href="#item3mobile" data-value="2">政策新闻</a>
+					<a class="mui-control-item" href="#item4mobile" data-value="3">公告</a>
+				</div>
+				<div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-3"></div>
+				<div class="mui-slider-group">
+					<div id="item1mobile" class="mui-slider-item mui-control-content mui-active">
+						<div class="mui-loading"><div class="mui-icon mui-spinner"></div></div>
+					</div>
+					<div id="item2mobile" class="mui-slider-item mui-control-content">
+						<div class="mui-loading"><div class="mui-icon mui-spinner"></div></div>
+					</div>
+					<div id="item3mobile" class="mui-slider-item mui-control-content">
+						<div class="mui-loading"><div class="mui-icon mui-spinner"></div></div>
+					</div>
+					<div id="item4mobile" class="mui-slider-item mui-control-content">
+						<div class="mui-loading"><div class="mui-icon mui-spinner"></div></div>
+					</div>
+				</div>
+			</div>
+			<div id="moreControl" class="btn-more"></div> -->
+			<!-- 资讯结束 -->
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var newsSwitch = 0; //资讯模块开关，1-开启，0-关闭，开启后需要解开资讯html注释
+			var select_location_lat, select_location_lon;
+			var upLock = 1;
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				lat: db2.getVal("location_lat"),
+				lon: db2.getVal("location_lon"),
+				newsPage: 1,
+				newsType: 0,
+				newContainer: document.getElementById("item1mobile"),
+				init: function() {
+					select_location_lat = db2.getVal("location_lat");
+					select_location_lon = db2.getVal("location_lon");
+
+					thisPage.requestData("history");
+						setTimeout(function() {
+									api.showProgress({
+									    title: "加载中...",
+									    text: "请稍候",
+									    modal: false
+									});
+			            thisPage.requestData("new");
+			        }, 350);
+
+			       	if (newsSwitch == 1) thisPage.getNewsList(0); //获取资讯列表
+
+					/*初始化下拉刷新*/
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#eee",
+			            textColor: "#bbb",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData("new");
+			        });
+				},
+				setLocation: function() {
+					var map = api.require('bMap');
+					map.getNameFromCoords({
+					    lon: db2.getVal("location_lon"),
+					    lat: db2.getVal("location_lat")
+					}, function(ret, err) {
+					    if (ret.status) {
+					        document.getElementById("user_location").innerText = ret.address;
+					    } else {
+					    	mui.toast("获取位置信息失败");
+					    }
+					});
+				},
+				changeAddrText: function(name) {
+					 document.getElementById("user_location").innerText = name;
+				},
+				requestData: function(dataFrom) {
+
+					window.cachename = api.frameName + api.winName + JSON.stringify(api.pageParam);
+
+					dataFrom = dataFrom || "all";
+
+					if (dataFrom != "new") {
+						db.getConfig(cachename, function(data) {
+							window.histroydata = data;
+							if (data != "" && (window.ajaxsuccess || 0) == 0) {
+								log("历史数据填充");
+								thisPage.fillData(JSON.parse(data));
+							}
+						});
+					}
+
+					if (dataFrom == "history") return false;
+
+					var urlParam = "Lat=" + thisPage.lat;
+					urlParam += "&Lng=" + thisPage.lon;
+					urlParam += "&Token=" + db2.getVal("user_token");
+
+					doAjax("Client", "index", urlParam, "post", function(rs) {
+						window.ajaxsuccess = 1;
+						api.hideProgress();
+						api.refreshHeaderLoadDone();
+						if (rs.ErrorCode == 1) {
+							var stringifyData = JSON.stringify(rs.Data);
+							if (window.histroydata != stringifyData || !rs.Data) {
+								db.setConfig(cachename, stringifyData);
+								thisPage.fillData(rs.Data);
+								log("使用最新数据渲染了");
+							} else {
+								log("与历史一致，不处理【" + window.histroydata + "】");
+							}
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				fillData: function(data) {
+					/*轮播图*/
+					var imgArray =  data.index_img;
+					var len = imgArray.length;
+					setTimeout(function() {
+						var img_array = document.getElementById("img_array");
+						var img_circle = document.getElementById("img_circle");
+						var img_html = "";
+						var circle_html = "";
+
+						var first_img = '<div class="mui-slider-item mui-slider-item-duplicate" data-target="'+imgArray[len-1].LinkTarget+'" data-type="'+imgArray[len-1].BannerCatType+'" data-id="'+imgArray[len-1].Linkid+'" data-value="'+imgArray[len-1].BannerTypeKey+'">' +
+											// '<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[len-1].Pic)+');"></p>' +
+												'<img src="'+toAbsUrl(imgArray[len-1].Pic)+'"/>'+
+										'</div>';
+						var last_img = 	'<div class="mui-slider-item mui-slider-item-duplicate" data-target="'+imgArray[0].LinkTarget+'" data-type="'+imgArray[0].BannerCatType+'" data-id="'+imgArray[0].Linkid+'" data-value="'+imgArray[0].BannerTypeKey+'">' +
+											// '<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[0].Pic)+');"></p>' +
+											'<img src="'+toAbsUrl(imgArray[0].Pic)+'"/>'+
+										'</div>';
+
+						for (var i = 0; i < len; i++) {
+							img_html += '<div class="mui-slider-item mui-slider-item-duplicate" data-target="'+imgArray[i].LinkTarget+'" data-type="'+imgArray[i].BannerCatType+'" data-id="'+imgArray[i].Linkid+'" data-value="'+imgArray[i].BannerTypeKey+'">' +
+											// '<p class="img-box" style="background-image: url('+toAbsUrl(imgArray[i].Pic)+');"></p>' +
+											'<img src="'+toAbsUrl(imgArray[i].Pic)+'"/>'+
+										'</div>';
+							if (i == 0) {
+								circle_html += '<div class="mui-indicator mui-active"></div>';
+							} else {
+								circle_html += '<div class="mui-indicator"></div>';
+							}
+						}
+
+						img_array.innerHTML = first_img + img_html + last_img;
+						img_circle.innerHTML = circle_html;
+
+						setTimeout(function(){
+							if (imgArray.length > 1) {
+								mui('#homeBanner').slider({interval: 5000});
+							}
+						}, 350);
+					}, 100);
+
+					/*服务模块*/
+					var navArray = data.catList;
+					var pageCount = Math.ceil(navArray.length / 10);
+
+					var pHtml = "";
+					var sHtml = "";
+					var maxLen = navArray.length;
+
+					navArray.forEach(function(item, i) {
+						sHtml += 	'<li data-value="'+item.cat_alias+'" data-type="'+item.cat_type+'">' +
+					    				'<i class="img-box" style="background-image: url('+toAbsUrl(item.cat_pic)+');"></i>' +
+					    				'<span>'+item.cat_name+'</span>' +
+				    				'</li>';
+
+				    	if ((i+1) % 10 == 0 || maxLen == i + 1){
+		                  	pHtml += 	'<div class="mui-slider-item">' +
+									    	'<div class="inner-box">' +
+									    		'<ul class="nav-list">' +
+									    		sHtml +
+									    		'</ul>' +
+									    	'</div>' +
+									    '</div>';
+
+		                  	sHtml = '';
+		                }
+					});
+
+					document.getElementById("itemGroup").innerHTML = pHtml;
+
+					var indicatorHtml = "";
+					for (var i = 0; i < pageCount; i++) {
+						indicatorHtml += '<div class="mui-indicator '+(i==0?'mui-active':'')+'"></div>\n';
+					}
+					document.getElementById("indicatorGroup").innerHTML = indicatorHtml;
+
+					/*四大版块*/
+					document.getElementById("homeModFour").innerHTML = "";
+					var modFour = data.index_four;
+					modFour.forEach(function(el) {
+						var item = document.createElement("div");
+						item.setAttribute("class", "item img-box");
+						item.setAttribute("data-type", el.cat_alias);
+						item.style.backgroundImage = 'url('+toAbsUrl(el.cat_pic)+')';
+						document.getElementById("homeModFour").appendChild(item);
+					});
+
+					/*广告*/
+					var lists = data.lists;
+					var lists_html = "";
+
+					if (isset(lists)) {
+						for (var i = 0; i < lists.length; i++) {
+							lists_html += '<li class="ad-item" data-id="'+lists[i].AdId+'">' +
+											'<div class="ad-img img-box" style="background-image: url('+toAbsUrl(lists[i].AdPic[0])+');"></div>' +
+											'<div class="ad-info">' +
+												'<b class="ad-name">'+lists[i].AdName+'</b>' +
+												'<strong class="ad-money">答题奖励: <i>&yen;'+lists[i].ReturnMoney+'</i></strong>' +
+												'<div class="ad-num"><i class="iconfont icon-caidan"></i><span>投放: '+lists[i].DeliveryNum+'份</span></div>' +
+												'<div class="ad-num"><i class="iconfont icon-yanjing"></i><span>剩余: '+lists[i].SurplusNum+'份</span></div>' +
+											'</div>' +
+											'<div class="other-info">' +
+												'<span class="distance">'+lists[i].juli+'km</span>' +
+												'<span class="click-num">点击 : &nbsp;'+lists[i].AdClick+'次</span>' +
+											'</div>' +
+								 		'</li>';
+						}
+						document.getElementById("pageList").innerHTML = lists_html;
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">没有内容</div>';
+					}
+				},
+				getNewsList: function(type) {
+					var urlParam = "TypeId=" + type;
+					urlParam += "&page=1";
+
+					doAjax("Client", "article", urlParam, "post", function(rs) {
+						//api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillNewsList(rs.Data);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				fillNewsList: function(data) {
+					document.getElementById("moreControl").innerHTML = "";
+					upLock = 1;
+
+					var newsList = data.news_list;
+					var newsHtml = "";
+					var typeStr = {
+						"1": "招投标",
+						"2": "政策新闻",
+						"3": "公告",
+					};
+					if (isset(newsList)) {
+						newsList.forEach(function(item) {
+							newsHtml += '<li data-id="'+item.Id+'">' +
+											'<div class="news-info">' +
+												'<b class="news-title">'+item.Title+'</b>' +
+												'<strong class="news-con">'+item.Content+'</strong>' +
+												'<span class="news-time">'+item.AddTime+'  &nbsp;'+typeStr[item.TypeId]+'</span>' +
+											'</div>' +
+										'</li>';
+						});
+						thisPage.newContainer.innerHTML = '<ul class="news-list">'+newsHtml+'</ul>';
+					} else {
+						thisPage.newContainer.innerHTML = '<div class="empty-list">没有内容</div>';
+					}
+				},
+				getMoreNews: function() {
+					if (upLock == 0) return;
+
+					upLock = 0;
+
+					thisPage.newsPage ++;
+
+					document.getElementById("moreControl").innerHTML = '<div class="mui-icon mui-spinner"></div>';
+
+					var urlParam = "TypeId=" + thisPage.newsType;
+					urlParam += "&page=" + thisPage.newsPage;
+
+					doAjax("Client", "article", urlParam, "post", function(rs) {
+						if (rs.ErrorCode == 1) {
+							var typeStr = {
+								"1": "招投标",
+								"2": "政策新闻",
+								"3": "公告",
+							};
+							var newsList = rs.Data.news_list;
+							if (isset(newsList)) {
+								document.getElementById("moreControl").innerHTML = "";
+								upLock = 1;
+
+								newsList.forEach(function(el) {
+									var item = document.createElement("li");
+									item.setAttribute("data-id", el.Id);
+									item.innerHTML = 	'<div class="news-info">' +
+															'<b class="news-title">'+el.Title+'</b>' +
+															'<strong class="news-con">'+el.Content+'</strong>' +
+															'<span class="news-time">'+el.AddTime+'  &nbsp;'+typeStr[el.TypeId]+'</span>' +
+														'</div>';
+
+									thisPage.newContainer.querySelector(".news-list").appendChild(item);
+								});
+							} else {
+								document.getElementById("moreControl").innerHTML = "我是有底线的";
+								setTimeout(function() {
+									document.getElementById("moreControl").innerHTML = "";
+									upLock = 1;
+								}, 2000);
+							}
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				addEvent: function() {
+					api.addEventListener({
+						name:'online'
+					}, function(ret, err){
+							thisPage.init();
+					});
+					/*轮播图链接*/
+					mui("#img_array").on("tap", ".mui-slider-item", function() {
+						var dataType = this.getAttribute("data-type"),
+							dataValue = this.getAttribute("data-value"),
+							dataId = this.getAttribute("data-id"),
+							dataTarget = this.getAttribute("data-target");
+						//alert(dataType+"-"+dataValue+"-"+dataId+"-"+dataTarget);
+						var param = "";
+						switch (dataTarget) {
+							case "ad":
+								param += "ad_id=" + dataId;
+								openWin("watch_ad_detail", param);
+								break;
+							case "article":
+								param += "data_id=" + dataId;
+								openWin("news_detail", param);
+								break;
+							case "serve":
+								param += "id=" + dataId;
+								param += "&type_key=" + dataValue;
+								param += "&ser_type=" + dataType;
+								openWin("service_detail", param);
+								break;
+							case "goodstao":
+								param += "page_id=" + dataId;
+								openWin("list_tao_detail", param);
+								break;
+							case "goodshuan":
+								param += "page_id=" + dataId;
+								openWin("list_exchange_detail", param);
+								break;
+							case "goodswei":
+								param += "page_id=" + dataId;
+								openWin("list_public_detail", param);
+								break;
+							case "taojiahuanjia":
+								param += "hotal_id=" + dataId;
+								openWin("haggle_detail", param);
+								break;
+							default:
+								break;
+						}
+					});
+
+					/*服务模块链接*/
+					mui("#itemGroup").on("tap", "li", function() {
+						var param = "mode_type=" + this.getAttribute("data-type");
+						param += "&type_value=" + this.getAttribute("data-value");
+						param += "&type_name=" + this.querySelector("span").innerText;
+						openWin("service_list", param);
+					});
+
+					/*4个版块*/
+					mui("#homeModFour").on("tap", ".item", function() {
+						var dataType = this.getAttribute("data-type");
+						switch (dataType) {
+							case "weigongyi":
+								openWin("list_public");
+								break;
+							case "taosihuo":
+								openWin("list_tao");
+								break;
+							case "huanhuo":
+								openWin("list_exchange");
+								break;
+							case "taojiahuanjia":
+								openWin("haggle_home");
+								break;
+							default:
+								break;
+						}
+					});
+
+					/*更多广告*/
+					document.querySelector("#more_ad").addEventListener("tap", function() {
+						openWin("watch_ad_list");
+					});
+
+					/*广告详情*/
+					mui("#pageList").on("tap", "li", function() {
+						var param = "ad_id=" + this.getAttribute("data-id");
+						openWin("watch_ad_detail", param);
+					});
+
+					/*资讯*/
+					if (newsSwitch == 1) {
+						api.addEventListener({ //上拉加载
+						    name:'scrolltobottom',
+						    extra:{
+						        threshold:0
+						    }
+						}, function(ret, err){
+						    thisPage.getMoreNews();
+						});
+					}
+
+					mui("#slider").on("tap", "li", function() { //资讯详情
+						var param = "data_id=" + this.getAttribute("data-id");
+						openWin("news_detail", param);
+					});
+				}
+			};
+
+			mui.init({
+				swipeBack: false
+			});
+			(function($) {
+				if (newsSwitch == 0) return;
+
+				var type = 0;
+				$('.mui-scroll-wrapper').scroll({
+					indicators: true //是否显示滚动条
+				});
+				document.getElementById('slider').addEventListener('slide', function(e) {
+					thisPage.newsType = e.detail.slideNumber;
+					thisPage.newContainer = document.getElementById("item"+(e.detail.slideNumber+1)+"mobile");
+					thisPage.getNewsList(e.detail.slideNumber);
+				});
+				var sliderSegmentedControl = document.getElementById('sliderSegmentedControl');
+				$('.mui-input-group').on('change', 'input', function() {
+					if (this.checked) {
+						sliderSegmentedControl.className = 'mui-slider-indicator mui-segmented-control mui-segmented-control-inverted mui-segmented-control-' + this.value;
+						//force repaint
+						sliderProgressBar.setAttribute('style', sliderProgressBar.getAttribute('style'));
+					}
+				});
+			})(mui);
+		</script>
+	</body>
+</html>

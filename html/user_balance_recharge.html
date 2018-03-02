@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">余额充值</h1>
+		</div>
+		<div id="setPayWord" class="action-sheet-control pay-alert" style="display: none;">
+			<div class="dark"></div>
+			<div class="alert-box">
+				<div class="box-contant">
+					<input type="number" placeholder="请设置支付密码" />
+				</div>
+				<div class="box-btns double">
+					<div class="item btn-cancel">取消</div>
+					<div id="btnSet" class="item warning">确定</div>
+				</div>
+			</div>
+		</div>
+		<div id="putPayWord" class="action-sheet-control pay-alert" style="display: none;">
+			<div class="dark"></div>
+			<div class="alert-box">
+				<div class="box-contant">
+					<input type="number" placeholder="请输入支付密码" />
+				</div>
+				<div class="box-btns double">
+					<div class="item btn-cancel">取消</div>
+					<div id="btnSubmit" class="item warning">确定</div>
+				</div>
+			</div>
+		</div>
+		<div class="mui-content recharge money">
+			<div class="expla">充值后可使用余额进行交易支付</div>
+			<div class="input-money">
+				<i class="m-icon">&yen;</i>
+				<input id="recharge_number" type="number" placeholder="请输入充值金额" />
+			</div>
+			<div class="headline">请选择支付方式</div>
+			<div class="input-radios">
+				<div class="radio-item mui-radio mui-right">
+					<span class="pay-icon iconfont icon-alipay"></span>
+					<label class="pay-name" for="alipay">支付宝</label>
+					<input id="alipay" name="pay" value="alipay" type="radio" checked="checked" />
+				</div>
+				<div class="radio-item mui-radio mui-right">
+					<span class="pay-icon iconfont icon-wechat"></span>
+					<label class="pay-name" for="wechat">微信</label>
+					<input id="wechat" name="pay" value="wechat" type="radio" />
+				</div>
+			</div>
+			<div class="btn-submit invalid">立即充值</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				payType: "1",
+				init: function() {
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".btn-submit"));
+				},
+				toPayAli: function(info) {
+					var aliPayPlus = api.require('aliPayPlus');
+
+					//alert(info);
+
+					aliPayPlus.payOrder({
+					    orderInfo: info
+					}, function(ret, err) {
+						//广播用户信息修改事件（余额）
+						api.sendEvent({
+	                        name: 'AlertUserInfo'
+	                    });
+	                    //更新流水记录
+	                    api.execScript({
+						    name: 'user_balance',
+						    frameName: 'user_balance_sub',
+						    script: 'thisPage.requestData("new");'
+						});
+
+						document.getElementById("recharge_number").value = "";
+						document.querySelector(".btn-submit").classList.add("invalid");
+						
+						
+						var result_msg = '';
+						if (ret.code == "9000") {
+							result_msg = '支付成功';
+						} else {
+							result_msg = ret.code;
+						}
+					    api.alert({
+					        title: '支付结果',
+					        msg: result_msg,
+					        buttons: ['确定']
+					    });
+					});
+				},
+				toPayWx: function(info) {
+					var wxPay = api.require('wxPay');
+
+					wxPay.payOrder({
+					    apiKey: info.appid,
+					    orderId: info.prepayid,
+					    mchId: info.partnerid,
+					    nonceStr: info.noncestr,
+					    timeStamp: info.timestamp,
+					    package: 'Sign=WXPay',
+					    sign: info.sign
+					}, function(ret, err) {
+					    if (ret.status) { //支付成功
+					        //广播用户信息修改事件（余额）
+							api.sendEvent({
+		                        name: 'AlertUserInfo'
+		                    });
+		                    //更新流水记录
+		                    api.execScript({
+							    name: 'user_balance',
+							    frameName: 'user_balance_sub',
+							    script: 'thisPage.requestData("new");'
+							});
+
+							document.getElementById("recharge_number").value = "";
+							document.querySelector(".btn-submit").classList.add("invalid");
+
+							api.alert({
+						        title: '支付结果',
+						        msg: '支付成功',
+						        buttons: ['确定']
+						    });
+					    } else {
+					    	var emsg = '支付失败';
+					        if (err.code == 1) {
+					        	emsg = '支付失败';
+					        } else if (err.code == -2) {
+					        	emsg = '支付取消';
+					        } else if (err.code == -1) {
+					        	emsg = '未知错误';
+					        }
+
+					        api.alert({
+						        title: '支付结果',
+						        msg: emsg,
+						        buttons: ['确定']
+						    });
+					    }
+					});
+				},
+				toPay: function(info) {
+					switch (thisPage.payType) {
+						case "1":
+							thisPage.toPayAli(info);
+							break;
+						case "3":
+							thisPage.toPayWx(info);
+							break;
+						default:
+							break;
+					}
+				},
+				doPay: function() {
+					var recharge_number = document.getElementById("recharge_number").value;
+
+					if (recharge_number == 0) {
+						PubApp.toast("充值金额不能为0");
+						return false;
+					}
+
+					
+					api.showProgress({
+					    title: "正在发起支付...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "Token=" + db2.getVal("user_token");
+					urlParam += "&ChangeMoney=" + recharge_number;
+					urlParam += "&pay_type=" + thisPage.payType;
+
+					doAjax("Pay", "user_pay_result", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							//alert(rs.data.sign);
+
+							if (thisPage.payType == "1") {
+								thisPage.toPay(rs.data.sign);
+							} else {
+								thisPage.toPay(rs.data.app_response);
+							}
+
+							//关闭当前页面
+							// setTimeout(function() {
+							// 	api.closeWin();
+							// }, 350);
+						} else {
+							PubApp.toast(rs.msg);
+						}
+					});
+				},
+				addEvent: function() {
+					/*立即充值*/
+					document.querySelector(".btn-submit").addEventListener("tap", function() {
+						if (!this.classList.contains("invalid")) {
+							thisPage.doPay();
+						}
+					});
+
+					/*取消*/
+					mui("body").on("tap", ".btn-cancel", function() {
+						document.getElementById("setPayWord").style.display = "none";
+					});
+
+					/*支付方式选择*/
+					mui(".mui-content").on("change",".mui-radio",function(){
+						var radioValue = this.querySelector("input").value;
+						if (radioValue == "alipay") { thisPage.payType = "1"; }
+						if (radioValue == "wechat") { thisPage.payType = "3"; }
+					});
+
+					/*监听提现金额是否为空*/
+					document.querySelector("#recharge_number").addEventListener("input", function() {
+						if (this.value.length > 0) {
+							document.querySelector(".btn-submit").classList.remove("invalid");
+						} else {
+							document.querySelector(".btn-submit").classList.add("invalid");
+						}
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

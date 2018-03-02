@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../css/mui.picker.css" />
+		<link rel="stylesheet" href="../css/mui.poppicker.css" />
+		<link rel="stylesheet" href="../css/mui.dtpicker.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">确认下单</h1>
+		</div>
+		<div class="bot-control">
+			<div class="btn-item total">
+				<span class="total-text">合计 : <i id="page_total">0.00</i>元</span>
+			</div>
+			<div id="btn_submit_order" class="btn-item warning">提交订单</div>
+		</div>
+		<div class="mui-content has-bot-tab-big apply-free service-orders">
+			<div class="collect-item-goods">
+				<div class="top-row">
+					<div id="user_avatar" class="user-avatar img-box" style="background-image: url();"></div>
+					<b id="user_name" class="user-name"><!-- 李果果 --></b>
+				</div>
+				<div class="goods-info">
+					<p id="service_pic" class="goods-pic img-box" style="background-image: url();"></p>
+					<strong id="service_name" class="goods-name"><!-- 上门保洁 -->&nbsp;</strong>
+					<div class="price-info">
+						<div class="price-box">
+							<!-- <i class="m-icon">&yen;</i>
+							<span class="m-num">200</span>
+							<i class="m-icon">/天</i> -->
+						</div>
+					</div>
+				</div>
+				<div class="publish-edit">
+					<div class="publish-item">
+						<b class="item-name">需求量</b>
+						<div class="select-number">
+							<i class="iconfont icon-jian"></i>
+							<!-- <span id="g_num" class="s-num">1</span> -->
+							<input id="g_num" type="number" value="1" />
+							<i class="iconfont icon-jia"></i>
+						</div>
+					</div>
+					<div id="service_time" class="publish-item select" style="display: none;">
+						<b class="item-name">服务时间</b>
+						<span class="item-text">请选择服务时间</span>
+						<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+					</div>
+					<div id="service_way" class="publish-item select" style="display: none;">
+						<b class="item-name">服务方式</b>
+						<span class="item-text">请选择服务方式</span>
+						<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+					</div>
+					<div id="select_service_addr" class="publish-item select addr">
+						<b class="item-name">服务地址</b>
+						<div id="serviceAddr">
+							<span class="item-text">请选择地址</span>
+							<!-- <div class="addr-text">
+								<span>浙江省杭州市拱墅区丰登街341</span>
+								<span>某某小区20栋1单元302</span>
+							</div> -->
+						</div>
+						<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+					</div>
+					<div id="ipt_service_addr" class="publish-item inpt ipt-addr">
+						<b class="item-name">详细地址</b>
+						<input type="text" placeholder="输入详细地址" />
+					</div>
+					<div id="select_start_addr" class="publish-item select addr">
+						<b class="item-name">出发地址</b>
+						<div id="startAddr">
+							<span class="item-text">请选择地址</span>
+							<!-- <div class="addr-text">
+								<span>浙江省杭州市拱墅区丰登街341</span>
+								<span>某某小区20栋1单元302</span>
+							</div> -->
+						</div>
+						<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+					</div>
+					<div id="ipt_start_addr" class="publish-item inpt ipt-addr">
+						<b class="item-name">详细地址</b>
+						<input type="text" placeholder="输入详细地址" />
+					</div>
+					<div id="select_end_addr" class="publish-item select addr">
+						<b class="item-name">结束地址</b>
+						<div id="endAddr">
+							<span class="item-text">请选择地址</span>
+							<!-- <div class="addr-text">
+								<span>浙江省杭州市拱墅区丰登街341</span>
+								<span>某某小区20栋1单元302</span>
+							</div> -->
+						</div>
+						<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+					</div>
+					<div id="ipt_end_addr" class="publish-item inpt ipt-addr">
+						<b class="item-name">详细地址</b>
+						<input type="text" placeholder="输入详细地址" />
+					</div>
+					<div class="publish-item inpt">
+						<b class="item-name">联系方式</b>
+						<input id="user_tel" type="number" placeholder="请输入联系方式" />
+					</div>
+					<div class="publish-item inpt">
+						<b class="item-name">姓名</b>
+						<input id="user_name_ipt" type="text" placeholder="请输入姓名(选填)" />
+					</div>
+					<div class="publish-item inpt">
+						<b class="item-name">留言</b>
+						<input id="user_msg" type="text" placeholder="请输入留言(选填)" />
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.picker.js" ></script>
+		<script type="text/javascript" src="../js/mui.poppicker.js" ></script>
+		<script type="text/javascript" src="../js/mui.dtpicker.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+				thisPage.setPhone();
+			};
+			var thisPage = {
+				priceSingle: "", //单价
+				serviceWay: 0, //服务方式 默认0
+				serviceTime: {
+					isEmpty: 1,
+					time_ymd: "",
+					time_h: "",
+				},
+				serviceAddr: {
+					isVisible: 0,
+					isEmpty: 1,
+					params: {
+						addrName: "",
+			        	addrDetail: "",
+			        	lat: "0",
+			        	lng: "0"
+					},
+					container: document.getElementById("select_service_addr"),
+					addrIpt: document.getElementById("ipt_service_addr")
+				},
+				startAddr: {
+					isVisible: 0,
+					isEmpty: 1,
+					params: {
+						addrName: "",
+			        	addrDetail: "",
+			        	lat: "0",
+			        	lng: "0"
+					},
+					container: document.getElementById("select_start_addr"),
+					addrIpt: document.getElementById("ipt_start_addr")
+				},
+				endAddr: {
+					isVisible: 0,
+					isEmpty: 1,
+					params: {
+						addrName: "",
+			        	addrDetail: "",
+			        	lat: "0",
+			        	lng: "0"
+					},
+					container: document.getElementById("select_end_addr"),
+					addrIpt: document.getElementById("ipt_end_addr")
+				},
+				init: function() {
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".bot-control"));
+
+					/*初始化服务方式选择器*/
+					window.servicePicker = new mui.PopPicker();
+					window.servicePicker.setData([{
+						value: 1,
+						text: "对方上门"
+					}, {
+						value: 2,
+						text: "去店里"
+					}]);
+
+					thisPage.requestData("history");
+					setTimeout(function() {
+			            thisPage.requestData("new");
+			        }, 350);
+
+					/*初始化下拉刷新*/
+			        /*api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#eee",
+			            textColor: "#bbb",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData("new");
+			        });*/
+				},
+				requestData: function(dataFrom) {
+					window.cachename = api.frameName + api.winName + JSON.stringify(api.pageParam) + db2.getVal("user_token");
+
+					dataFrom = dataFrom || "all";
+
+					if (dataFrom != "new") {
+						db.getConfig(cachename, function(data) {
+							window.histroydata = data;
+							if (data != "" && (window.ajaxsuccess || 0) == 0) {
+								log("历史数据填充");
+								thisPage.fillData(JSON.parse(data));
+							}
+						});
+					}
+
+					if (dataFrom == "history") return false;
+
+					/*Ajax请求*/
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&id=" + api.pageParam.data_id;
+
+					doAjax("Client", "orderServeInfo", urlParam, "post", function(rs) {
+						window.ajaxsuccess = 1;
+						api.hideProgress();
+						if (rs.code == 1) {
+							var stringifyData = JSON.stringify(rs.data);
+							if (window.histroydata != stringifyData || !rs.data) {
+								db.setConfig(cachename, stringifyData);
+								thisPage.fillData(rs.data);
+								log("使用最新数据渲染了");
+							} else {
+								log("与历史一致，不处理【" + window.histroydata + "】");
+							}
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+
+						//api.refreshHeaderLoadDone();
+					});
+				},
+				setPhone:function(){
+						var urlParam = "token=" + db2.getVal("user_token");
+						doAjax("Member", "getUserTel", urlParam, "post", function(rs) {
+							if (rs.ErrorCode == 1) {
+										document.getElementById('user_tel').value = rs.Data;
+							} else {
+
+							}
+						});
+				},
+				fillData: function(data) {
+					var orderInfo = data.info;
+					//alert(JSON.stringify(orderInfo));
+					//用户信息（头像，昵称）
+					document.getElementById("user_avatar").style.backgroundImage = 'url('+toAbsUrl(orderInfo.UserHead)+')';
+					document.getElementById("user_name").innerText = orderInfo.NickName;
+					//服务信息（图片，名称，价格）
+					document.getElementById("service_pic").style.backgroundImage = 'url('+toAbsUrl(orderInfo.ssupply_picture)+')';
+					document.getElementById("service_name").innerText = orderInfo.ssupply_name;
+					document.querySelector(".price-box").innerHTML = 	'<i class="m-icon">&yen;</i>' +
+																		'<span class="m-num">'+parseInt(orderInfo.ssupply_price)+'</span>' +
+																		'<i class="m-icon">/'+orderInfo.ssupply_unit+'</i>';
+					//合计（默认）
+					thisPage.priceSingle = orderInfo.ssupply_price;
+					document.getElementById("page_total").innerText = orderInfo.ssupply_price;
+
+					//默认信息
+					if (orderInfo.addressInfo.adrress) {
+						document.getElementById("user_tel").value = orderInfo.addressInfo.Tel;
+						document.getElementById("user_name_ipt").value = orderInfo.addressInfo.Consignee;
+					}
+
+					//初始化服务时间选择器
+					window.dtpicker = new mui.DtPicker({
+					    type: "hour",
+					    beginDate: new Date(),
+					    "customData": {
+					       	"h": orderInfo.time_come
+					    }
+					});
+
+					//下单类型
+					var pageType = api.pageParam.ser_type;
+					switch (pageType) {
+						case "1":
+							document.getElementById("service_time").style.display = 'block';
+
+							thisPage.serviceAddr.isVisible = 1;
+							thisPage.serviceAddr.container.style.display = 'block';
+							thisPage.serviceAddr.addrIpt.style.display = 'block';
+							break;
+						case "2":
+							break;
+						case "3":
+							document.getElementById("service_time").style.display = 'block';
+
+							thisPage.startAddr.isVisible = 1;
+							thisPage.endAddr.isVisible = 1;
+
+							thisPage.startAddr.container.style.display = 'block';
+							thisPage.startAddr.addrIpt.style.display = 'block';
+
+							thisPage.endAddr.container.style.display = 'block';
+							thisPage.endAddr.addrIpt.style.display = 'block';
+							break;
+						case "4":
+							document.getElementById("service_time").style.display = 'block';
+							document.getElementById("service_way").style.display = 'block';
+
+							thisPage.serviceAddr.isVisible = 1;
+							thisPage.serviceAddr.container.style.display = 'block';
+							thisPage.serviceAddr.addrIpt.style.display = 'block';
+							break;
+						default:
+							break;
+					}
+				},
+				submit: function() {
+					var user_name = document.getElementById("user_name_ipt").value,
+						user_tel = document.getElementById("user_tel").value,
+						user_msg = document.getElementById("user_msg").value;
+
+					if (document.getElementById("g_num").value == "" || document.getElementById("g_num").value == 0) {
+						mui.toast("数量必须为大于0的数字");
+						return false;
+					}
+
+					if (thisPage.serviceAddr.isVisible && thisPage.serviceAddr.isEmpty) {
+						PubApp.toast("请选择服务地址");
+						return false;
+					}
+					if (thisPage.startAddr.isVisible && thisPage.startAddr.isEmpty) {
+						PubApp.toast("请选择出发地址");
+						return false;
+					}
+					if (thisPage.endAddr.isVisible && thisPage.endAddr.isEmpty) {
+						PubApp.toast("请选择结束地址");
+						return false;
+					}
+
+					// if (user_name == "") {
+					// 	PubApp.toast("请输入姓名");
+					// 	return false;
+					// }
+
+					var rule = new RegExp(/^(1[0-9]{2})+\d{8}$/i);
+					if (!rule.test(user_tel)) {
+						PubApp.toast("手机号不正确");
+						return false;
+					}
+
+					api.showProgress({
+					    title: "提交中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&id=" + api.pageParam.data_id;
+					urlParam += "&order_num=" + document.getElementById("g_num").value;
+					urlParam += "&order_truename=" + user_name;
+					urlParam += "&order_phone=" + user_tel;
+					urlParam += "&order_message=" + user_msg;
+
+					var pageType = api.pageParam.ser_type;
+					switch (pageType) {
+						case "1":
+							urlParam += "&dateYMD=" + thisPage.serviceTime.time_ymd;
+							urlParam += "&timeHI=" + thisPage.serviceTime.time_h;
+
+							urlParam += "&order_address=" + thisPage.serviceAddr.addrIpt.querySelector("input").value;
+							urlParam += "&order_last_login_lat=" + thisPage.serviceAddr.params.lat;
+							urlParam += "&order_last_login_lon=" + thisPage.serviceAddr.params.lng;
+							break;
+						case "2":
+							break;
+						case "3":
+							urlParam += "&dateYMD=" + thisPage.serviceTime.time_ymd;
+							urlParam += "&timeHI=" + thisPage.serviceTime.time_h;
+
+							urlParam += "&order_address=" + thisPage.startAddr.addrIpt.querySelector("input").value;
+							urlParam += "&order_start_login_lat=" + thisPage.startAddr.params.lat;
+							urlParam += "&order_start_login_lon=" + thisPage.startAddr.params.lng;
+
+							urlParam += "&order_address2=" + thisPage.endAddr.addrIpt.querySelector("input").value;
+							urlParam += "&order_last_login_lat=" + thisPage.endAddr.params.lat;
+							urlParam += "&order_last_login_lon=" + thisPage.endAddr.params.lng;
+							break;
+						case "4":
+							urlParam += "&dateYMD=" + thisPage.serviceTime.time_ymd;
+							urlParam += "&timeHI=" + thisPage.serviceTime.time_h;
+
+							urlParam += "&order_serve_way=" + thisPage.serviceWay;
+
+							urlParam += "&order_address=" + thisPage.serviceAddr.addrIpt.querySelector("input").value;
+							urlParam += "&order_last_login_lat=" + thisPage.serviceAddr.params.lat;
+							urlParam += "&order_last_login_lon=" + thisPage.serviceAddr.params.lng;
+							break;
+						default:
+							break;
+					}
+
+					doAjax("Client", "serveOrder", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							api.sendEvent({
+							    name: "gotoOrderList"
+							});
+
+							setTimeout(function() {
+								api.closeToWin({
+								    name: "root"
+								});
+							}, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*提交订单*/
+					document.querySelector("#btn_submit_order").addEventListener("tap", function() {
+						thisPage.submit();
+					});
+
+					/*需求量加减*/
+					var countNum = document.getElementById("g_num");
+					var pageTotal = document.getElementById("page_total");
+					countNum.addEventListener("input", function() {
+						var currentPrice = (thisPage.priceSingle * this.value).toFixed(2);
+						pageTotal.innerText = currentPrice;
+					});
+					document.querySelector(".icon-jia").addEventListener("tap", function() {
+						countNum.value ++;
+						pageTotal.innerText = (thisPage.priceSingle * countNum.value).toFixed(2);
+					});
+					document.querySelector(".icon-jian").addEventListener("tap", function() {
+						if (countNum.value > 1) {
+							countNum.value --;
+							pageTotal.innerText = (thisPage.priceSingle * countNum.value).toFixed(2);
+						}
+					});
+
+					/*服务时间选择*/
+					document.querySelector("#service_time").addEventListener("tap", function() {
+						window.dtpicker.show(function(selectItems) {
+							thisPage.serviceTime.isEmpty = 0;
+							thisPage.serviceTime.time_ymd = selectItems.y.text+"-"+selectItems.m.text+"-"+selectItems.d.text;
+							thisPage.serviceTime.time_h = selectItems.h.text;
+
+							document.querySelector("#service_time span").style.color = '#333';
+							document.querySelector("#service_time span").innerText = selectItems.text;
+						});
+					});
+
+					/*服务方式选择*/
+					document.querySelector("#service_way").addEventListener("tap", function() {
+						window.servicePicker.show(function(selectItems) {
+							thisPage.serviceWay = selectItems[0].value;
+
+							document.querySelector("#service_way span").style.color = '#333';
+							document.querySelector("#service_way span").innerText = selectItems[0].text;
+						});
+					});
+
+					/*选择服务地址*/
+					document.querySelector("#select_service_addr").addEventListener("tap", function() {
+						var param = "addr_type=serviceAddr";
+						openWin("map_addr", param);
+						return false;
+					});
+
+					/*选择出发地址*/
+					document.querySelector("#select_start_addr").addEventListener("tap", function() {
+						var param = "addr_type=startAddr";
+						openWin("map_addr", param);
+						return false;
+					});
+
+					/*选择结束地址*/
+					document.querySelector("#select_end_addr").addEventListener("tap", function() {
+						var param = "addr_type=endAddr";
+						openWin("map_addr", param);
+						return false;
+					});
+
+					/*监听地址选择事件*/
+					api.addEventListener({
+					    name: "mapSelectAddress"
+					}, function(ret, err) {
+						thisPage[ret.value.addrType].isEmpty = 0;
+						thisPage[ret.value.addrType].params = ret.value.info;
+						thisPage[ret.value.addrType].addrIpt.querySelector("input").value = ret.value.info.addrDetail;
+					    var htmlStr = 	'<div class="addr-text">' +
+											'<span>'+ret.value.info.addrDetail+'</span>' +
+										'</div>';
+					    document.getElementById(ret.value.addrType).innerHTML = htmlStr;
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">评价</h1>
+			<span class="btn-top-right font">发表</span>
+		</div>
+		<div class="mui-content user-evaluate">
+			<div class="top-info">
+				<div class="mui-content-padded">
+					<div class="mui-inline">设施</div>
+					<div class="mui-inline" data-value="sheshi">
+						<i data-index="1" class="iconfont icon-star"></i>
+						<i data-index="2" class="iconfont icon-star"></i>
+						<i data-index="3" class="iconfont icon-star"></i>
+						<i data-index="4" class="iconfont icon-star"></i>
+						<i data-index="5" class="iconfont icon-star"></i>
+					</div>
+				</div>
+				<div class="mui-content-padded">
+					<div class="mui-inline">服务</div>
+					<div class="mui-inline" data-value="fuwu">
+						<i data-index="1" class="iconfont icon-star"></i>
+						<i data-index="2" class="iconfont icon-star"></i>
+						<i data-index="3" class="iconfont icon-star"></i>
+						<i data-index="4" class="iconfont icon-star"></i>
+						<i data-index="5" class="iconfont icon-star"></i>
+					</div>
+				</div>
+				<div class="mui-content-padded">
+					<div class="mui-inline">卫生</div>
+					<div class="mui-inline" data-value="weisheng">
+						<i data-index="1" class="iconfont icon-star"></i>
+						<i data-index="2" class="iconfont icon-star"></i>
+						<i data-index="3" class="iconfont icon-star"></i>
+						<i data-index="4" class="iconfont icon-star"></i>
+						<i data-index="5" class="iconfont icon-star"></i>
+					</div>
+				</div>
+				<div class="mui-content-padded">
+					<div class="mui-inline">位置</div>
+					<div class="mui-inline" data-value="weizhi">
+						<i data-index="1" class="iconfont icon-star"></i>
+						<i data-index="2" class="iconfont icon-star"></i>
+						<i data-index="3" class="iconfont icon-star"></i>
+						<i data-index="4" class="iconfont icon-star"></i>
+						<i data-index="5" class="iconfont icon-star"></i>
+					</div>
+				</div>
+			</div>
+			<div class="publish-item normal">
+				<div class="upload-imgs">
+					<input id="evaluate_content" class="desc" type="text" placeholder="您的评价对其他用户很重要" />
+					<div id="imgBox" style="display: inline-block">
+						<!--<div class="item img-box" style="background-image: url(../img_temp/upload-1.png);">
+							<i class="iconfont icon-cha"></i>
+						</div>-->
+					</div>
+					<div id="btn_upload" class="btn-upload">
+						<i class="iconfont icon-jiahao1"></i>
+						<span>上传图片</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				gradeNum: {
+					sheshi: "",
+					fuwu: "",
+					weisheng: "",
+					weizhi: ""
+				},
+				imgIndex: 0,
+				imgArray: [],
+				init: function() {
+					pageControl.winBack();
+				},
+				requestData: function() {
+					
+				},
+				fillData: function(data) {
+
+				},
+				submit: function() {
+					var evaluate_content = document.getElementById("evaluate_content").value;
+
+					if (thisPage.gradeNum.sheshi == "") {
+						PubApp.toast("请给设施打分");
+						return false;
+					}
+
+					if (thisPage.gradeNum.fuwu == "") {
+						PubApp.toast("请给服务打分");
+						return false;
+					}
+
+					if (thisPage.gradeNum.weisheng == "") {
+						PubApp.toast("请给卫生打分");
+						return false;
+					}
+
+					if (thisPage.gradeNum.weizhi == "") {
+						PubApp.toast("请给位置打分");
+						return false;
+					}
+
+					// if (evaluate_content == "") {
+					// 	PubApp.toast("请输入评论内容");
+					// 	return false;
+					// }
+
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + api.pageParam.data_id;
+					urlParam += "&commen_content=" + evaluate_content;
+					urlParam += "&commen_picture=" + imgSet.value;
+
+					urlParam += "&commen_score1=" + thisPage.gradeNum.sheshi;
+					urlParam += "&commen_score2=" + thisPage.gradeNum.fuwu;
+					urlParam += "&commen_score3=" + thisPage.gradeNum.weisheng;
+					urlParam += "&commen_score4=" + thisPage.gradeNum.weizhi;
+					
+					doAjax("Client", "order_comment", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+								api.closeToWin({
+								    name: "root"
+								});
+							}, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*星级评分*/
+					mui('.mui-inline').on('tap','i',function(){
+					  	var index = parseInt(this.getAttribute("data-index"));
+					  	var parent = this.parentNode;
+					  	var children = parent.children;
+						var active = index;
+
+						for(var i = 0; i < 5; i++){
+							if(i < active){
+								children[i].classList.add('on');
+							}else{
+								children[i].classList.remove('on');
+							}
+					  	}
+
+					  	var data_value = parent.getAttribute("data-value");
+					  	thisPage.gradeNum[data_value] = index;
+				  	});
+
+				  	/*upload image*/
+					window.imgSet = new Set();
+					var addImgView = function(imgurl) {
+						var imgNode = document.createElement("div");
+						imgNode.setAttribute("class","item img-box");
+						imgNode.style.backgroundImage = 'url('+imgurl+')';
+						imgNode.innerHTML = '<i data-value="'+imgurl+'" class="iconfont icon-cha btn_remove"></i>';
+						document.getElementById("imgBox").appendChild(imgNode);
+					};
+					document.getElementById("btn_upload").addEventListener("tap", function() {
+						if (imgSet.value.length == 3) {
+							mui.toast('最多上传3张图片');
+							return false;
+						}
+						getImgAndCrop(function(locationImgPath) {
+			                if (typeof locationImgPath == 'string') {
+			                	uploadimg(locationImgPath, function(remateurl) {
+						        	imgSet.add(remateurl);
+						        	addImgView(locationImgPath);
+				                });
+			                } else if (typeof locationImgPath == 'object') {
+			                	locationImgPath.forEach(function(item) {
+			     					uploadimg(item.path, function(remateurl) {
+							        	imgSet.add(remateurl);
+			     						addImgView(item.thumbPath);
+					                });
+			     				});
+			                }
+			            }, 500, 500, imgSet.value.length);
+					});
+					/*remove image*/
+					mui("#imgBox").on("tap", ".btn_remove", function() {
+						imgSet.remove(this.getAttribute("data-value"));
+						var parent = this.parentNode;
+						parent.parentNode.removeChild(parent);
+					});
+
+					/*发表*/
+				  	document.querySelector(".btn-top-right").addEventListener("tap", function() {
+				  		thisPage.submit();						
+				  	});
+				}
+			};
+		</script>
+	</body>
+</html>

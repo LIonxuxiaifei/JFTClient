@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.mui-bar~.mui-content{height: 100%;}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav search">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<div class="top-search">
+				<span class="mui-icon mui-icon-search"></span>
+				<input id="search_ipt" type="text" placeholder="请输入查找内容" />
+			</div>
+			<span class="btn-search">搜索</span>
+		</div>
+		<div class="top-tab-filter haggle">
+			<div id="item_filter" class="item" data-type="filtrate"><span>筛选</span><i class="iconfont icon-xiasanjiao"></i></div>
+			<div class="item" data-type="sort"><span>排序</span><i class="iconfont icon-xiasanjiao"></i></div>
+		</div>
+		<div class="action-sheet-control sort">
+			<div class="dark"></div>
+			<ul id="sortList" class="list top">
+				<li class="on" data-value="1"><i class="iconfont icon-gouxuan"></i>距离优先</li>
+				<li data-value="2"><i class="iconfont icon-gouxuan"></i>高价优先</li>
+				<li data-value="3"><i class="iconfont icon-gouxuan"></i>低价优先</li>
+				<li data-value="4"><i class="iconfont icon-gouxuan"></i>信誉优先</li>
+			</ul>
+		</div>
+		<div class="action-sheet-control filtrate">
+			<div class="dark"></div>
+			<div class="filter-list">
+				<h2 class="filter-name">星级</h2>
+				<ul class="items list_star">
+					<li class="on" data-value="0">不限</li>
+					<li data-value="1">经济</li>
+					<li data-value="2">二星</li>
+					<li data-value="3">三星</li>
+					<li data-value="4">四星</li>
+					<li data-value="5">五星</li>
+				</ul>
+				<h2 class="filter-name">价格</h2>
+				<ul class="items list_price">
+					<li class="on" data-value="0">不限</li>
+					<li data-value="200">200以下</li>
+					<li data-value="200-500">200-500</li>
+					<li data-value="500">500以上</li>
+				</ul>
+				<div id="btn_confirm" class="btn-submit">确定</div>
+			</div>
+		</div>
+		<div class="mui-content haggle has-top-tab">
+			<ul id="pageList" class="haggle-list">
+				<!-- <li class="collect-item-shops">
+					<p class="shops-pic img-box" style="background: url(../img_temp/hotal-1.png);"></p>
+					<div class="shops-info">
+						<div class="shops-name">阿玛瑞廊曼机场酒店</div>
+						<div class="shops-info-row">
+							<div class="star-level">
+								<div class="bot-bg"><div class="top-bg level-4"></div></div>
+								<span>4.0</span>
+							</div>
+							<span class="com-num">220条评论</span>
+						</div>
+						<div class="other-info-row">
+							<span>五星</span>
+							<span>1100单</span>
+						</div>
+						<div class="other-info-row">
+							<span class="location">距您0.2公里∣汽车北站及国..</span>
+						</div>
+					</div>
+					<div class="price-info">
+						<div class="price-box">
+							<i class="m-icon">&yen;</i>
+							<span class="m-num">329</span>
+							<span class="m-end">起</span>
+						</div>
+					</div>
+				</li>
+				<li class="collect-item-shops">
+					<p class="shops-pic img-box" style="background: url(../img_temp/hotal-2.png);"></p>
+					<div class="shops-info">
+						<div class="shops-name">廊双辉盛坊城市酒店</div>
+						<div class="shops-info-row">
+							<div class="star-level">
+								<div class="bot-bg"><div class="top-bg level-5"></div></div>
+								<span>5.0</span>
+							</div>
+							<span class="com-num">220条评论</span>
+						</div>
+						<div class="other-info-row">
+							<span>经济型</span>
+							<span>320单</span>
+						</div>
+						<div class="other-info-row">
+							<span class="location">距您1.2公里∣运河商务区</span>
+						</div>
+					</div>
+					<div class="price-info">
+						<div class="price-box">
+							<i class="m-icon">&yen;</i>
+							<span class="m-num">129</span>
+							<span class="m-end">起</span>
+						</div>
+					</div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				hotalPrice: "0", //默认不限
+				hotalRank: "0", //默认不限
+				sort: "1", //1-距离，2-高价，3-低价，4-信誉
+				//searchValue: "", //搜索关键词
+				init: function() {
+					pageControl.winBack();
+					pageControl.darkClose();
+
+					if (api.pageParam.hotal_type == 2) {
+						document.getElementById("item_filter").classList.add("invalid");
+					}
+
+					thisPage.hotalPrice = api.pageParam.hotal_price;
+					thisPage.hotalRank = api.pageParam.hotal_rank;
+					//thisPage.searchValue = api.pageParam.search_value;
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "Type=" + api.pageParam.hotal_type;
+					urlParam += "&Lat=" + api.pageParam.lat;
+					urlParam += "&Lng=" + api.pageParam.lng;
+					urlParam += "&HotelName=" + api.pageParam.search_value;
+					urlParam += "&Order=" + thisPage.sort;
+					if (api.pageParam.hotal_type == 1) {
+						urlParam += "&HotelPrice=" + thisPage.hotalPrice;
+						urlParam += "&HotelRank=" + thisPage.hotalRank;
+					}
+					
+					doAjax("Hotel", "searchHotelInfo", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				fillData: function(data) {
+					var page_html = "";
+					if (isset(data)) {
+						data.forEach(function(item) {
+							var rankStr = "";
+							switch (item.HotelRank) {
+								case "1":
+									rankStr = "经济型";
+									break;
+								case "2":
+									rankStr = "两星";
+									break;
+								case "3":
+									rankStr = "三星";
+									break;
+								case "4":
+									rankStr = "四星";
+									break;
+								case "5":
+									rankStr = "五星";
+									break;
+								default:
+									break;
+							}
+
+							var commentNum = Number(item.CommentAveStar);
+							var score = commentNum.toFixed(1);
+							var starHtml = 	'<div class="bot-bg"><div class="top-bg level-'+Math.round(commentNum)+'"></div></div>\n<span>'+score+'</span>';
+
+							page_html += 	'<li class="collect-item-shops" data-id="'+item.SellerId+'">' +
+												'<p class="shops-pic img-box" style="background-image: url('+toAbsUrl(item.HotelPic[0])+');"></p>' +
+												'<div class="shops-info">' +
+													'<div class="shops-name">'+item.ShopName+'</div>' +
+													'<div class="shops-info-row">' +
+														'<div class="star-level">'+starHtml+'</div>' +
+														'<span class="com-num">'+item.CommentNum+'条评论</span>' +
+													'</div>' +
+													'<div class="other-info-row">' +
+														'<span>'+rankStr+'</span>\n' +
+														'<span>'+item.OrderCount+'单</span>' +
+													'</div>' +
+													'<div class="other-info-row">' +
+														'<span class="location">'+item.Address+'</span>' +
+													'</div>' +
+												'</div>' +
+												'<div class="price-info">' +
+													'<div class="price-box">' +
+														'<i class="m-icon">&yen;</i>\n' +
+														'<span class="m-num">'+parseInt(item.HotelPrice)+'</span>\n' +
+														// '<span class="m-num">'+item.HotelPrice.split(".")[0]+'</span><span class="m-num-deci">.'+item.HotelPrice.split(".")[1]+'</span>' +
+														'<span class="m-end">起</span>' +
+													'</div>' +
+												'</div>' +
+											'</li>';
+						});
+						document.getElementById("pageList").innerHTML = page_html;
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">空空如也</div>';
+					}
+				},
+				getSearchResult: function() {
+					/*重置筛选排序*/
+					thisPage.hotalPrice = "0";
+					document.querySelector(".items.list_price .on").classList.remove("on");
+					document.querySelectorAll(".items.list_price li")[0].classList.add("on");
+
+					thisPage.hotalRank = "0";
+					document.querySelector(".items.list_star .on").classList.remove("on");
+					document.querySelectorAll(".items.list_star li")[0].classList.add("on");
+
+					thisPage.sort = "1";
+					document.querySelector("#sortList .on").classList.remove("on");
+					document.querySelectorAll("#sortList li")[0].classList.add("on");
+
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "Type=" + api.pageParam.hotal_type;
+					urlParam += "&Lat=" + api.pageParam.lat;
+					urlParam += "&Lng=" + api.pageParam.lng;
+					urlParam += "&HotelName=" + document.getElementById("search_ipt").value;
+					urlParam += "&Order=" + thisPage.sort;
+					if (api.pageParam.hotal_type == 1) {
+						urlParam += "&HotelPrice=" + thisPage.hotalPrice;
+						urlParam += "&HotelRank=" + thisPage.hotalRank;
+					}
+					
+					doAjax("Hotel", "searchHotelInfo", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*筛选排序切换*/
+					mui(".top-tab-filter").on("tap", ".item", function() {
+						if(this.classList.contains("on") || this.classList.contains("invalid")) return;
+						document.querySelector(".mui-content").style = 'overflow:hidden;';
+						if (document.querySelector(".top-tab-filter .on")) {
+							document.querySelector(".top-tab-filter .on").classList.remove("on");
+						}
+						if (document.querySelector(".action-sheet-control.active")) {
+							document.querySelector(".action-sheet-control.active").classList.remove("active");
+						}
+						this.classList.add("on");
+						document.querySelector(".action-sheet-control."+this.getAttribute("data-type")).classList.add("active");
+					});
+
+					/*筛选*/
+					mui(".items.list_star").on("tap", "li", function() { //选择星级
+						if (this.classList.contains("on")) return;
+
+						document.querySelector(".items.list_star .on").classList.remove("on");
+						this.classList.add("on");
+					});
+
+					mui(".items.list_price").on("tap", "li", function() { //选择价格
+						if (this.classList.contains("on")) return;
+
+						document.querySelector(".items.list_price .on").classList.remove("on");
+						this.classList.add("on");
+					});
+
+					document.querySelector("#btn_confirm").addEventListener("tap", function() { //确定
+						var starValue = document.querySelector(".items.list_star .on").getAttribute("data-value");
+						var priceValue = document.querySelector(".items.list_price .on").getAttribute("data-value");
+						//alert(starValue + "&" + priceValue);
+						thisPage.hotalRank = starValue;
+						thisPage.hotalPrice = priceValue;
+
+						document.querySelector(".action-sheet-control.filtrate").classList.remove("active");
+						document.querySelector(".top-tab-filter .on").classList.remove("on");
+
+						setTimeout(function() {
+				            thisPage.requestData();
+				        }, 350);
+					});
+
+					/*排序*/
+					mui("#sortList").on("tap", "li", function() {
+						if(this.classList.contains("on")) return;
+						document.querySelector("#sortList .on").classList.remove("on");
+						this.classList.add("on");
+
+						thisPage.sort = this.getAttribute("data-value");
+
+						//alert(thisPage.sort);
+
+						document.querySelector(".action-sheet-control.sort").classList.remove("active");
+						document.querySelector(".top-tab-filter .on").classList.remove("on");
+
+						setTimeout(function() {
+				            thisPage.requestData();
+				        }, 350);
+					});
+
+					/*酒店详情*/
+					mui("#pageList").on("tap", "li", function() {
+						var param = "hotal_id=" + this.getAttribute("data-id");
+						openWin("haggle_detail", param);
+					});
+
+					/*搜索*/
+					document.querySelector(".btn-search").addEventListener("tap", function() {
+						if (document.getElementById("search_ipt").value == "") {
+							PubApp.toast("搜索内容不能为空");
+						} else {
+							thisPage.getSearchResult();
+						}
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

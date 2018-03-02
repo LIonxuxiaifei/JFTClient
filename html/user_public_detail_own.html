@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.public-detail .collect-item-goods .bot-row {
+				border-top: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">订单详情</h1>
+			<span class="btn-top-right font">投诉</span>
+		</div>
+		<div class="mui-content public-detail">
+			<div class="collect-item-goods">
+				<div class="top-row">
+					<div id="user_avatar" class="user-avatar img-box" style="background-image: url();"></div>
+					<b id="user_name" class="user-name"><!-- 李果果 --></b>
+					<span id="order_status_name" class="apply-status"><!-- 已申请 --></span>
+				</div>
+				<div class="goods-info">
+					<p id="goods_pic" class="goods-pic img-box" style="background-image: url();"></p>
+					<strong id="goods_name" class="goods-name"><!-- iPhone7数据线  x1 --></strong>
+				</div>
+				<div id="btn_call" class="bot-row">
+					<i class="iconfont icon-rexian"></i>
+					<span>联系对方</span>
+				</div>
+			</div>
+			<div id="order_info" class="person-info">
+				<!-- <span class="info-row">订单编号：1234567890</span>
+				<span class="info-row">下单时间：2016-12-10 15:30:10</span>
+				<span class="info-row">姓名：李雷</span>
+				<span class="info-row">手机号：15869173714</span>
+				<span class="info-row">联系地址：杭州市拱墅区祥园路88号</span>
+				<span class="info-row">姓名：韩梅梅</span>
+				<span class="info-row">手机号：18869173714</span>
+				<span class="info-row">联系地址：杭州市西湖区文一路320号</span> -->
+			</div>
+			<div id="apply_info" class="apply-info">
+				<!-- <p class="apply-exp">申请理由：文字说文字说明文字说文字说明文字说文字说明文字说文字说明</p>
+				<div class="apply-pics">
+					<p class="pic img-box" style="background: url(../img_temp/public-img.png);"></p>
+				</div> -->
+			</div>
+			<div id="commentContainer" class="user-center" style="margin-top: 10px;"></div>
+			<div id="btn_confirm" class="btn-submit atbot" style="display: none;">确认收货</div>
+			<div id="btn_comment" class="btn-submit atbot" style="display: none;">留言</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			var dataId = 0;
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				typeKey: "weigongyi",
+				goodsPhone: "",
+				init: function() {
+					pageControl.winBack();
+
+			        setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&papply_id=" + api.pageParam.data_id;
+
+					doAjax("Goods", "publicApplyDetails", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					/*初始化按钮显示*/
+			        document.getElementById("btn_confirm").style.display = 'none';
+			        document.getElementById("btn_comment").style.display = 'none';
+
+					var dataInfo = data.info;
+					dataId = dataInfo.Mid;
+					thisPage.goodsPhone = dataInfo.goods_phone;
+					document.querySelector(".goods-info").setAttribute("data-id", dataInfo.papply_gid);
+
+					if (dataInfo.papply_status == "2") {
+						document.getElementById("btn_confirm").style.display = 'block';
+					}
+
+					//alert(dataInfo.papply_status+"&&"+dataInfo.papply_is_comment);
+					if (dataInfo.papply_status == "3" && dataInfo.papply_is_comment == "0") {
+						document.getElementById("btn_comment").style.display = 'block';
+					}
+
+					if (dataInfo.papply_status < 4) {
+						document.getElementById("order_status_name").classList.add("warning");
+					}
+
+					document.getElementById("user_avatar").style.backgroundImage = 'url('+toAbsUrl(dataInfo.UserHead)+')';
+					document.getElementById("user_name").innerText = dataInfo.NickName;
+					document.getElementById("order_status_name").innerText = dataInfo.papply_status_name;
+
+					document.getElementById("goods_pic").style.backgroundImage = 'url('+toAbsUrl(dataInfo.papply_goodspicture[0])+')';
+					document.getElementById("goods_name").innerText = dataInfo.papply_goodsname + " x" + dataInfo.papply_apply_num;
+
+					/*订单信息*/
+					document.getElementById("order_info").innerHTML = 	'<span class="info-row">订单编号：'+dataInfo.papply_ordernum+'</span>' +
+																		'<span class="info-row">下单时间：'+dataInfo.papply_create_time+'</span>' +
+																		'<span class="info-row">姓名：'+dataInfo.papply_realname+'</span>' +
+																		'<span class="info-row">手机号：'+dataInfo.papply_phone+'</span>' +
+																		'<span class="info-row">联系地址：'+dataInfo.papply_address+'</span>' +
+																		'<span class="info-row">姓名：'+dataInfo.RealName+'</span>' +
+																		'<span class="info-row">手机号：'+dataInfo.goods_phone+'</span>' +
+																		'<span class="info-row">联系地址：'+dataInfo.goods_address+'</span>';
+
+					/*申请理由*/
+					var picHtml = "";
+					var picList = dataInfo.papply_picture;
+					if (isset(picList)) {
+						picList.forEach(function(item) {
+							picHtml += '<p class="pic img-box" style="background-image: url('+toAbsUrl(item)+');"></p>';
+						});
+					}
+					document.getElementById("apply_info").innerHTML = 	'<p class="apply-exp">申请理由：'+dataInfo.papply_apply_reason+'</p>' +
+																		'<div class="apply-pics">'+picHtml+'</div>';
+
+					//评论信息
+					var commentInfo = dataInfo.comment;
+					if (isset(commentInfo)) {
+						var commentContainer = document.getElementById('commentContainer');
+						//评分
+						var scoreNum = Number(commentInfo.commen_score);
+						var starHtml = '<div class="bot-bg"><div class="top-bg level-'+Math.round(scoreNum)+'"></div></div>';
+
+						//图片
+						var comPicList = commentInfo.commen_picture;
+						var comPicHtml = "";
+						comPicList.forEach(function(item) {
+							comPicHtml += '<p class="pic-item img-box" style="background-image: url('+toAbsUrl(item)+');"></p>'
+						});
+
+						//回复
+						var replyHtml = "";
+						if (commentInfo.reply && commentInfo.reply != '') {
+							replyHtml = '<div class="reply">\
+											<i class="iconfont icon-07"></i>\
+											<div class="reply-info">\
+												<span class="reply-person">回复 : </span>\
+												<span class="reply-content">'+commentInfo.reply+'</span>\
+											</div>\
+										</div>';
+						}
+
+						commentContainer.innerHTML = '<ul class="comment-list active">\
+														<li>\
+															<div class="user-avatar img-box" style="background-image: url('+toAbsUrl(commentInfo.UserHead)+');"></div>\
+															<div class="com-time">'+commentInfo.commen_create_time+'</div>\
+															<div class="com-info">\
+																<div class="com-person">'+commentInfo.commen_username+'</div>\
+																<div class="grade">\
+																	<span>打分</span>\
+																	<div class="star-level">'+starHtml+'</div>\
+																</div>\
+																<p class="com-content">'+commentInfo.commen_content+'</p>\
+																<div class="pics">'+comPicHtml+'</div>\
+															</div>\
+															'+replyHtml+'\
+														</li>\
+													</ul>';
+					}
+
+				},
+				doConfirm: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&papply_id=" + id;
+
+					doAjax("Goods", "publicApply_comfim", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'user_public',
+							    frameName: 'user_public_own',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*联系对方*/
+					document.querySelector("#btn_call").addEventListener("tap", function() {
+						var tel_number = thisPage.goodsPhone;
+						if (tel_number != "") {
+							api.confirm({
+							    title: '提示',
+							    msg: '是否拨打' + tel_number,
+							    buttons: ['拨打', '取消']
+							}, function(ret, err) {
+								if (ret.buttonIndex == 1) {
+									api.call({
+									    type: 'tel',
+									    number: tel_number
+									});
+								}
+							});
+						}
+					});
+
+					/*确认收货*/
+					document.querySelector("#btn_confirm").addEventListener("tap", function() {
+						var data_id = api.pageParam.data_id;
+
+						api.confirm({
+						    title: '提示',
+						    msg: '是否确认收货',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doConfirm(data_id);
+							}
+						});
+					});
+
+					/*评价*/
+					document.querySelector("#btn_comment").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.data_id;
+						openWin("user_evaluate_public", param);
+					});
+
+					/*投诉*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.data_id;
+						openWin("user_complaint", param);
+					});
+
+					/*商品详情*/
+					document.querySelector(".goods-info").addEventListener("tap", function() {
+						var param = "page_id=" + this.getAttribute("data-id");
+						openWin("list_public_detail", param);
+					});
+					/*头像*/
+					document.querySelector("#user_avatar").addEventListener("tap", function() {
+						api.openWin({
+						    name: 'user_center_'+dataId,
+						    url: './user_center_person.html',
+						    pageParam: {
+						        user_id: dataId
+						    }
+						});
+						return false;
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

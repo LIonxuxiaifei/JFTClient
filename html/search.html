@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav search">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<div class="top-search">
+				<span class="mui-icon mui-icon-search"></span>
+				<input id="keyWords" autofocus type="text" placeholder="请输入查找内容" />
+			</div>
+			<span class="btn-search">搜索</span>
+		</div>
+		<div class="mui-content">
+			<div class="search-nav">
+				<div class="nav-item on" data-value="serve">
+					<span class="iconfont icon-fuwu"></span>
+					<strong>服务</strong>
+				</div>
+				<div class="nav-item" data-value="goods">
+					<span class="iconfont icon-shangpin"></span>
+					<strong>商品</strong>
+				</div>
+				<div class="nav-item" data-value="taojiahuanjia">
+					<span class="iconfont icon-jiudian"></span>
+					<strong>酒店</strong>
+				</div>
+				<div class="nav-item" data-value="weigongyi">
+					<span class="iconfont icon-gongyi"></span>
+					<strong>公益</strong>
+				</div>
+				<div class="nav-item" data-value="zhuanqian">
+					<span class="iconfont icon-guanggao"></span>
+					<strong>广告</strong>
+				</div>
+				<div class="nav-item" data-value="xinwenzixun">
+					<span class="iconfont icon-zixun"></span>
+					<strong>资讯</strong>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+			};
+			var thisPage = {
+				searchType: "serve",
+				init: function() {
+					//pageControl.winBack();
+					thisPage.addEvent();
+				},
+				submit: function() {
+					var keyWords = document.getElementById("keyWords").value;
+					if (keyWords == "") {
+						PubApp.toast("搜索内容不能为空");
+						return false;
+					}
+					var param = "search_type=" + thisPage.searchType;
+					param += "&search_value=" + keyWords;
+					openWin("search_result", param);
+				},
+				addEvent: function() {
+					/*type switch*/
+					mui(".search-nav").on("tap", ".nav-item", function() {
+						if (this.classList.contains("on")) return;
+						
+						thisPage.searchType = this.getAttribute("data-value");
+						document.querySelector(".search-nav .on").classList.remove("on");
+						this.classList.add("on");
+					});
+
+					/*submit*/
+					document.querySelector(".btn-search").addEventListener("click", function() {
+						thisPage.submit();
+					});
+
+					/*close*/
+					document.querySelector(".btn-top-left").addEventListener("tap", function() {
+						api.closeFrame();	
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

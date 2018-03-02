@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">总体评价</h1>
+		</div>
+		<div class="mui-content hotal-evaluate">
+			<div class="top-info">
+				<span class="grade-all"><i id="grade_all">0.0</i> 分</span>
+				<ul class="grade-list">
+					<li>
+						<span id="grade_sheshi" class="g-num">0.0</span>
+						<span class="g-name">设施</span>
+					</li>
+					<li>
+						<span id="grade_service" class="g-num">0.0</span>
+						<span class="g-name">服务</span>
+					</li>
+					<li>
+						<span id="grade_health" class="g-num">0.0</span>
+						<span class="g-name">卫生</span>
+					</li>
+					<li>
+						<span id="grade_place" class="g-num">0.0</span>
+						<span class="g-name">位置</span>
+					</li>
+				</ul>
+			</div>
+			<div class="com-block user-center">
+				<h2>全部评论 ( <i id="comment_num">0</i> )</h2>
+				<ul id="pageList" class="comment-list" style="display:block;">
+					<!-- <li>
+						<div class="user-avatar img-box" style="background: url(../img_temp/user-info-avatar.png);"></div>
+						<div class="com-time">2016-12-06</div>
+						<div class="com-info">
+							<div class="com-person">菜和</div>
+							<div class="grade">
+								<span>打分</span>
+								<div class="star-level">
+									<div class="bot-bg"><div class="top-bg level-4"></div></div>
+								</div>
+							</div>
+							<p class="com-content">好喜欢test内容，下次还找啊啊啊啊啊</p>
+							<div class="pics">
+								<p class="pic-item img-box" style="background-image: url();"></p>
+								<p class="pic-item img-box" style="background-image: url();"></p>
+								<p class="pic-item img-box" style="background-image: url();"></p>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="user-avatar img-box" style="background: url(../img_temp/user-info-avatar.png);"></div>
+						<div class="com-time">2016-12-06</div>
+						<div class="com-info">
+							<div class="com-person">菜和</div>
+							<div class="grade">
+								<span>打分</span>
+								<div class="star-level">
+									<div class="bot-bg"><div class="top-bg level-4"></div></div>
+								</div>
+							</div>
+							<p class="com-content">好喜欢test内容，下次还找啊啊啊啊啊</p>
+						</div>
+					</li> -->
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+
+					api.setWinAttr({
+					    bgColor: '#fff'
+					});
+			
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+
+			        /*初始化下拉刷新*/
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#eee",
+			            textColor: "#bbb",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			       		thisPage.requestData();
+			        });
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					
+					var urlParam = "HotelId=" + api.pageParam.data_id;
+					
+					doAjax("Hotel", "getHotelCommentList", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+
+						api.refreshHeaderLoadDone();
+					});
+
+
+				},
+				fillData: function(data) {
+					/*评分*/
+					var gredeInfo = data.resAllComment[0];
+					document.getElementById("grade_all").innerText = gredeInfo.CommentAveStar;
+					document.getElementById("grade_sheshi").innerText = gredeInfo.CommentAveSheSi;
+					document.getElementById("grade_service").innerText = gredeInfo.CommentAveStar;
+					document.getElementById("grade_health").innerText = gredeInfo.CommentAveHealth;
+					document.getElementById("grade_place").innerText = gredeInfo.CommentAvePlace;
+
+					/*评论*/
+					var commentList = data.lists;
+					var commentHtml = "";
+					if (isset(commentList)) {
+						document.getElementById("comment_num").innerText = commentList.length;
+						commentList.forEach(function(item) {
+							var scoreNum = Number(item.commen_score);
+							var starHtml = '<div class="bot-bg"><div class="top-bg level-'+Math.round(scoreNum)+'"></div></div>';
+
+							var comPicHtml = "";
+							if (item.commen_picture) {
+								var comPicList = item.commen_picture;
+								comPicList.forEach(function(item) {
+									comPicHtml += '<p class="pic-item img-box" style="background-image: url('+toAbsUrl(item)+');"></p>'
+								});
+							}
+
+							commentHtml += 	'<li>' +
+												'<div class="user-avatar img-box" style="background-image: url('+toAbsUrl(item.userhead)+');"></div>' +
+												'<div class="com-time">'+item.commen_create_time+'</div>' +
+												'<div class="com-info">' +
+													'<div class="com-person">'+item.nickname+'</div>' +
+													'<div class="grade">' +
+														'<span>打分</span>' +
+														'<div class="star-level">'+starHtml+'</div>' +
+													'</div>' +
+													'<p class="com-content">'+item.commen_content+'</p>' +
+													'<div class="pics">'+comPicHtml+'</div>' +
+												'</div>' +
+											'</li>';
+						});
+						document.getElementById("pageList").innerHTML = commentHtml;	
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">空空如也</div>';
+					}
+
+					api.hideProgress();
+					api.refreshHeaderLoadDone();
+				},
+				addEvent: function() {
+			
+				}
+			};
+		</script>
+	</body>
+</html>

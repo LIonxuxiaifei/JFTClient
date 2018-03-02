@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">订单详情</h1>
+			<span class="btn-top-right font">投诉</span>
+		</div>
+		<div id="unpaid_buy" class="bot-control haggle" style="display: none;">
+			<div class="btn-item btn_cancel">不换了</div>
+			<div class="btn-item warning btn_confirm">确认换</div>
+		</div>
+		<div id="unpaid_sell" class="bot-control haggle" style="display: none;">
+			<div class="btn-item btn_cancel">拒绝交换</div>
+			<div class="btn-item warning btn_confirm">确认换</div>
+		</div>
+		<div class="mui-content order-detail-exchange">
+			<div class="order-list">
+				<div class="item">
+					<div class="order-top-info bot-line">
+						<div id="user_avatar" class="user-avatar img-box" style="background-image: url();"></div>
+						<b id="user_name" class="user-name"><!--李果果--></b>
+						<span id="order_status_name" class="order-status warning"><!--交换中--></span>
+					</div>
+					<div class="order-mid-info bot-line">
+						<div class="outer-box">
+							<div class="order-pic img-box" style="background-image: url();"></div>
+							<div class="order-main">
+								<!--<div class="order-name">iphone6国行16G白银   X1</div>-->
+							</div>
+							<div class="price-info">
+								<!--<div class="price-box">
+									<i class="m-icon">市场现价&yen;</i>
+									<span class="m-num">209</span>
+								</div>-->
+							</div>
+						</div>
+						<div class="pic-title">交换的物品</div>
+						<div class="outer-box">
+							<div class="order-pic img-box" style="background-image: url();"></div>
+							<div class="order-main">
+								<!--<div class="order-name">紫砂壶 x1</div>-->
+							</div>
+							<div class="price-info">
+								<!--<div class="price-box">
+									<i class="m-icon">市场现价&yen;</i>
+									<span class="m-num">300</span>
+								</div>-->
+							</div>
+						</div>
+					</div>
+					<div class="order-price-info bot-line">
+						<div class="total">手续费 : &nbsp;<i id="order_total">0.00</i>元</div>
+					</div>
+					<div id="btn_call" class="order-bot-tel">
+						<i class="iconfont icon-rexian"></i>
+						<span>联系对方</span>
+					</div>
+				</div>
+			</div>
+			<div id="order_info_block">
+				<!--<div class="order-info-block">
+					<div class="item">订单编号：<i>1234567890</i></div>
+					<div class="item">下单时间：<i>2016-12-10 15:30:10</i></div>
+					<div class="item">姓名：<i>张飞</i></div>
+					<div class="item">联系电话：<i>13838383855</i></div>
+					<div class="item">收货地址：<i>浙江省杭州市拱墅区丰登街333号</i></div>
+					<div class="item">姓名：<i>张飞</i></div>
+					<div class="item">联系电话：<i>13838383855</i></div>
+					<div class="item">收货地址：<i>浙江省杭州市拱墅区丰登街333号</i></div>
+				</div>	-->
+			</div>
+			<div id="commentContainer" class="user-center" style="margin-top: 10px;"></div>
+			<div id="btn_finish_exchange" class="btn-submit atbot" style="display: none;">换货完成</div>
+			<div id="btn_comment" class="btn-submit atbot" style="display: none;">评价</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				telephone: "", //对方电话
+				pageType: 0,
+				init: function() {
+					pageControl.winBack();
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + api.pageParam.order_id;
+					urlParam += "&type_key=" + api.pageParam.order_type;
+
+					doAjax("Client", "orderDetails", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: "获取网络失败" });
+							//api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					thisPage.pageType = data.is_seller;
+
+					/*重置按钮显示*/
+					document.getElementById("btn_finish_exchange").style.display = 'none';
+					document.getElementById("btn_comment").style.display = 'none';
+					document.getElementById("unpaid_buy").style.display = 'none';
+					document.getElementById("unpaid_sell").style.display = 'none';
+
+					var orderInfo = data.orderInfo;
+
+					/*对方电话*/
+					thisPage.telephone = (data.is_seller == 0 ? orderInfo.order_username : orderInfo.order_phone);
+
+					/*换货发起人信息*/
+					document.getElementById("user_avatar").style.backgroundImage = 'url('+toAbsUrl(orderInfo.UserHead)+')';
+					document.getElementById("user_avatar").setAttribute("data-id", orderInfo.Mid);
+					document.getElementById("user_name").innerHTML = orderInfo.NickName;
+					document.getElementById("order_status_name").innerText = orderInfo.order_vstatus_name;
+
+					/*物品信息*/
+					document.querySelector(".order-mid-info").setAttribute("data-id", orderInfo.order_gid);
+					var goodsHtml = '<div class="outer-box">' +
+										'<div class="order-pic img-box" style="background-image: url('+toAbsUrl(orderInfo.order_picture)+');"></div>' +
+										'<div class="order-main">' +
+											'<div class="order-name">'+orderInfo.order_goodsname+'</div>' +
+											'<div class="number">数量 : &nbsp;<i>'+orderInfo.order_num+'</i></div>' +
+										'</div>' +
+										'<div class="price-info">' +
+											'<div class="price-box">' +
+												'<i class="m-icon">市场现价&yen;</i>\n' +
+												'<span class="m-num">'+orderInfo.order_price.split(".")[0]+'</span><span class="m-num-deci">.'+orderInfo.order_price.split(".")[1]+'</span>' +
+												'<i class="m-icon">/'+orderInfo.order_unit+'</i>'+
+											'</div>' +
+										'</div>' +
+									'</div>' +
+									'<div class="pic-title">交换的物品</div>' +
+									'<div class="outer-box">' +
+										'<div class="order-pic img-box" style="background-image: url('+toAbsUrl(orderInfo.exgoods_picture)+');"></div>' +
+										'<div class="order-main">' +
+											'<div class="order-name">'+orderInfo.exgoods_goodsname+'</div>' +
+											'<div class="number">数量 : &nbsp;<i>'+orderInfo.exgoods_ex_num+'</i></div>' +
+										'</div>' +
+										'<div class="price-info">' +
+											'<div class="price-box">' +
+												'<i class="m-icon">市场现价&yen;</i>\n' +
+												'<span class="m-num">'+orderInfo.exgoods_price.split(".")[0]+'</span><span class="m-num-deci">.'+orderInfo.exgoods_price.split(".")[1]+'</span>' +
+												'<i class="m-icon">/'+orderInfo.exgoods_unit+'</i>' +
+											'</div>' +
+										'</div>' +
+									'</div>';
+					document.querySelector(".order-mid-info").innerHTML = goodsHtml;
+
+					/*合计*/
+					document.getElementById("order_total").innerText = orderInfo.order_total;
+
+					/*订单信息*/
+					document.getElementById("order_info_block").innerHTML = '<div class="order-info-block">' +
+																				'<div class="item">订单编号：<i>'+orderInfo.order_number+'</i></div>' +
+																				'<div class="item">下单时间：<i>'+orderInfo.order_create_time+'</i></div>' +
+																				'<div class="item">姓名：<i>'+orderInfo.RealName+'</i></div>' +
+																				'<div class="item">联系电话：<i>'+orderInfo.order_username+'</i></div>' +
+																				'<div class="item">收货地址：<i>'+orderInfo.order_seller_address+'</i></div>' +
+																				'<div class="item">姓名：<i>'+orderInfo.order_truename+'</i></div>' +
+																				'<div class="item">联系电话：<i>'+orderInfo.order_phone+'</i></div>' +
+																				'<div class="item">收货地址：<i>'+orderInfo.order_address+'</i></div>' +
+																			'</div>';
+
+					/*状态模块*/
+					if (data.is_seller == 0) { //买入
+						switch (orderInfo.order_status) {
+							case "1":
+								if (orderInfo.order_is_agreeex == 0) { //待确认
+									/* do nothing */
+								} else if (orderInfo.order_is_agreeex == 1) { //待支付手续费
+									document.getElementById("unpaid_buy").style.display = 'block';
+								}
+								break;
+							case "2": //交换中
+								document.getElementById("btn_finish_exchange").style.display = 'block';
+								break;
+							case "4": //已完成
+								if (orderInfo.order_is_comment == 0) { //待评价
+									document.getElementById("btn_comment").style.display = 'block';
+								}
+								break;
+							default:
+								break;
+						}
+					} else { //卖出
+						switch (orderInfo.order_status) {
+							case "1":
+								if (orderInfo.order_is_agreeex == 0) { //待确认
+									document.getElementById("unpaid_sell").style.display = 'block';
+								} else if (orderInfo.order_is_agreeex == 1) { //待支付手续费
+									/* do nothing */
+								}
+								break;
+							case "2": //交换中
+								document.getElementById("btn_finish_exchange").style.display = 'block';
+								break;
+							case "4": //待评价
+								if (orderInfo.order_is_comment == 0) {
+									document.getElementById("btn_comment").style.display = 'block';
+								}
+								break;
+							default:
+								break;
+						}
+					}
+
+					//评论信息
+					var commentInfo = data.comment;
+					if (isset(commentInfo)) {
+						var commentContainer = document.getElementById('commentContainer');
+						//评分
+						var scoreNum = Number(commentInfo.commen_score);
+						var starHtml = '<div class="bot-bg"><div class="top-bg level-'+Math.round(scoreNum)+'"></div></div>';
+
+						//图片
+						var comPicList = commentInfo.commen_picture;
+						var comPicHtml = "";
+						comPicList.forEach(function(item) {
+							comPicHtml += '<p class="pic-item img-box" style="background-image: url('+toAbsUrl(item)+');"></p>'
+						});
+
+						//回复
+						var replyHtml = "";
+						if (commentInfo.reply && commentInfo.reply != '') {
+							replyHtml = '<div class="reply">\
+											<i class="iconfont icon-07"></i>\
+											<div class="reply-info">\
+												<span class="reply-person">回复 : </span>\
+												<span class="reply-content">'+commentInfo.reply+'</span>\
+											</div>\
+										</div>';
+						}
+
+						commentContainer.innerHTML = '<ul class="comment-list active">\
+														<li>\
+															<div class="user-avatar img-box" style="background-image: url('+toAbsUrl(commentInfo.UserHead)+');"></div>\
+															<div class="com-time">'+commentInfo.commen_create_time+'</div>\
+															<div class="com-info">\
+																<div class="com-person">'+commentInfo.commen_username+'</div>\
+																<div class="grade">\
+																	<span>打分</span>\
+																	<div class="star-level">'+starHtml+'</div>\
+																</div>\
+																<p class="com-content">'+commentInfo.commen_content+'</p>\
+																<div class="pics">'+comPicHtml+'</div>\
+															</div>\
+															'+replyHtml+'\
+														</li>\
+													</ul>';
+					}
+				},
+				doCancelOrder: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+
+					doAjax("Client", "order_cancel", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				doFinishOrder: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+
+					doAjax("Client", "order_finish", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				doConfirmExchange: function(id) {
+					api.showProgress({
+					    title: "",
+					    text: "",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+
+					var ajaxControl = "order_comfirm"
+					if (thisPage.pageType == 0) { //买入
+						api.hideProgress();
+						openWin("order_pay", "data_id=" + id);
+					} else { //卖出
+						doAjax("Client", ajaxControl, urlParam, "post", function(rs) {
+							api.hideProgress();
+							if (rs.code == 1) {
+								PubApp.toast(rs.msg);
+								setTimeout(function() {
+						            thisPage.requestData();
+						        }, 350);
+							} else {
+								api.toast({ msg: rs.msg });
+							}
+						});
+					}
+				},
+				doConfirmSend: function(id) {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&order_id=" + id;
+
+					doAjax("Client", "order_send", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*投诉*/
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						var param = "order_id=" + api.pageParam.order_id;
+						openWin("user_complaint", param);
+					});
+
+					/*联系对方*/
+					document.querySelector("#btn_call").addEventListener("tap", function() {
+						if (thisPage.telephone != "") {
+							var tel_number = thisPage.telephone;
+							api.confirm({
+							    title: '提示',
+							    msg: '是否拨打' + tel_number,
+							    buttons: ['拨打', '取消']
+							}, function(ret, err) {
+								if (ret.buttonIndex == 1) {
+									api.call({
+									    type: 'tel',
+									    number: tel_number
+									});
+								}
+							});
+						}
+					});
+
+					/*换货完成*/
+					document.querySelector("#btn_finish_exchange").addEventListener("tap", function() {
+						api.confirm({
+						    title: '提示',
+						    msg: '是否完成换货?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doFinishOrder(api.pageParam.order_id);
+							}
+						});
+					});
+
+
+					/*评价*/
+					document.querySelector("#btn_comment").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.order_id;
+
+						if (thisPage.pageType == 0) {
+							openWin("user_evaluate", param);
+						} else {
+							param += "&type=other";
+							openWin("user_evaluate_reply", param);
+						}
+					});
+
+					/*取消交换*/
+					mui("body").on("tap", ".btn_cancel", function() {
+						api.confirm({
+						    title: '提示',
+						    msg: '是否取消交换?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doCancelOrder(api.pageParam.order_id);
+							}
+						});
+					});
+
+					/*确认交换*/
+					mui("body").on("tap", ".btn_confirm", function() {
+						api.confirm({
+						    title: '提示',
+						    msg: '是否确认交换?',
+						    buttons: ['是', '否']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								thisPage.doConfirmExchange(api.pageParam.order_id);
+							}
+						});
+					});
+
+					/*头像*/
+					document.getElementById("user_avatar").addEventListener("tap", function() {
+						var dataId = this.getAttribute("data-id");
+						api.openWin({
+						    name: 'user_center_'+dataId,
+						    url: './user_center_person.html',
+						    pageParam: {
+						        user_id: dataId
+						    }
+						});
+					});
+
+					/*商品详情*/
+					document.querySelector(".order-mid-info").addEventListener("tap", function() {
+						var param = "page_id=" + this.getAttribute("data-id");
+						openWin("list_exchange_detail", param);
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

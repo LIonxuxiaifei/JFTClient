@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">我的影响力</h1>
+			<span class="btn-top-right font">规则</span>
+		</div>
+		<div class="mui-content user-team">
+			<h2 class="top-info">总人数：<span class="m-num" id="all_ren">0</span>人&nbsp;&nbsp;总收益：<span class="m-num" id="all_money">0</span>元</h2>
+			<ul id="pageList" class="team-list">
+				<!-- <li>
+					<div class="user-avatar img-box" style="background: url(../img_temp/team-icon.png);"></div>
+					<div class="team-row-people">
+						<span class="p-name">李雷</span>
+						<span class="p-num">(团队2人)</span>
+					</div>
+					<div class="team-row-info">
+						<span class="register-time">注册时间 2016-11-05</span>
+						<span class="income">总收益：200.00元</span>
+					</div>
+				</li>
+				<li>
+					<div class="user-avatar img-box" style="background: url(../img_temp/team-icon.png);"></div>
+					<div class="team-row-people">
+						<span class="p-name">李雷</span>
+						<span class="p-num">(团队2人)</span>
+					</div>
+					<div class="team-row-info">
+						<span class="register-time">注册时间 2016-11-05</span>
+						<span class="income">总收益：200.00元</span>
+					</div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				init: function() {
+					pageControl.winBack();
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "Token=" + db2.getVal("user_token");
+
+					doAjax("Member", "getAllTeam", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							thisPage.fillData(rs.Data);
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				fillData: function(data) {
+					//alert(JSON.stringify(data));
+
+					document.getElementById("all_money").innerText = data.TeamSalesAllMoney;
+					document.getElementById('all_ren').innerText = data.TeamNum;
+					var list = data.lists;
+					var pageHtml = "";
+					if (isset(list)) {
+						list.forEach(function(item) {
+							pageHtml += '<li>' +
+											'<div class="user-avatar img-box" style="background-image: url('+toAbsUrl(item.UserHead)+');" data-id='+item.Mid+'></div>' +
+											'<div class="team-row-people">' +
+												'<span class="p-name">'+item.NickName+'</span>' +
+												'<span class="p-num">(团队'+item.TeamNum+'人)</span>' +
+											'</div>' +
+											'<div class="team-row-info">' +
+												'<span class="register-time">注册时间 '+item.RegTime+'</span>' +
+												'<span class="income">总收益：'+item.SalesAllMoney+'元</span>' +
+											'</div>' +
+										'</li>';
+						});
+						document.getElementById("pageList").innerHTML = pageHtml;
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">空空如也</div>';
+					}
+				},
+				addEvent: function() {
+					document.querySelector(".btn-top-right").addEventListener("tap", function() {
+						openWin("user_team_rule");
+					});
+					mui("#pageList").on("tap", ".user-avatar", function() {
+						var dataId = this.getAttribute("data-id");
+						api.openWin({
+						    name: 'user_center_'+dataId,
+						    url: './user_center_person.html',
+						    pageParam: {
+						        user_id: dataId
+						    }
+						});
+						return false;
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

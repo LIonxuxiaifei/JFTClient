@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			#hasLogin{display: none;}
+			.log-in #hasLogin{display: inline-block;}
+			.log-in #noLogin{display: none;}
+		</style>
+	</head>
+	<body>
+		<!-- <div class="mui-bar mui-bar-nav blue">
+			<h1 class="mui-title">我的</h1>
+		</div> -->
+		<div class="mui-content user" style="padding-bottom: 30px;">
+			<div class="top-info">
+				<div id="userInfo" class="user-info bot-line">
+					<div id="userAvatar" class="img-box user-avatar" style="background-image: url();"></div>
+					<span id="noLogin" class="no-login">注册&nbsp;&nbsp;|&nbsp;&nbsp;登录</span>
+					<div id="hasLogin" class="info-block">
+						<div class="user-name"><b id="nickName" class="nickname">未填写</b><span id="userLevel" class="level">LV0</span></div>
+						<!-- <div class="user-id">ID:无</div> -->
+						<div class="user-level">
+							<div class="star-level">
+								<div class="bot-bg"><div id="starNum" class="top-bg"></div></div>
+								<span id="commentAveStar">0.0</span>
+							</div>
+						</div>
+					</div>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div class="user-data">
+					<div id="balance" class="item">
+						<span id="balance_num">0</span>
+						<strong>现金余额</strong>
+					</div>
+					<div id="ticket" class="item">
+						<span id="ticket_num">0</span>
+						<strong>优惠券</strong>
+					</div>
+				</div>
+			</div>
+			<ul class="user-list">
+				<li id="user_team">
+					<span class="iconfont icon-tuandui1"></span>
+					<b>我的影响力</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="user_collect">
+					<span class="iconfont icon-1111121"></span>
+					<b>我的收藏</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="user_publish">
+					<span class="iconfont icon-fabu"></span>
+					<b>我的发布</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="user_mini">
+					<span class="iconfont icon-wanggongyi"></span>
+					<b>我的微公益</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="teamwork" class="special">
+					<span class="iconfont icon-hezuo"></span>
+					<b>入驻平台</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="customer_service">
+					<span class="iconfont icon-rexian"></span>
+					<b>客服热线</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="user_feedback">
+					<span class="iconfont icon-xinfeng"></span>
+					<b>问题与建议</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="user_setting" class="special">
+					<span class="iconfont icon-shezhi1"></span>
+					<b>设置</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+				<li id="app_open">
+					<span class="iconfont icon-app"></span>
+					<b>商户端</b>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</li>
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			apiready = function(){
+			    thisPage.init();
+
+			    thisPage.addEvent();
+			};
+			var thisPage = {
+				tel: "",
+				init: function() { //页面初始化
+					thisPage.getTel();
+					thisPage.requestData("history");
+					setTimeout(function() {
+						thisPage.requestData("new");
+					}, 350);
+					setInterval(function(){
+						thisPage.isLogin();
+					},5000);
+					/*初始化下拉刷新*/
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#eee",
+			            textColor: "#bbb",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData("new");
+			        });
+				},
+				getTel: function() {
+					doAjax("Index", "kefuTel", "", "post", function(rs) {
+						if (rs.code == 1) {
+							thisPage.tel = rs.data.info;
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				requestData: function(dataFrom) { //页面数据请求
+
+					if (isLogin() == false) { thisPage.fillData(""); return; }
+
+					window.cachename = api.frameName + api.winName + JSON.stringify(api.pageParam) + db2.getVal("user_token");
+
+					dataFrom = dataFrom || "all";
+
+					if (dataFrom != "new") {
+						db.getConfig(cachename, function(data) {
+							window.histroydata = data;
+							if (data != "" && (window.ajaxsuccess || 0) == 0) {
+								log("历史数据填充");
+								thisPage.fillData(JSON.parse(data));
+							}
+						});
+					}
+
+					if (dataFrom == "history") return false; //只请求历史数据
+
+					/*Ajax请求*/
+
+					var urlParam = "Token=" + db2.getVal("user_token");
+
+					console.log(urlParam);
+
+					doAjax("Member", "getUInfo", urlParam, "post", function(rs) {
+						window.ajaxsuccess = 1;
+						if (rs.ErrorCode == 1) {
+							var stringifyData = JSON.stringify(rs.Data);
+							if (window.histroydata != stringifyData || !rs.Data) {
+								window.histroydata = stringifyData;
+								db.setConfig(cachename, stringifyData);
+								thisPage.fillData(rs.Data);
+
+								//广播用户信息更新
+								api.sendEvent({
+			                        name: 'updataUserInfo'
+			                    });
+
+								log("使用最新数据渲染了");
+							} else {
+								log("与历史一致，不处理【" + window.histroydata + "】");
+							}
+						} else {
+							//api.hideProgress();
+							PubApp.toast(rs.ErrorMsg);
+						}
+
+						api.refreshHeaderLoadDone();
+					});
+				},
+				fillData: function(data) { //页面数据填充
+					if (isLogin() == true) {
+						document.getElementById("userInfo").classList.add("log-in");
+
+						if (isset(data.lists)) {
+
+							//数据存储本地
+							db2.setVal("user_id", data.lists.Mid);
+							db2.setVal("user_avatar", data.lists.UserHead);
+                			db2.setVal("user_nickname", data.lists.NickName);
+                			db2.setVal("user_level", data.lists.level);
+                			db2.setVal("user_sex", data.lists.UserSex);
+                			db2.setVal("user_tel", data.lists.UserTel);
+                			db2.setVal("user_city", data.lists.City);
+                			db2.setVal("user_intro", data.lists.UserIntroduce);
+                			db2.setVal("user_balance", data.lists.UserMoney);
+                			db2.setVal("user_province", data.lists.Province);
+                			db2.setVal("user_issetpaypwd", data.lists.isset_PaidPass); //支付密码设置状态
+                			db2.setVal("user_issetloginpwd", data.lists.isset_UserPass); //登录密码设置状态
+
+							//头像，昵称，等级
+							document.getElementById("userAvatar").style.backgroundImage = "url("+ toAbsUrl(data.lists.UserHead) +")";
+							document.getElementById("nickName").innerHTML = data.lists.NickName;
+							document.getElementById("userLevel").innerHTML = data.lists.level;
+							//卖家评分等级
+							var commentNum = Number(data.lists.CommentAveStar);
+							var score = commentNum.toFixed(1);
+							document.getElementById("commentAveStar").innerHTML = score;
+							var starStyle = "level-" + Math.round(commentNum);
+							document.getElementById("starNum").classList.add(starStyle);
+							//现金金额，优惠券数量
+							document.getElementById("balance_num").innerHTML = data.lists.UserMoney;
+							document.getElementById("ticket_num").innerHTML = data.lists.CouponNum;
+						}
+					} else {
+						document.getElementById("userInfo").classList.remove("log-in");
+						document.getElementById("userAvatar").style.background = "url(../img/default-avatar.png)";
+						document.getElementById("balance_num").innerHTML = "0";
+						document.getElementById("ticket_num").innerHTML = "0";
+					}
+
+					//api.hideProgress();
+					api.refreshHeaderLoadDone();
+				},
+				openApp: function() {
+					//检验app是否安装
+					var system = api.systemType;
+					var app_bundle;
+					if (system == "android") {
+						app_bundle = "cn.iaapp.app.jiafutongservice";
+					} else if (system == "ios") {
+						app_bundle = "URL Scheme"; //ios URL Scheme
+					}
+
+					var installed = api.appInstalled({
+						sync: true,
+						appBundle: app_bundle
+					});
+
+					if (installed) { //已安装应用 直接打开
+						if (system == "android") {
+							api.openApp({
+							    androidPkg: 'cn.iaapp.app.jiafutongservice',
+							    mimeType: 'text/html'
+							}, function(ret, err) {
+							    if (ret) {
+							        console.log(JSON.stringify(ret));
+							    } else {
+							        console.log(JSON.stringify(err));
+							    }
+							});
+						} else if (system == "ios") {
+							api.openApp({
+							    iosUrl: 'https://itunes.apple.com/cn/app/%E6%97%B6%E5%85%89%E9%A9%AC%E7%94%B2/id1316875984', //URLScheme为应用URL Scheme
+							});
+						}
+					} else { //未安装应用 提示下载
+						api.confirm({
+			            	title: '提示',
+			                msg: '未检测到应用，是否确定下载？',
+			                buttons: ['确定', '取消']
+			            }, function(ret, err) {
+			            	if (ret.buttonIndex == 1) {
+			            		downLoadApp();
+			            	}
+			            });
+					}
+
+					function downLoadApp() {
+						var urlParam = "appos=" + system;
+						urlParam += "&serve=1";
+
+						doAjax("index", "download", urlParam, "post", function(rs) {
+							if (rs.code == 1) {
+								if (system == "android") {
+									api.download({
+			                            url: rs.data.source,
+			                            report: true
+			                        }, function(ret, err) {
+			                            if (ret && 0 == ret.state) { //下载进度
+			                            	mui.toast("正在下载应用" + ret.percent + "%");
+			                            }
+			                            if (ret && 1 == ret.state) { //下载完成
+			                                var savePath = ret.savePath;
+			                                api.installApp({
+			                                    appUri: savePath
+			                                });
+			                            }
+			                        });
+								} else if (system == "ios") {
+										api.openApp({
+										    iosUrl: 'https://itunes.apple.com/cn/app/%E6%97%B6%E5%85%89%E9%A9%AC%E7%94%B2/id1316875984', //URLScheme为应用URL Scheme
+										});
+								}
+							} else {
+								mui.toast(rs.msg);
+							}
+						});
+					}
+				},
+				isLogin:function(){
+					var urlParam = "Token=" + db2.getVal("user_token");
+					doAjax("Member", "getUInfo", urlParam, "post", function(rs) {
+							if (rs.ErrorCode == 1) {
+									try{document.getElementById("balance_num").innerHTML = rs.Data.lists.UserMoney;}catch(e){};
+									if(rs.Data.lists.noreadcount > 0){
+											api.sendEvent({
+											    name: 'upFriendLists',
+											    extra: {}
+											});
+									}
+							}
+					});
+				},
+				addEvent: function() { //页面控件事件监听
+					/*登录或登出自定义事件监听*/
+					api.addEventListener({
+						name: "userloginorout"
+					}, function(ret, err) {
+						if (isLogin() == false) {
+							//退出登录清空缓存
+							window.histroydata = null;
+		                    db.setConfig(window.cachename,null);
+		                }
+						thisPage.requestData("new");
+					});
+					/*用户信息修改监听*/
+					api.addEventListener({
+						name: "AlertUserInfo"
+					}, function(ret, err) {
+						log("收到用户信息修改广播")
+						thisPage.requestData("new");
+					});
+
+					/*用户信息*/
+					document.querySelector("#userInfo").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("user_center");
+						} else {
+							openWin("login");
+							return;
+						}
+					});
+
+					/*现金余额*/
+					document.querySelector("#balance").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("user_balance");
+						} else {
+							openWin("login");
+							return;
+						}
+					});
+
+					/*优惠券*/
+					document.querySelector("#ticket").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("user_ticket");
+						} else {
+							openWin("login");
+							return;
+						}
+					});
+
+					/*我的团队*/
+					document.querySelector("#user_team").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("user_team");
+						} else {
+							openWin("login");
+							return;
+						}
+					});
+
+					/*我的收藏*/
+					document.querySelector("#user_collect").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("user_collect");
+						} else {
+							openWin("login");
+							return;
+						}
+					});
+
+					/*我的发布*/
+					document.querySelector("#user_publish").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("user_publish");
+						} else {
+							openWin("login");
+							return;
+						}
+					});
+					/*我的微公益*/
+					document.querySelector("#user_mini").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("user_public");
+						} else {
+							openWin("login");
+							return;
+						}
+					});
+
+					/*商家合作*/
+					document.querySelector("#teamwork").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							//openWin("user_teamwork");
+
+							api.openWin({
+							    name: 'user_teamwork',
+							    url: 'user_teamwork.html',
+							    allowEdit: true
+							});
+						} else {
+							openWin("login");
+							return;
+						}
+					});
+
+					/*客服热线*/
+					document.querySelector("#customer_service").addEventListener("tap", function() {
+						if (thisPage.tel != "") {
+							var tel_number = thisPage.tel;
+							api.confirm({
+							    title: '提示',
+							    msg: '是否拨打' + tel_number,
+							    buttons: ['拨打', '取消']
+							}, function(ret, err) {
+								if (ret.buttonIndex == 1) {
+									api.call({
+									    type: 'tel',
+									    number: tel_number
+									});
+								}
+							});
+						}
+					});
+
+					/*问题反馈*/
+					document.querySelector("#user_feedback").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("user_feedback");
+						} else {
+							openWin("login");
+							return;
+						}
+					});
+
+					/*设置*/
+					document.querySelector("#user_setting").addEventListener("tap", function() {
+						if (isLogin() == true) {
+							openWin("user_setting");
+						} else {
+							openWin("login");
+							return;
+						}
+					});
+
+					/*应用跳转*/
+					document.getElementById("app_open").addEventListener("tap", function() {
+						thisPage.openApp();
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

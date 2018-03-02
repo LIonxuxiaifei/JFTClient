@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.publish-item.select.addr .addr-text span {
+				text-align: right;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">我要淘</h1>
+		</div>
+		<div class="bot-control">
+			<div class="btn-item total">
+				<span class="total-text">合计 : <i id="page_total">0.00</i>元</span>
+			</div>
+			<div id="btn_submit_order" class="btn-item warning">提交下单</div>
+		</div>
+		<div class="mui-content apply-free has-bot-tab-big">
+			<div id="order_info" class="collect-item-goods">
+				<!--<div class="top-row">
+					<div class="user-avatar img-box" style="background-image: url();"></div>
+					<b class="user-name">李果果</b>
+				</div>
+				<div class="goods-info">
+					<p class="goods-pic img-box" style="background-image: url();"></p>
+					<strong class="goods-name">iphone6国行(型号:A1586)16G白银&nbsp;</strong>
+					<div class="stock">库存 : &nbsp;<i>0</i></div>
+					<div class="price-info">
+						<div class="price-box">
+							<i class="m-icon">&yen;</i>
+							<span class="m-num">0</span>
+						</div>
+						<div class="old-price">原价 &yen; 0</div>
+					</div>
+				</div>-->
+			</div>
+			<div class="publish-edit">
+				<div class="publish-item">
+					<b class="item-name">数量</b>
+					<div class="select-number">
+						<i class="iconfont icon-jian"></i>
+						<!-- <span id="g_num" class="s-num">1</span> -->
+						<input id="g_num" type="number" value="1" />
+						<i class="iconfont icon-jia"></i>
+					</div>
+				</div>
+				<div class="publish-item">
+					<b class="item-name">快递方式</b>
+					<span id="freight_way" class="item-font"><!--自提--></span>
+				</div>
+				<!--包邮不显示-->
+				<div id="addr_ziti">
+					<!--<div class="publish-item select re-addr">
+						<b class="item-name">自提地址</b>
+						<div class="addr-text">
+							<span>张飞13852643222</span>
+							<span>浙江省杭州市拱墅区丰登街341</span>
+							<span>某某小区20栋1单元302</span>
+						</div>
+					</div>	-->
+				</div>
+				<!--包邮不显示-->
+				<div id="btn_select_addr" class="publish-item select addr">
+					<b class="item-name">地址</b>
+					<div id="user_address">
+						<span id="unselected" class="item-text text-right">请选择地址</span>
+						<!-- <div class="addr-text">
+							<span>张飞13852643222</span>
+							<span>浙江省杭州市拱墅区丰登街341</span>
+							<span>某某小区20栋1单元302</span>
+						</div> -->
+					</div>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<div class="publish-item">
+					<b class="item-name">实付金额</b>
+					<span class="item-font warning"><i id="rel_price">0.00</i> 元</span>
+				</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				priceSingle: "0",
+				userAddress: {}, //userAddress addrPro addrCity addrArea addrRelname addrPhone
+				init: function() {
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".bot-control"));
+					
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+
+			        /*初始化下拉刷新*/
+			        api.setRefreshHeaderInfo({
+			            visible: true,
+			            bgColor: "#eee",
+			            textColor: "#bbb",
+			            textDown: "下拉刷新...",
+			            textUp: "松开刷新...",
+			            showTime: true
+			        }, function(ret, err) {
+			            thisPage.requestData("new");
+			        });
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&id=" + api.pageParam.data_id;
+					
+					doAjax("Client", "orderGoodsInfo", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+
+						api.refreshHeaderLoadDone();
+					});
+				},
+				fillData: function(data) {
+					var dataInfo = data.info;
+
+					thisPage.priceSingle = dataInfo.goods_discount_price;
+
+					document.getElementById("order_info").innerHTML = 	'<div class="top-row">' +
+																			'<div class="user-avatar img-box" style="background-image: url('+toAbsUrl(dataInfo.UserHead)+');"></div>' +
+																			'<b class="user-name">'+dataInfo.NickName+'</b>' +
+																		'</div>' +
+																		'<div class="goods-info">' +
+																			'<p class="goods-pic img-box" style="background-image: url('+toAbsUrl(dataInfo.goods_picture)+');"></p>' +
+																			'<strong class="goods-name">'+dataInfo.goods_goodsname+'</strong>' +
+																			'<div class="stock">库存 : &nbsp;<i>'+dataInfo.goods_num+'</i></div>' +
+																			'<div class="price-info">' +
+																				'<div class="price-box">' +
+																					'<i class="m-icon">&yen;</i>\n' +
+																					'<span class="m-num">'+dataInfo.goods_discount_price.split(".")[0]+'</span><span class="m-num-deci">.'+dataInfo.goods_discount_price.split(".")[1]+'</span>' +
+																					'<i class="m-icon">/'+dataInfo.goods_unit+'</i>' +
+																				'</div>' +
+																				'<div class="old-price">原价 &yen; '+dataInfo.goods_price+'</div>' +
+																			'</div>' +
+																		'</div>';
+
+					document.getElementById("freight_way").innerText = dataInfo.goods_freight_mode;
+
+					/*自提地址*/
+					var addrZiti = "";
+					if (dataInfo.goods_freight_mode == "自提") {
+						addrZiti = 	'<div class="publish-item select addr">' +
+										'<b class="item-name">自提地址</b>' +
+										'<div class="addr-text">' +
+											'<span>'+dataInfo.goods_realname+' '+dataInfo.goods_phone+'</span>' +
+											'<span>'+dataInfo.goods_address+'</span>' +
+										'</div>' +
+									'</div>';
+					}
+					document.getElementById("addr_ziti").innerHTML = addrZiti;
+
+					/*默认地址*/
+					var addressInfo = data.info.addressInfo;
+					if (isset(addressInfo)) {
+
+						thisPage.userAddress.userAddress = addressInfo.adrress;
+						thisPage.userAddress.addrPhone = addressInfo.Tel;
+						thisPage.userAddress.addrRelname = addressInfo.Consignee;
+
+						document.getElementById("user_address").innerHTML = '<div class="addr-text">\
+																				<span>'+addressInfo.Consignee+" "+addressInfo.Tel+'</span>\
+																				<span>'+addressInfo.adrress+'</span>\
+																			</div>';
+					}
+
+					document.getElementById("rel_price").innerText = dataInfo.goods_discount_price;
+
+					document.getElementById("page_total").innerText = dataInfo.goods_discount_price;
+
+				},
+				submit: function() {
+					if (document.getElementById("g_num").value == "" || document.getElementById("g_num").value == 0) {
+						mui.toast("数量必须为大于0的数字");
+						return false;
+					}
+
+					if (document.getElementById("unselected")) {
+						mui.toast("请选择地址");
+						return false;
+					}
+
+					api.showProgress({
+					    title: "订单提交中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&id=" + api.pageParam.data_id;
+					urlParam += "&order_num=" + document.getElementById("g_num").value;
+					urlParam += "&order_freight_mode=" + document.getElementById("freight_way").innerText;
+					urlParam += "&order_address=" + thisPage.userAddress.userAddress;
+					urlParam += "&order_province=" + thisPage.userAddress.addrPro;
+					urlParam += "&order_city=" + thisPage.userAddress.addrCity;
+					urlParam += "&order_area=" + thisPage.userAddress.addrArea;
+					urlParam += "&order_truename=" + thisPage.userAddress.addrRelname;
+					urlParam += "&order_phone=" + thisPage.userAddress.addrPhone;
+					
+					doAjax("Client", "goodsOrder", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							PubApp.toast(rs.msg);
+
+							api.execScript({
+							    name: 'root',
+							    frameName: 'order',
+							    script: 'thisPage.requestData();'
+							});
+
+							api.sendEvent({
+							    name: "gotoOrderList"
+							});
+							
+							setTimeout(function() {
+								api.closeToWin({
+								    name: "root"
+								});
+							}, 350);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*数量加减*/
+					var countNum = document.getElementById("g_num");
+					var pageTotal = document.getElementById("page_total");
+					var relPrice = document.getElementById("rel_price");
+
+					countNum.addEventListener("input", function() {
+						var currentPrice = (thisPage.priceSingle * this.value).toFixed(2);
+						pageTotal.innerText = currentPrice;
+						relPrice.innerText = currentPrice;
+					});
+					document.querySelector(".icon-jia").addEventListener("tap", function() {
+						countNum.value ++;
+						var currentPrice = (thisPage.priceSingle * countNum.value).toFixed(2);
+						pageTotal.innerText = currentPrice;
+						relPrice.innerText = currentPrice;
+					});
+					document.querySelector(".icon-jian").addEventListener("tap", function() {
+						if (countNum.value > 1) {
+							countNum.value --;
+							var currentPrice = (thisPage.priceSingle * countNum.value).toFixed(2);
+							pageTotal.innerText = currentPrice;
+							relPrice.innerText = currentPrice;
+						}
+					});
+
+					/*选择地址*/
+					document.querySelector("#btn_select_addr").addEventListener("tap", function() {
+						openWin("user_setting_address_manage");
+					});
+
+					/*监听地址选择事件*/
+					api.addEventListener({
+					    name: "userSelectAddress"
+					}, function(ret, err) {
+						thisPage.userAddress = ret.value;
+					    var htmlStr = 	'<div class="addr-text">' +
+											'<span>'+ret.value.userInfo+'</span>' +
+											'<span>'+ret.value.userAddress+'</span>' +
+										'</div>';
+					    document.getElementById("user_address").innerHTML = htmlStr;
+					});
+
+					/*提交下单*/
+					document.querySelector("#btn_submit_order").addEventListener("tap", function() {
+						thisPage.submit();
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

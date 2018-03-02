@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">详情页</h1>
+			<span id="btn_share" class="btn-top-right iconfont icon-fenxiang"></span>
+			<span id="btn_collect" class="btn-top-right iconfont icon-aixin"></span>
+		</div>
+		<div class="bot-control">
+			<div class="btn-item special">
+				<span id="btn_call" class="item">
+					<i class="iconfont icon-rexian"></i>
+					<span>一键拨号</span>
+				</span>
+				<span id="btn_com" class="item">
+					<i class="iconfont icon-jiaoliu"></i>
+					<span>评论</span>
+				</span>
+			</div>
+			<div id="btn_orders" class="btn-item warning">立即下单</div>
+		</div>
+		<div class="mui-content user-public-detail has-bot-tab">
+			<div class="main-info">
+				<div class="list-item">
+					<div class="top-info">
+						<div id="user_avatar" class="img-box avatar" style="background-image: url();"></div>
+						<div class="user-info">
+							<div class="row">
+								<div id="user_info" class="name-info"><!-- 李果果<i class="lv">LV0</i> --></div>
+							</div>
+							<div class="row">
+								<div class="star-level">
+									<div class="bot-bg"><div class="top-bg level-0"></div></div>
+									<span>0.0</span>
+								</div>
+								<div class="order-num"><i id="order_num">0</i>单</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="btn_follow" class="btn-follow">加关注</div>
+				<div id="detail_content" class="content">
+					<ul class="pics"><li><img src="" /></li></ul>
+					<div style="position: relative;padding-bottom: 20px;">
+						<div class="price-info">
+							<!--<div class="price-box">
+								<i class="m-icon">吐血价&yen;</i>
+								<span class="m-num">0</span>
+							</div>
+							<div class="old-price">原价 &yen; 0</div>-->
+						</div>
+							<div class="info-title"><!--iphone6国行(型号:A1586)16G白银-->&nbsp;</div>
+							<div class="remain"><!--库存 : &nbsp;<i>3</i>件 <span class="g-info">7成新</span><span class="g-info">自提</span>-->&nbsp;</div>
+							<div class="text">&nbsp;</div>
+					</div>
+				</div>
+			</div>
+			<div class="com-block">
+				<div class="top-tab">
+					<div class="item on" data-type="comment">服务评论 (<i id="commentNum">0</i>)</div>
+					<div class="item" data-type="chat">评论区 (<i id="chatNum">0</i>)</div>
+				</div>
+				<div id="commentList" class="user-center">
+					<ul id="comment" class="comment-list active">
+						<!-- <li>
+							<div class="user-avatar img-box" style="background-image: : url();"></div>
+							<div class="com-time">2016-12-06</div>
+							<div class="com-info">
+								<div class="com-person">菜和</div>
+								<div class="grade">
+									<span>打分</span>
+									<div class="star-level">
+										<div class="bot-bg"><div class="top-bg level-0"></div></div>
+									</div>
+								</div>
+								<p class="com-content">好喜欢test内容，下次还找啊啊啊啊啊</p>
+							</div>
+						</li> -->
+					</ul>
+					<ul id="chat" class="comment-list">
+						<!-- <li>
+							<div class="user-avatar img-box" style="background: url(../img_temp/user-info-avatar.png);"></div>
+							<div class="com-time">2016-12-06</div>
+							<div class="com-info">
+								<div class="com-person">菜和2333</div>
+								<p class="com-content">好喜欢test内容，下次还找啊啊啊啊啊</p>
+							</div>
+						</li> -->
+					</ul>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.zoom.js" ></script>
+		<script type="text/javascript" src="../js/mui.previewimage.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			var share_title = "邀请注册",
+				share_desc = "邀请注册",
+				share_pic = "Skin/img/share.png",
+				share_url = "http://jiafutong.iaapp.cn/index.php/app/Share/register/Pid/" + db2.getVal("user_pid");
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				typeKey: "taosihuo",
+				uid: "",
+				tel: "",
+				timerCount: 1,
+				init: function() {
+					mui.previewImage();
+
+					pageControl.winBack();
+					PubApp.share();
+			
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function() {
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "type_key=" + thisPage.typeKey;
+					urlParam += "&id=" + api.pageParam.page_id;
+					urlParam += "&token=" + (isLogin() == true ? db2.getVal("user_token") : "");
+					
+					doAjax("Client", "client_details", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							thisPage.fillData(rs.data);
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+					});
+				},
+				fillData: function(data) {
+					var detailInfo = data.list;
+					thisPage.uid = detailInfo.uid;
+					thisPage.tel = detailInfo.telephone;
+
+					//商品状态
+					if (detailInfo.goods_status == 2) {
+						document.getElementById("btn_orders").classList.add("invalid");
+						document.getElementById("btn_orders").innerText = "已下架";
+					}
+
+					/*收藏和关注状态*/
+					if (detailInfo.is_collection == 1) {
+						document.getElementById("btn_collect").classList.add("on");
+					}
+					if (detailInfo.is_follow == 1) {
+						document.getElementById("btn_follow").classList.add("on");
+						document.getElementById("btn_follow").innerText = "取消关注";
+					}
+
+					/*用户信息*/
+					document.getElementById("user_avatar").style.backgroundImage = 'url('+toAbsUrl(detailInfo.UserHead)+')';
+					document.getElementById("user_info").innerHTML = detailInfo.NickName + '<i class="lv"> LV'+detailInfo.lv+'</i>';
+					document.getElementById("order_num").innerText = detailInfo.SellerOrderCount;
+
+					var commentNum = Number(detailInfo.CommentAveStar);
+					var score = commentNum.toFixed(1);
+					var starHtml = 	'<div class="bot-bg"><div class="top-bg level-'+Math.round(commentNum)+'"></div></div>\n<span>'+score+'</span>';
+					document.querySelector(".star-level").innerHTML = starHtml;
+
+					/*内容*/
+					var picList = detailInfo.picture;
+					var picHtml = "";
+					picList.forEach(function(item) {
+						picHtml += '<li><img src="'+toAbsUrl(item)+'" alt="图片加载失败" data-preview-src="" data-preview-group="1" /></li>';
+					});
+					document.getElementById("detail_content").innerHTML = 	'<ul class="pics">'+picHtml+'</ul>' +
+																			'<div style="position: relative;padding-bottom: 20px;">' +	
+																				'<div class="price-info">' +
+																					'<div class="price-box">' +
+																						'<i class="m-icon">吐血价 &yen;</i>\n' +
+																						'<span class="m-num">'+detailInfo.goods_discount_price.split(".")[0]+'</span><span class="m-num-deci">.'+detailInfo.goods_discount_price.split(".")[1]+'</span>' +
+																						'<i class="m-icon">/'+detailInfo.unit+'</i>' +
+																					'</div>' +
+																					'<div class="old-price">原价 &yen; '+detailInfo.goods_current_price+'</div>' +
+																				'</div>' +
+																				'<div class="info-title">'+detailInfo.goodsname+'</div>' +
+																				'<div class="remain">库存 : &nbsp;<i>'+detailInfo.goods_num+'</i>件 <span class="g-info">'+detailInfo.degree+'成新</span><span class="g-info">'+detailInfo.goods_freight_mode+'</span></div>' +
+																				'<div class="text">'+detailInfo.content+'</div>' +
+																			'</div>';
+					/*服务评价*/
+					var list_comment = data.list_comment;
+					document.getElementById("commentNum").innerText = list_comment.length; //评论数量
+					var com_html = "";
+					if (isset(list_comment)) {
+						list_comment.forEach(function(item) {
+							var scoreNum = Number(item.commen_score);
+							var starHtml = '<div class="bot-bg"><div class="top-bg level-'+Math.round(scoreNum)+'"></div></div>';
+
+							var comPicList = item.commen_picture;
+							var comPicHtml = "";
+							comPicList.forEach(function(item) {
+								comPicHtml += '<p class="pic-item img-box" style="background-image: url('+toAbsUrl(item)+');"></p>'
+							});
+
+							var replyHtml = "";
+							if (item.reply && item.reply != '') {
+								replyHtml = '<div class="reply">' +
+												'<i class="iconfont icon-07"></i>' +
+												'<div class="reply-info">' +
+													'<span class="reply-person">回复 : </span>' +
+													'<span class="reply-content">'+item.reply+'</span>' +
+												'</div>' +
+											'</div>';
+							}
+
+							com_html += '<li>' +
+											'<div class="user-avatar img-box" style="background-image: url('+toAbsUrl(item.UserHead)+');"></div>' +
+											'<div class="com-time">'+item.commen_create_time+'</div>' +
+											'<div class="com-info">' +
+												'<div class="com-person">'+item.NickName+'</div>' +
+												'<div class="grade">' +
+													'<span>打分</span>' +
+													'<div class="star-level">'+starHtml+'</div>' +
+												'</div>' +
+												'<p class="com-content">'+item.commen_content+'</p>' +
+												'<div class="pics">'+comPicHtml+'</div>' +
+											'</div>' +
+											replyHtml +
+										'</li>';
+						});
+						document.getElementById("comment").innerHTML = com_html;
+					} else {
+						document.getElementById("comment").innerHTML = '<div class="empty-list">空空如也</div>';
+					}
+					
+					/*交流区*/
+					var list_interflow = data.list_interflow;
+					document.getElementById("chatNum").innerText = list_interflow.length; //评论数量
+					var chat_html = "";
+					if (isset(list_interflow)) {
+						list_interflow.forEach(function(item) {
+							chat_html += '<li>' +
+											'<div class="user-avatar img-box" style="background-image: url('+toAbsUrl(item.UserHead)+');"></div>' +
+											'<div class="com-time">'+item.interflow_createtime+'</div>' +
+											'<div class="com-info">' +
+												'<div class="com-person">'+item.NickName+'</div>' +
+												'<p class="com-content">'+item.interflow_content+'</p>' +
+											'</div>' +
+										'</li>';
+						});
+						document.getElementById("chat").innerHTML = chat_html;
+					} else {
+						document.getElementById("chat").innerHTML = '<div class="empty-list">空空如也</div>';
+					}
+																			
+				},
+				addToCollect: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&gid=" + api.pageParam.page_id;
+					urlParam += "&type_key=" + thisPage.typeKey;
+					
+					doAjax("Index", "addCollection", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							control.classList.add("on");
+							PubApp.toast(rs.msg);
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						} else {
+							api.toast({ msg: rs.msg });
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						}
+					});
+				},
+				removeToCollect: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&gid=" + api.pageParam.page_id;
+					urlParam += "&type_key=" + thisPage.typeKey;
+					
+					doAjax("Index", "cancelCollection", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							control.classList.remove("on");
+							PubApp.toast(rs.msg);
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						} else {
+							api.toast({ msg: rs.msg });
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						}
+					});
+				},
+				addFollow: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&follow_mid=" + thisPage.uid;
+					
+					doAjax("Index", "addFollow", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							control.innerText = "取消关注"
+							control.classList.add("on");
+							PubApp.toast(rs.msg);
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						} else {
+							api.toast({ msg: rs.msg });
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						}
+					});
+				},
+				removeFollow: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&follow_mid=" + thisPage.uid;
+					
+					doAjax("Index", "cancelFollow", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							control.innerText = "加关注"
+							control.classList.remove("on");
+							PubApp.toast(rs.msg);
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						} else {
+							api.toast({ msg: rs.msg });
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						}
+					});
+				},
+				addEvent: function() {
+					/*服务评价&交流区切换*/
+					mui(".top-tab").on("tap", ".item", function() {
+						if (this.classList.contains("on")) return;
+						document.querySelector(".top-tab .on").classList.remove("on");
+						this.classList.add("on");
+						
+						var type = this.getAttribute("data-type");
+						document.querySelector("#commentList .active").classList.remove("active");
+						document.getElementById(type).classList.add("active");
+					});
+
+					/*一键拨号*/
+					document.querySelector("#btn_call").addEventListener("tap", function() {
+						if (thisPage.tel != "") {
+							var tel_number = thisPage.tel;
+							api.confirm({
+							    title: '提示',
+							    msg: '是否拨打' + tel_number,
+							    buttons: ['拨打', '取消']
+							}, function(ret, err) {
+								if (ret.buttonIndex == 1) {
+									api.call({
+									    type: 'tel',
+									    number: tel_number
+									});
+								}
+							});
+						}
+					});
+
+					/*交流*/
+					document.getElementById("btn_com").addEventListener("tap", function() {
+						var param = "data_id=" + api.pageParam.page_id;
+						param += "&data_type=" + thisPage.typeKey;
+						openWin("user_communicate", param);	
+					});
+
+					api.addEventListener({
+					    name: 'updateComList'
+					}, function(ret, err) {
+					    setTimeout(function() {
+				            thisPage.requestData();
+				        }, 350);
+					});
+
+					/*收藏或取消收藏*/
+					document.querySelector("#btn_collect").addEventListener("tap", function() {
+						var self = this;
+						if (isLogin() == true) {
+							if (this.classList.contains("on")) { //取消收藏
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									thisPage.removeToCollect(self);
+								}
+							} else { //添加收藏
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									thisPage.addToCollect(self);
+								}
+							}
+						} else {
+							openWin('login');
+						}
+					});
+
+
+					/*关注或取消关注*/
+					document.querySelector("#btn_follow").addEventListener("tap", function() {
+						var self = this;
+						if (isLogin() == true) {
+							if (this.classList.contains("on")) { //取消关注
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									thisPage.removeFollow(self);
+								}
+							} else { //添加关注
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									thisPage.addFollow(self);
+								}
+							}
+						} else {
+							openWin('login');
+						}
+					});
+
+					/*立即下单*/
+					document.querySelector("#btn_orders").addEventListener("tap", function() {
+						if (this.classList.contains("invalid")) return;
+
+						if (isLogin() == true) {
+							var param = "data_id=" + api.pageParam.page_id;
+							openWin("list_tao_orders", param);
+						} else {
+							openWin('login');
+						}					
+					});
+
+					/*分享给朋友*/
+					document.querySelector("#btn_share").addEventListener("tap", function() {
+						mask.show();
+            			$api.removeCls($api.dom("#share_box"), "hide");
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

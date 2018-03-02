@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../css/mui.picker.css" />
+		<link rel="stylesheet" href="../css/mui.poppicker.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<h1 class="mui-title">填写资料</h1>
+		</div>
+		<div class="mui-content teamwork money">
+			<div class="teamwork-info">
+				<div class="info-row">
+					<b class="info-name">商家名称</b>
+					<input id="ad_name" type="text" placeholder="输入商家名称" />
+				</div>
+				<div id="hotel_location" class="info-row">
+					<b class="info-name">所在位置</b>
+					<span class="info-con">选择商家位置</span>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div>
+				<!-- <div class="info-row text-area">
+					<textarea placeholder="填写商家详细地址"></textarea>
+				</div> -->
+				<!-- <div class="info-row">
+					<b class="info-name">姓名</b>
+					<input id="user_bank_relname" type="text" placeholder="输入银行预留姓名" />
+				</div>
+				<div class="info-row">
+					<b class="info-name">银行卡号</b>
+					<input id="user_bank_card" type="number" placeholder="输入银行卡号" />
+				</div>
+				<div class="info-row">
+					<b class="info-name">开户银行</b>
+					<input id="user_bank" type="text" placeholder="输入开户银行" />
+				</div>
+				<div id="bank_area" class="info-row">
+					<b class="info-name">所在区域</b>
+					<span class="info-con">选择分支行所在区域</span>
+					<i class="mui-icon mui-icon-arrowright arrow-right"></i>
+				</div> -->
+				<div class="info-row">
+					<b class="info-name">姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名</b>
+					<input id="user_relname" type="text" placeholder="请输入身份证姓名" />
+				</div>
+				<div class="info-row">
+					<b class="info-name">身份证号</b>
+					<input id="user_card_number" type="text" placeholder="请输入身份证号" />
+				</div>
+			</div>
+			<div class="upload-block">
+				<div class="btn-addpic img-box" data-value="front">
+					<i class="iconfont icon-cha btn_remove" style="display: none;"></i>
+					<div class="btn_info" style="display: block;">
+						<i class="iconfont icon-jiahao1"></i>
+						<span class="expla-text">上传法人身份证正面照</span>
+					</div>
+				</div>
+				<div class="btn-addpic img-box" data-value="back">
+					<i class="iconfont icon-cha btn_remove" style="display: none;"></i>
+					<div class="btn_info" style="display: block;">
+						<i class="iconfont icon-jiahao1"></i>
+						<span class="expla-text">上传法人身份证反面照</span>
+					</div>
+				</div>
+				<div class="btn-addpic img-box business" data-value="license">
+					<i class="iconfont icon-cha btn_remove" style="display: none;"></i>
+					<div class="btn_info" style="display: block;">
+						<i class="iconfont icon-jiahao1"></i>
+						<span class="expla-text">上传营业执照</span>
+					</div>
+				</div>
+			</div>
+			<div class="remark" style="display:none">
+
+			</div>
+			<div class="btn-submit">申请</div>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/mui.picker.js" ></script>
+		<script type="text/javascript" src="../js/mui.poppicker.js" ></script>
+		<script type="text/javascript" src="../js/city.data-3.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var listenType = 0;
+			var btnType = 0;
+			var thisPage = {
+				pageType: "2", //合作类型 1-酒店 2-广告
+				hotelAddress: {
+						Address:'',
+						lat:'',
+						lng:''
+				}, //商家位置
+				pageImg: {
+					front: "",
+					back: "",
+					license: ""
+				},
+				bankArea: null, //province city area
+				init: function() {
+					pageControl.winBack();
+					pageControl.fixedHide(document.querySelector(".btn-submit"));
+					thisPage.pageInit();
+
+					//初始化省市区选择器
+					setTimeout(function() {
+						window.pickerBankArea = new mui.PopPicker({layer: 3});
+						window.pickerBankArea.setData(cityData3);
+					}, 20);
+				},
+				pageInit:function(){
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+					var urlParam = "type=2&Token=" + db2.getVal("user_token");
+					doAjax("Member", "getSellerInfo", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+								if(rs.Data != ""){
+										var imgElAll = document.querySelectorAll('.btn-addpic');
+										document.getElementById("ad_name").value = rs.Data.HotelName;
+										document.getElementById("user_relname").value = rs.Data.RealName;
+										document.getElementById("user_card_number").value = rs.Data.IdNumber;
+										thisPage.hotelAddress.Address = rs.Data.Address;
+										thisPage.hotelAddress.lat = rs.Data.Lat;
+										thisPage.hotelAddress.lng = rs.Data.Lng;
+										thisPage.pageImg.front = rs.Data.IdNumberImg_Z;
+										thisPage.pageImg.back = rs.Data.IdNumberImg_F;
+										thisPage.pageImg.license = rs.Data.License;
+										document.querySelector("#hotel_location .info-con").innerText = thisPage.hotelAddress.Address;
+										if(rs.Data.Address == ""){
+												thisPage.setLocation();
+										};
+										if(thisPage.pageImg.front != ""){
+												thisPage.pageImg['front'] = thisPage.pageImg.front;
+												imgElAll[0].style.backgroundImage = 'url('+toAbsUrl(thisPage.pageImg.front)+')';
+												imgElAll[0].querySelector(".btn_info").style.display = 'none';
+												imgElAll[0].querySelector(".btn_remove").style.display = 'block';
+										};
+										if(thisPage.pageImg.back != ""){
+												thisPage.pageImg['back'] = thisPage.pageImg.back;
+												imgElAll[1].style.backgroundImage = 'url('+toAbsUrl(thisPage.pageImg.back)+')';
+												imgElAll[1].querySelector(".btn_info").style.display = 'none';
+												imgElAll[1].querySelector(".btn_remove").style.display = 'block';
+										};
+										if(thisPage.pageImg.license != ""){
+												thisPage.pageImg['license'] = thisPage.pageImg.license;
+												imgElAll[2].style.backgroundImage = 'url('+toAbsUrl(thisPage.pageImg.license)+')';
+												imgElAll[2].querySelector(".btn_info").style.display = 'none';
+												imgElAll[2].querySelector(".btn_remove").style.display = 'block';
+										};
+										if(rs.Data.beizhu != ""){
+												document.querySelector('.remark').style.display = 'block';
+												document.querySelector('.remark').innerHTML = rs.Data.beizhu;
+										};
+										if(rs.Data.Status == "2"){
+												listenType = "2";
+												var inputAll = document.querySelectorAll('input');
+												var maxLen = inputAll.length;
+												for(var j = 0;j < maxLen;j ++){
+													 inputAll[j].setAttribute('disabled','disabled');
+												};
+												document.querySelector('.btn-submit').style.display = 'block';
+												document.querySelector('.btn-submit').style.backgroundColor = '#eeeeee';
+												document.querySelector('.btn-submit').innerHTML = "审核已通过";
+												btnType = 1;
+										}
+								}else{
+										thisPage.setLocation();
+								};
+						} else {
+								thisPage.setLocation();
+						}
+					});
+				},
+				setLocation: function() {
+					var map = api.require('bMap');
+					map.getNameFromCoords({
+					    lon: db2.getVal("location_lon"),
+					    lat: db2.getVal("location_lat")
+					}, function(ret, err) {
+					    if (isset(ret.address)) {
+					       	document.querySelector("#hotel_location .info-con").innerText = ret.address;
+					       	thisPage.hotelAddress.address = ret.address;
+									thisPage.hotelAddress.lat = db2.getVal("location_lat");
+									thisPage.hotelAddress.lng = db2.getVal("location_lon");
+					    } else {
+					    	mui.toast("获取位置信息失败");
+					    }
+					});
+				},
+				submit: function() {
+					var ad_name = document.getElementById("ad_name").value;
+					// var user_bank = document.getElementById("user_bank").value;
+					// var user_bank_relname = document.getElementById("user_bank_relname").value;
+					// var user_bank_card = document.getElementById("user_bank_card").value;
+					var user_relname = document.getElementById("user_relname").value;
+					var user_card_number = document.getElementById("user_card_number").value;
+
+					if (ad_name == "") {
+						PubApp.toast("请输入商家名称");
+						return false;
+					}
+
+					// if (thisPage.hotelAddress == null) {
+					// 	PubApp.toast("请选择商家位置");
+					// 	return false;
+					// }
+
+					// if (user_bank_relname == "") {
+					// 	PubApp.toast("请输入银行预留姓名");
+					// 	return false;
+					// }
+
+					// var bank_reg = /^(\d{16}|\d{19})$/;
+					// if (!bank_reg.test(user_bank_card)) {
+					// 	PubApp.toast("请输入正确的银行卡号");
+					// 	return false;
+					// }
+
+					// if (user_bank == "") {
+					// 	PubApp.toast("请输入开户银行");
+					// 	return false;
+					// }
+
+					// if (thisPage.bankArea == null) {
+					// 	PubApp.toast("请选择分支行所在区域");
+					// 	return false;
+					// }
+
+					if (user_relname == "") {
+						PubApp.toast("请输入姓名");
+						return false;
+					}
+
+					var idcard_reg = /^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$|^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)$/;
+					if (!idcard_reg.test(user_card_number)) {
+						PubApp.toast("请输入正确的身份证号");
+						return false;
+					}
+
+					if (thisPage.pageImg.front == "") {
+						PubApp.toast("请上传身份证正面照");
+						return false;
+					}
+
+					if (thisPage.pageImg.back == "") {
+						PubApp.toast("请上传身份证反面照");
+						return false;
+					}
+
+					// if (thisPage.pageImg.license == "") {
+					// 	PubApp.toast("请上传营业执照");
+					// 	return false;
+					// }
+
+					api.showProgress({
+					    title: "提交中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "Token=" + db2.getVal("user_token");
+					urlParam += "&HotelName=" + ad_name;
+					urlParam += "&Address=" + thisPage.hotelAddress.address;
+					urlParam += "&Lat=" + thisPage.hotelAddress.lat;
+					urlParam += "&Lng=" + thisPage.hotelAddress.lng;
+
+					// urlParam += "&Name=" + user_bank_relname;
+					// urlParam += "&BankName=" + user_bank;
+					// urlParam += "&CardNumber=" + user_bank_card;
+					urlParam += "&IdNumber=" + user_card_number;
+					urlParam += "&RealName=" + user_relname;
+
+					// urlParam += "&BankSheng=" + thisPage.bankArea.province;
+					// urlParam += "&BankShi=" + thisPage.bankArea.city;
+					// urlParam += "&BankQu=" + thisPage.bankArea.area;
+
+					urlParam += "&Type=" + thisPage.pageType;
+
+					urlParam += "&IdNumberImg=" + thisPage.pageImg.front + "|" + thisPage.pageImg.back;
+					urlParam += "&License=" + thisPage.pageImg.license;
+
+					//alert(urlParam); return;
+
+					doAjax("Member", "enterSeller", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.ErrorCode == 1) {
+							api.alert({
+							    title: '提交成功',
+							    msg: '等待审核（需要1~3个工作日）',
+							}, function(ret, err) {
+									api.closeWin();
+							});
+						} else {
+							api.toast({ msg: rs.ErrorMsg });
+						}
+					});
+				},
+				addEvent: function() {
+					/*提交申请*/
+					document.querySelector(".btn-submit").addEventListener("tap", function() {
+						if(btnType == 0){
+								thisPage.submit();
+						};
+					});
+
+					/*选择商家位置*/
+					document.querySelector("#hotel_location").addEventListener("tap", function() {
+						if(listenType == "2"){return false;}
+						var param = "addr_type=hotelLocation";
+						openWin("map_addr", param);
+						return false;
+					});
+
+					/*选择分支行区域*/
+					// document.querySelector("#bank_area").addEventListener("tap", function() {
+					// 	window.pickerBankArea.show(function (selectItems) {
+					// 		document.querySelector("#bank_area .info-con").innerText = selectItems[0].text+" "+selectItems[1].text+" "+selectItems[2].text;
+					// 		document.querySelector("#bank_area .info-con").style.color = "#333";
+					// 		thisPage.bankArea = {
+					// 			province: selectItems[0].text,
+					// 			city: selectItems[1].text,
+					// 			area: selectItems[2].text
+					// 		};
+					// 	});
+					// });
+
+					/*监听定位选择事件*/
+					api.addEventListener({
+					    name: "mapSelectAddress"
+					}, function(ret, err) {
+						thisPage.hotelAddress = ret.value.info;
+						document.querySelector("#hotel_location .info-con").innerText = thisPage.hotelAddress.address;
+						document.querySelector("#hotel_location .info-con").style.color = "#333";
+					});
+
+					/*上传图片*/
+					mui(".upload-block").on("tap", ".btn-addpic", function() {
+						if(listenType == "2"){return false;}
+						document.getElementById("user_card_number").blur();
+						var self = this;
+						var data_value = self.getAttribute("data-value");
+						if (thisPage.pageImg[data_value] == "") {
+							getImgAndCrop(function(locationImgPath) {
+				                uploadimg(locationImgPath, function(remateurl) {
+				                	thisPage.pageImg[data_value] = remateurl;
+						        	self.style.backgroundImage = 'url('+toAbsUrl(remateurl)+')';
+						        	self.querySelector(".btn_info").style.display = 'none';
+						        	self.querySelector(".btn_remove").style.display = 'block';
+				                });
+				            }, 1000, 1000);
+						}
+					});
+
+					/*删除图片*/
+					mui(".upload-block").on("tap", ".btn_remove", function() {
+						if(listenType == "2"){return false;}
+						var parents = this.parentNode;
+						var data_value = parents.getAttribute("data-value");
+						thisPage.pageImg[data_value] = "";
+
+						parents.style.backgroundImage = '';
+			        	parents.querySelector(".btn_info").style.display = 'block';
+			        	parents.querySelector(".btn_remove").style.display = 'none';
+
+			        	return false;
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no" />
+		<link rel="stylesheet" href="../css/mui.min.css" />
+		<link rel="stylesheet" href="../fonts/iconfont/iconfont.css" />
+		<link rel="stylesheet" href="../css/style.css" />
+		<style type="text/css">
+			.mui-bar~.mui-content{height: 100%;}
+		</style>
+	</head>
+	<body>
+		<div class="mui-bar mui-bar-nav has-top-search">
+			<span class="btn-top-left iconfont icon-houtui"></span>
+			<form action="">
+				<div class="mui-input-row mui-search">
+					<input id="searchInput" type="search" class="mui-input-clear" placeholder="二手市场">
+				</div>
+			</form>
+		</div>
+		<div class="top-tab-filter">
+			<div class="item" data-type="filtrate"><span>筛选</span><i class="iconfont icon-xiasanjiao"></i></div>
+			<div class="item" data-type="sort"><span>排序</span><i class="iconfont icon-xiasanjiao"></i></div>
+		</div>
+		<div class="action-sheet-control sort">
+			<div class="dark"></div>
+			<ul id="sortList" class="list top">
+				<li class="on" data-value=""><i class="iconfont icon-gouxuan"></i>默认排序</li>
+				<li data-value="range asc"><i class="iconfont icon-gouxuan"></i>距离从近到远</li>
+				<li data-value="price desc"><i class="iconfont icon-gouxuan"></i>价格从高到低</li>
+				<li data-value="price asc"><i class="iconfont icon-gouxuan"></i>价格从低到高</li>
+				<li data-value="commentavestar desc"><i class="iconfont icon-gouxuan"></i>信誉从高到低</li>
+			</ul>
+		</div>
+		<div class="action-sheet-control filtrate">
+			<div class="dark"></div>
+			<ul id="filterList" class="list top">
+				<!-- <li class="on"><i class="iconfont icon-gouxuan"></i>全部分类</li>
+				<li><i class="iconfont icon-gouxuan"></i>家庭保洁</li>
+				<li><i class="iconfont icon-gouxuan"></i>月嫂</li>
+				<li><i class="iconfont icon-gouxuan"></i>看护小孩</li>
+				<li><i class="iconfont icon-gouxuan"></i>做家务</li> -->
+			</ul>
+		</div>
+		<div class="mui-content has-top-tab">
+			<ul id="pageList" class="tao-list">
+				<!-- <li class="list-item">
+					<div class="top-info">
+						<div class="img-box avatar" style="background: url(../img_temp/list-avatar.png);"></div>
+						<div class="user-info">
+							<div class="row">
+								<div class="name-info">李果果<i class="lv">LV1</i></div>
+							</div>
+							<div class="row">
+								<div class="star-level">
+									<div class="bot-bg"><div class="top-bg level-4"></div></div>
+									<span>4.0</span>
+								</div>
+								<div class="order-num">1100单</div>
+								<div class="distance">0.3km</div>
+							</div>
+						</div>
+						<div class="btn-box">
+							<span class="iconfont icon-chakantieziguanzhu on"></span>
+							<span class="iconfont icon-rexian"></span>
+						</div>
+					</div>
+					<div class="main-content">
+						<span class="con-title">iphone6国行(型号:A1586)16G白银</span>
+						<span class="con-text">描述</span>
+						<div class="pics">
+							<p class="pic-item img-box" style="background: url(../img_temp/collect-goods.png);"></p>
+							<p class="pic-item img-box" style="background: url(../img_temp/tao-img.png);"></p>
+						</div>
+					</div>
+					<div class="bot-info">
+						<div class="remain">库存 : &nbsp;<i>3</i>件 <span class="g-info">8成新</span><span class="g-info">包邮</span></div>
+						<div class="collect-item-goods">
+							<div class="price-info">
+								<div class="price-box">
+									<i class="m-icon">吐血价&yen;</i>
+									<span class="m-num">209</span>
+								</div>
+								<div class="old-price">原价 &yen; 300</div>
+							</div>
+						</div>
+					</div>
+					<div class="btn-block">立即下单</div>
+				</li> -->
+			</ul>
+		</div>
+		<script type="text/javascript" src="../js/mui.min.js" ></script>
+		<script type="text/javascript" src="../js/db.js" ></script>
+		<script type="text/javascript">
+			var pageControl = new PageControl();
+			apiready = function(){
+				thisPage.init();
+				thisPage.addEvent();
+			};
+			var thisPage = {
+				typeKey: "taosihuo",
+				lat: db2.getVal("location_lat"),
+				lon: db2.getVal("location_lon"),
+				catpid: "0", //筛选主id
+				//catid: "0", //筛选子id
+				order: "", //排序id
+				keywords: "",
+				timerCount: 1,
+				init: function() {
+					pageControl.winBack();
+					pageControl.darkClose();
+
+					setTimeout(function() {
+			            thisPage.requestData();
+			        }, 350);
+				},
+				requestData: function(isupdate) {
+					if (isupdate == undefined) { isupdate = false; }
+
+					api.showProgress({
+					    title: "加载中...",
+					    text: "请稍候",
+					    modal: false
+					});
+
+					var urlParam = "type_key=" + thisPage.typeKey;
+					urlParam += "&lat=" + thisPage.lat;
+					urlParam += "&lon=" + thisPage.lon;
+					urlParam += "&catpid=" + thisPage.catpid;
+					//urlParam += "&catid=" + thisPage.catid;
+					urlParam += "&order=" + thisPage.order;
+					urlParam += "&token=" + (isLogin() == true ? db2.getVal("user_token") : "");
+
+					urlParam += "&keywords=" + thisPage.keywords;
+
+					doAjax("Client", "client_list", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							if( isupdate == true) {
+								thisPage.getListData(rs.data);
+							} else{
+								thisPage.fillData(rs.data);
+							}
+						} else {
+							api.toast({ msg: rs.msg });
+						}
+
+						api.refreshHeaderLoadDone();
+					});
+				},
+				getListData: function(data) {
+					var pageList = data.list;
+					var pageHtml = "";
+					if (isset(pageList)) {
+						pageList.forEach(function(item) {
+							/*星级评分*/
+							var commentNum = Number(item.CommentAveStar);
+							var score = commentNum.toFixed(1);
+							var starHtml = 	'<div class="bot-bg"><div class="top-bg level-'+Math.round(commentNum)+'"></div></div>\n<span>'+score+'</span>';
+
+							/*图片组*/
+							var picList = item.picture;
+							var picHtml = "";
+							picList.forEach(function(item) {
+								picHtml += '<p class="pic-item img-box" style="background-image: url('+toAbsUrl(item)+');"></p>';
+							});
+
+							pageHtml += '<li class="list-item" data-id="'+item.id+'">' +
+											'<div class="top-info">' +
+												'<div class="img-box avatar" data-id="'+item.uid+'" style="background-image: url('+toAbsUrl(item.UserHead)+');"></div>' +
+												'<div class="user-info">' +
+													'<div class="row">' +
+														'<div class="name-info">'+item.NickName+'&nbsp;<i class="lv">LV'+item.lv+'</i></div>' +
+													'</div>' +
+													'<div class="row">' +
+														'<div class="star-level">'+starHtml+'</div>\n' +
+														'<div class="order-num">'+item.SellerOrderCount+'单</div>' +
+														'<div class="distance" data-lat="'+item.lat+'" data-lon="'+item.lon+'" data-address="'+item.goods_address+'">'+item.juli+'km</div>' +
+													'</div>' +
+												'</div>' +
+												'<div class="btn-box">' +
+													'<span class="btn_follow iconfont icon-chakantieziguanzhu '+(item.is_follow==0?'':'on')+'" data-id="'+item.uid+'"></span>\n' +
+													'<span class="btn_call iconfont icon-rexian" data-value="'+item.telephone+'"></span>' +
+												'</div>' +
+											'</div>' +
+											'<div class="main-content">' +
+												'<div class="pics">'+picHtml+'</div>' +
+												'<span class="con-title">标题：'+item.goodsname+'</span>' +
+												'<span class="con-text">描述：'+item.content+'</span>' +
+											'</div>' +
+											'<div class="bot-info">' +
+												'<div class="remain"><div class="old-price">原价 &yen; '+parseInt(item.price)+'</div>库存 : &nbsp;<i>'+item.goods_num+'</i>件 <span class="g-info">'+item.degree+'成新</span><span class="g-info">'+item.goods_freight_mode+'</span></div>' +
+												'<div class="price-info">' +
+													'<div class="price-box">' +
+														'<i class="m-icon">吐血价 &yen;</i>\n' +
+														'<span class="m-num">'+item.goods_discount_price.split(".")[0]+'</span><span class="m-num-deci">.'+item.goods_discount_price.split(".")[1]+'</span>' +
+														'<i class="m-icon">/'+item.unit+'</i>' +
+													'</div>' +
+												'</div>' +
+											'</div>' +
+											'<div class="btn-block btn_chat" style="right:110px;"  data-id="'+item.uid+'">私聊</div>'+
+											'<div class="btn-block btn_orders">立即下单</div>' +
+										'</li>';
+						});
+						document.getElementById("pageList").innerHTML = pageHtml;
+					} else {
+						document.getElementById("pageList").innerHTML = '<div class="empty-list">空空如也</div>';
+					}
+				},
+				fillData: function(data) {
+					/*填充筛选选项*/
+					var filterList = data.catArr;
+					var filterHtml = '<li class="on" data-id="0"><i class="iconfont icon-gouxuan"></i>全部分类</li>';
+					filterList.forEach(function(item) {
+						filterHtml += '<li data-id="'+item.value+'"><i class="iconfont icon-gouxuan"></i>'+item.text+'</li>';
+					});
+					document.getElementById("filterList").innerHTML = filterHtml;
+
+					/*填充列表数据*/
+					thisPage.getListData(data);
+
+					api.hideProgress();
+					api.refreshHeaderLoadDone();
+				},
+				addFollow: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&follow_mid=" + control.getAttribute("data-id");
+
+					doAjax("Index", "addFollow", urlParam, "post", function(rs) {
+						if (rs.code == 1) {
+							//control.classList.add("on");
+							PubApp.toast(rs.msg);
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						} else {
+							api.toast({ msg: rs.msg });
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						}
+					});
+				},
+				cancelFollow: function(control) {
+					var urlParam = "token=" + db2.getVal("user_token");
+					urlParam += "&follow_mid=" + control.getAttribute("data-id");
+
+					doAjax("Index", "cancelFollow", urlParam, "post", function(rs) {
+						api.hideProgress();
+						if (rs.code == 1) {
+							//control.classList.remove("on");
+							PubApp.toast(rs.msg);
+							setTimeout(function() {
+					            thisPage.requestData();
+					        }, 350);
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						} else {
+							api.toast({ msg: rs.msg });
+							setTimeout(function() { thisPage.timerCount = 1; }, 2000);
+						}
+					});
+				},
+				addEvent: function() {
+					/*筛选排序*/
+					mui(".top-tab-filter").on("tap", ".item", function() {
+						if(this.classList.contains("on")) return;
+						document.querySelector(".mui-content").style = 'overflow:hidden;';
+						if (document.querySelector(".top-tab-filter .on")) {
+							document.querySelector(".top-tab-filter .on").classList.remove("on");
+						}
+						if (document.querySelector(".action-sheet-control.active")) {
+							document.querySelector(".action-sheet-control.active").classList.remove("active");
+						}
+						this.classList.add("on");
+						document.querySelector(".action-sheet-control."+this.getAttribute("data-type")).classList.add("active");
+					});
+
+					/*筛选项切换*/
+					mui("#filterList").on("tap", "li", function() {
+						if(this.classList.contains("on")) return;
+
+						thisPage.catpid = this.getAttribute("data-id");
+
+						document.querySelector("#filterList .on").classList.remove("on");
+						this.classList.add("on");
+
+						this.parentNode.parentNode.classList.remove("active");
+            			document.querySelector(".top-tab-filter .on").classList.remove("on");
+
+						document.querySelector(".mui-content").style = 'overflow:auto;';
+						setTimeout(function() {
+				            thisPage.requestData(true);
+				        }, 350);
+					});
+
+					/*排序切换*/
+					mui("#sortList").on("tap", "li", function() {
+						if(this.classList.contains("on")) return;
+
+						thisPage.order = this.getAttribute("data-value");
+
+						document.querySelector("#sortList .on").classList.remove("on");
+						this.classList.add("on");
+
+						document.querySelector(".action-sheet-control.active").classList.remove("active");
+						document.querySelector(".top-tab-filter .on").classList.remove("on");
+
+						document.querySelector(".mui-content").style = 'overflow:auto;';
+						setTimeout(function() {
+				            thisPage.requestData(true);
+				        }, 350);
+					});
+
+					/*详情*/
+					mui("#pageList").on("tap", "#pageList li", function() {
+						var param = "page_id=" + this.getAttribute("data-id");
+						openWin("list_tao_detail", param);
+					});
+					/*聊天*/
+					mui("#pageList").on("tap", ".btn_chat", function() {
+						if (isLogin() == true) {
+								var id = this.getAttribute("data-id");
+								openWin('chat', 'user_id=' + id);
+						} else {
+							openWin('login');
+						}
+						return false;
+					});
+					/*关注或取消关注*/
+					mui("#pageList").on("tap", "#pageList .btn_follow", function() {
+						var self = this;
+
+						if (isLogin() == true) {
+							if (this.classList.contains("on")) { //取消关注
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									thisPage.cancelFollow(self);
+								}
+							} else { //添加关注
+								if (thisPage.timerCount) {
+									thisPage.timerCount = 0;
+									thisPage.addFollow(self);
+								}
+							}
+						} else {
+							openWin('login');
+						}
+
+						return false;
+					});
+
+					/*拨打电话*/
+					mui("#pageList").on("tap", "#pageList .btn_call", function() {
+						var tel_number = this.getAttribute("data-value");
+						api.confirm({
+						    title: '提示',
+						    msg: '是否拨打' + tel_number,
+						    buttons: ['拨打', '取消']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								api.call({
+								    type: 'tel',
+								    number: tel_number
+								});
+							}
+						});
+						return false;
+					});
+
+					/*下单*/
+					mui("#pageList").on("tap", "#pageList .btn_orders", function() {
+						if (isLogin()) {
+							var param = "data_id=" + this.parentNode.getAttribute("data-id");
+							openWin("list_tao_orders", param);
+						} else {
+							openWin('login');
+						}
+						return false;
+					});
+
+					/*搜索*/
+					document.querySelector("form").addEventListener("submit", function(e) {
+						e.preventDefault();
+
+						document.getElementById("searchInput").blur();
+
+						thisPage.keywords = document.getElementById("searchInput").value;
+						setTimeout(function() {
+				            thisPage.requestData(true);
+				        }, 350);
+					});
+
+					/*头像*/
+					mui("#pageList").on("tap", ".avatar", function() {
+						var dataId = this.getAttribute("data-id");
+						api.openWin({
+						    name: 'user_center_'+dataId,
+						    url: './user_center_person.html',
+						    pageParam: {
+						        user_id: dataId
+						    }
+						});
+						return false;
+					});
+
+					/*位置*/
+					mui("#pageList").on("tap", ".distance", function() {
+						//alert(this.getAttribute("data-lat")+"\n"+this.getAttribute("data-lon")+"\n"+db2.getVal("location_lat")+"\n"+db2.getVal("location_lon")+"\n"+this.getAttribute("data-address"));
+						openWin("map_view", "e_lat="+this.getAttribute("data-lat")+"&e_lon="+this.getAttribute("data-lon")+"&e_address="+this.getAttribute("data-address"));
+						return false;
+					});
+				}
+			};
+		</script>
+	</body>
+</html>

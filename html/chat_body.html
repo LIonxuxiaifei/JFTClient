@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <link href="../css/mui.min.css" rel="stylesheet" />
+    <!-- <link href="../css/mui.imageviewer.css" rel="stylesheet" /> -->
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
+
+        footer {
+            position: fixed;
+            width: 100%;
+            height: 50px;
+            min-height: 50px;
+            border-top: solid 1px #bbb;
+            left: 0px;
+            bottom: 0px;
+            overflow: hidden;
+            padding: 0px 50px;
+            background-color: #fafafa;
+        }
+
+        .footer-left {
+            display:none!important;
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            left: 0px;
+            bottom: 0px;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 100%;
+            padding: 12px 4px;
+        }
+
+        .footer-right {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            right: 0px;
+            bottom: 0px;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 100%;
+            padding: 12px 5px;
+            display: inline-block;
+        }
+
+        .footer-center {
+            height: 100%;
+            padding: 5px 0px;
+        }
+
+        .footer-center [class*=input] {
+            width: 100%;
+            height: 100%;
+            border-radius: 5px;
+        }
+
+        .footer-center .input-text {
+            background: #fff;
+            border: solid 1px #ddd;
+            padding: 10px !important;
+            font-size: 16px !important;
+            line-height: 18px !important;
+            font-family: verdana !important;
+            overflow: hidden;
+        }
+
+        .footer-center .input-sound {
+            background-color: #eee;
+        }
+
+        .mui-content {
+            height: 100%;
+            padding: 1px 0px 50px 0px;
+            overflow: auto;
+            background-color: #eaeaea;
+        }
+
+        #msg-list {
+            height: 100%;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .msg-item {
+            padding: 8px;
+            clear: both;
+        }
+
+        .msg-item .mui-item-clear {
+            clear: both;
+        }
+
+        .msg-item .timeline {
+            text-align: center;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .msg-item .msg-user {
+            width: 38px;
+            height: 38px;
+            border: solid 1px #d3d3d3;
+            display: inline-block;
+            background: #fff;
+            border-radius: 3px;
+            vertical-align: top;
+            text-align: center;
+            float: left;
+            padding: 3px;
+            color: #ddd;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            background-color: transparent;
+        }
+
+        .msg-item .msg-user-img {
+            width: 38px;
+            height: 38px;
+            display: inline-block;
+            border-radius: 3px;
+            vertical-align: top;
+            text-align: center;
+            float: left;
+            color: #ddd;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            background-color: transparent;
+        }
+
+        .msg-item .msg-content {
+            display: inline-block;
+            border-radius: 5px;
+            border: solid 1px #d3d3d3;
+            background-color: #FFFFFF;
+            color: #333;
+            padding: 8px;
+            vertical-align: top;
+            font-size: 15px;
+            position: relative;
+            margin: 0px 8px;
+            max-width: 75%;
+            min-width: 35px;
+            float: left;
+        }
+
+        .msg-item .msg-content .msg-content-inner {
+            overflow-x: hidden;
+        }
+
+        .msg-item .msg-content .msg-content-arrow {
+            position: absolute;
+            border: solid 1px #d3d3d3;
+            border-right: none;
+            border-top: none;
+            background-color: #FFFFFF;
+            width: 10px;
+            height: 10px;
+            left: -5px;
+            top: 12px;
+            -webkit-transform: rotateZ(45deg);
+            transform: rotateZ(45deg);
+        }
+
+        .msg-item-self .msg-user,
+        .msg-item-self .msg-content {
+            float: right;
+        }
+
+        .msg-item-self .msg-content .msg-content-arrow {
+            left: auto;
+            right: -5px;
+            -webkit-transform: rotateZ(225deg);
+            transform: rotateZ(225deg);
+        }
+
+        .msg-item-self .msg-content,
+        .msg-item-self .msg-content .msg-content-arrow {
+            background-color: #4CD964;
+            color: #fff;
+            border-color: #2AC845;
+        }
+
+        footer {
+            display: none;
+        }
+
+        footer .mui-icon {
+            color: #000;
+        }
+
+        footer .mui-icon:active {
+            color: #007AFF !important;
+        }
+
+        footer .mui-icon-paperplane:before {
+            content: "发送";
+        }
+
+        footer .mui-icon-paperplane {
+            /*-webkit-transform: rotateZ(45deg);
+                transform: rotateZ(45deg);*/
+            font-size: 16px;
+            word-break: keep-all;
+            line-height: 100%;
+            padding-top: 6px;
+            color: rgba(0, 135, 250, 1);
+        }
+
+        #msg-sound {
+            -webkit-user-select: none !important;
+            user-select: none !important;
+        }
+
+        .rprogress {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 140px;
+            height: 140px;
+            margin-left: -70px;
+            margin-top: -70px;
+            background-image: url(widget://css/chat/arecord.png);
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: 30px 30px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 5px;
+            display: none;
+            -webkit-transition: .15s;
+        }
+
+        .rschedule {
+            background-color: rgba(0, 0, 0, 0);
+            border: 5px solid rgba(0, 183, 229, 0.9);
+            opacity: .9;
+            border-left: 5px solid rgba(0, 0, 0, 0);
+            border-right: 5px solid rgba(0, 0, 0, 0);
+            border-radius: 50px;
+            box-shadow: 0 0 15px #2187e7;
+            width: 46px;
+            height: 46px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -23px;
+            margin-top: -23px;
+            -webkit-animation: spin 1s infinite linear;
+            animation: spin 1s infinite linear;
+        }
+
+        .r-sigh {
+            display: none;
+            border-radius: 50px;
+            box-shadow: 0 0 15px #2187e7;
+            width: 46px;
+            height: 46px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -23px;
+            margin-top: -23px;
+            text-align: center;
+            line-height: 46px;
+            font-size: 40px;
+            font-weight: bold;
+            color: #2187e7;
+        }
+
+        .rprogress-sigh {
+            background-image: none !important;
+        }
+
+        .rprogress-sigh .rschedule {
+            display: none !important;
+        }
+
+        .rprogress-sigh .r-sigh {
+            display: block !important;
+        }
+
+        .rsalert {
+            font-size: 12px;
+            color: #bbb;
+            text-align: center;
+            position: absolute;
+            border-radius: 5px;
+            width: 130px;
+            margin: 5px 5px;
+            padding: 5px;
+            left: 0px;
+            bottom: 0px;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #h {
+            background: #fff;
+            border: solid 1px #ddd;
+            padding: 10px !important;
+            font-size: 16px !important;
+            font-family: verdana !important;
+            line-height: 18px !important;
+            overflow: visible;
+            position: absolute;
+            left: -1000px;
+            right: 0px;
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+
+        .cancel {
+            background-color: darkred;
+        }
+
+        .emotion {
+            height: 20px;
+            width: 20px;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+
+<body contextmenu="return false;">
+    <!-- <header class="mui-bar mui-bar-nav">
+            <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+            <h1 class="mui-title">聊天窗口</h1>
+        </header> -->
+    <pre id='h'></pre>
+    <script id='msg-template' type="text/template">
+        <% for(var i in record){ var item=record[i]; %>
+            <% if(item.sender=='system' ) { %>
+                <div class="msg-item">
+                    <div class="timeline">
+                        <%=(item.content)%>
+                    </div>
+                </div>
+                <% } else { %>
+                    <div class="msg-item <%= (item.sender=='self'?' msg-item-self':'') %>" msg-type='<%=(item.type)%>' msg-content='<%=(item.content)%>'>
+                        <% if(item.sender=='self' ) { %>
+                            <i class="msg-user" style="background-image:url(<%=(item.headimg)%>);"></i>
+                            <% } else { %>
+                                <img class="msg-user-img " style="background-image:url(<%=(item.headimg)%>);" alt="" />
+                                <% } %>
+                                    <div class="msg-content">
+                                        <div class="msg-content-inner">
+                                            <% if(item.type=='text' ) { %>
+                                                <%=( item.content|| '&nbsp;&nbsp;') %>
+                                                    <% } else if(item.type=='image' ) { %>
+
+                                                        <img class="msg-content-image" onload="javascript:<% if(getHistoryMessageIng!==true){%>thisApp.goDown()<%}%>;" src="<%=(item.content)%>" style="max-width: 100px;" />
+
+                                                        <% } else if(item.type=='sound' ) { %>
+                                                            <span class="mui-icon mui-icon-mic" style="font-size: 18px;font-weight: bold;"></span>
+                                                            <span class="play-state">点击播放</span>
+                                                            <% } %>
+                                        </div>
+                                        <div class="msg-content-arrow"></div>
+                                    </div>
+                                    <div class="mui-item-clear"></div>
+                    </div>
+                    <% } %>
+                        <% } %>
+    </script>
+    <div class="mui-content">
+        <div id='msg-list'>
+        </div>
+    </div>
+    <footer>
+        <div class="footer-left" style="display:none">
+            <i id='msg-image' class="mui-icon mui-icon-camera" style="font-size: 28px;"></i>
+        </div>
+        <div class="footer-center">
+            <textarea id='msg-text' type="text" class='input-text'></textarea>
+            <button id='msg-sound' type="button" class='input-sound' style="display: none;">按住说话</button>
+        </div>
+        <label for="" class="footer-right">
+                <i id='msg-type' class="mui-icon mui-icon-mic"></i>
+            </label>
+    </footer>
+    <div id='sound-alert' class="rprogress">
+        <div class="rschedule"></div>
+        <div class="r-sigh">!</div>
+        <div id="audio_tips" class="rsalert">手指上滑，取消发送</div>
+    </div>
+    <script src="../js/mui.min.js"></script>
+    <script src="../js/arttmpl.js"></script>
+    <script type="text/javascript" src="../js/db.js"></script>
+    <script type="text/javascript" src="../js/mui.min.js"></script>
+    <script type="text/javascript" charset="UTF-8">
+        var user_id, //与我聊天的小伙伴的ID，窗口直接传递过来的；
+            user_headimg, //与我聊天的小伙伴的头像；
+            my_user_id,
+            my_user_headimg, //与我聊天的小伙伴的头像；
+            //record=[],//聊天的历史数据，本地的缓存
+            lastchat_record_id = 0, //最后的聊天ID
+            fristchat_record_id = -1, //第一条的聊天ID
+            firstRequet = 0,
+            getHistoryMessageIng = false, //是否在请求加载历史中
+            UIChatBox,
+            KeyboardStatus = false, //
+            apiready = function() {
+                thisApp.init();
+                thisApp.setUIChatBox();
+                thisApp.addEvt();
+                thisApp.heartbeat(); //设置心跳
+            }
+        var thisApp = {
+            init: function() {
+
+                user_id = api.pageParam.user_id;
+                my_user_id = db2.getVal("user_id");
+                if ((user_id || 0) == 0) {
+                    alert("user_id参数错误");
+                    api.closeWin();
+                }
+
+                window.MIN_SOUND_TIME = 800;
+                template.config('escape', false);
+
+                thisApp.requestDuihuaData();
+
+                setInterval(function(){
+						        thisApp.requestDuihuaData();
+    					  },5000);
+
+                /*thisApp.requestData("history");
+                setTimeout(function() {0
+                    thisApp.requestData("new");
+                }, 350);*/
+
+                /*record = [
+                    {
+                        sender: 'zs',
+                        type: 'text',
+                        content: 'Hi，我是 MUI 小管家！'
+                    },
+
+                    {
+                        sender: 'zs',
+                        type: 'text',
+                        content: 'Hi，我是 MUI 小管家！2'
+                    },
+
+                    {
+                        sender: 'self',
+                        type: 'text',
+                        content: 'Hi，我是 lisa 历史数据'
+                    }
+                ];*/
+                // api.showProgress(
+                // {
+                //     style: 'default',
+                //     animationType: 'fade',
+                //     title: '加载中…',
+                //     text: '稍等',
+                //     modal: false
+                // });
+
+
+            },
+            setUIChatBox: function() {
+                UIChatBox = api.require('UIChatBox');
+                UIChatBox.open({
+                    placeholder: '',
+                    maxRows: 4,
+                    emotionPath: 'widget://css/chat/emotion',
+                    texts: {
+                        recordBtn: {
+                            normalTitle: '按住说话',
+                            activeTitle: '松开结束'
+                        },
+                        sendBtn: {
+                            title: '发送'
+                        }
+                    },
+                    styles: {
+                        inputBar: {
+                            borderColor: '#d9d9d9',
+                            bgColor: '#f2f2f2'
+                        },
+                        inputBox: {
+                            borderColor: '#B3B3B3',
+                            bgColor: '#FFFFFF'
+                        },
+                        emotionBtn: {
+                            normalImg: 'widget://css/chat/chatBox_face1.png'
+                        },
+                        extrasBtn: {
+                            normalImg: 'widget://css/chat/chatBox_add1.png'
+                        },
+                        keyboardBtn: {
+                            normalImg: 'widget://css/chat/chatBox_key1.png'
+                        },
+                        // speechBtn: {
+                        //     normalImg: 'widget://css/chat/speechBtn.png'
+                        // },
+                        recordBtn: {
+                            normalBg: '#c4c4c4',
+                            activeBg: '#999999',
+                            color: '#000',
+                            size: 14
+                        },
+                        indicator: {
+                            target: 'extrasPanel',
+                            color: '#c4c4c4',
+                            activeColor: '#9e9e9e'
+                        },
+                        sendBtn: {
+                            titleColor: '#ffffff',
+                            bg: '#4CD964',
+                            activeBg: '#46a91e',
+                            titleSize: 14
+                        }
+                    },
+                    extras: {
+                        titleSize: 10,
+                        titleColor: '#a3a3a3',
+                        btns: [{
+                            title: '图片',
+                            normalImg: 'widget://css/chat/chatBox_album1.png',
+                            activeImg: 'widget://css/chat/chatBox_album2.png'
+                        }, {
+                            title: '拍照',
+                            normalImg: 'widget://css/chat/chatBox_cam1.png',
+                            activeImg: 'widget://css/chat/chatBox_cam2.png'
+                        }]
+                    }
+                }, function(ret, err) {
+                    if (ret) {
+                        log(JSON.stringify(ret));
+                        switch (ret.eventType) {
+                            case "send":
+                                send({
+                                    sender: 'self',
+                                    type: 'text',
+                                    headimg: my_user_headimg,
+                                    content: ret.msg.replace(new RegExp('\n', 'gm'), '<br/>')
+                                });
+                                break;
+                            case "clickExtras":
+                                switch (ret.index) {
+                                    case 0: //相册库
+                                        api.getPicture({
+                                            sourceType: "library",
+                                            encodingType: 'jpg',
+                                            mediaValue: 'pic',
+                                            destinationType: 'url',
+                                            allowEdit: true,
+                                            quality: 100,
+                                            saveToPhotoAlbum: false
+                                        }, function(ret, err) {
+                                            if (ret) {
+                                                if ($api.trim(ret.data) != "") {
+
+                                                    send({
+                                                        sender: 'self',
+                                                        type: 'image',
+                                                        headimg: my_user_headimg,
+                                                        content: ret.data
+                                                    });
+
+
+                                                }
+                                            } else {
+                                                //                          api.alert({
+                                                //                              msg : err.msg
+                                                //                          });
+                                            }
+                                        });
+                                        break;
+                                    case 1: //拍照
+                                        api.getPicture({
+                                            sourceType: "camera",
+                                            encodingType: 'jpg',
+                                            mediaValue: 'pic',
+                                            destinationType: 'url',
+                                            allowEdit: true,
+                                            quality: 100,
+                                            saveToPhotoAlbum: false
+                                        }, function(ret, err) {
+                                            if (ret) {
+                                                if ($api.trim(ret.data) != "") {
+
+                                                    send({
+                                                        sender: 'self',
+                                                        type: 'image',
+                                                        headimg: my_user_headimg,
+                                                        content: ret.data
+                                                    });
+                                                }
+                                            } else {
+                                                //                          api.alert({
+                                                //                              msg : err.msg
+                                                //                          });
+                                            }
+                                        });
+                                        break;
+                                    default:
+
+                                }
+                                break;
+                            default:
+
+                        }
+                    } else {
+
+                    }
+                });
+            },
+            // 表情转换
+            transText: function(msgcontent, imgWidth, imgHeight) {
+                var text = msgcontent;
+                var emotionData = JSON.parse(
+                    '{"[微笑]":"1","[撇嘴]":"2","[色]":"3","[发呆]":"4","[得意]":"5","[流泪]":"6","[害羞]":"7","[闭嘴]":"8","[睡]":"9","[大哭]":"10","[尴尬]":"11","[发怒]":"12","[调皮]":"13","[呲牙]":"14","[惊讶]":"15","[难过]":"16","[酷]":"17","[冷汗]":"18","[抓狂]":"19","[吐]":"20","[偷笑]":"21","[愉快]":"22","[白眼]":"23","[傲慢]":"24","[饥饿]":"25","[困]":"26","[恐惧]":"27","[流汗]":"28","[憨笑]":"29","[悠闲]":"30","[奋斗]":"31","[咒骂]":"32","[疑问]":"33","[嘘]":"34","[晕]":"35","[疯了]":"36","[衰]":"37","[骷髅]":"38","[敲打]":"39","[再见]":"40","[擦汗]":"41","[抠鼻]":"42","[鼓掌]":"43","[糗大了]":"44","[坏笑]":"45","[左哼哼]":"46","[右哼哼]":"47","[哈欠]":"48","[鄙视]":"49","[委屈]":"50","[快哭了]":"51","[阴险]":"52","[亲亲]":"53","[吓]":"54","[可怜]":"55","[菜刀]":"56","[西瓜]":"57","[啤酒]":"58","[篮球]":"59","[乒乓]":"60","[咖啡]":"61","[饭]":"62","[猪头]":"63","[玫瑰]":"64","[凋谢]":"65","[嘴唇]":"66","[爱心]":"67","[心碎]":"68","[蛋糕]":"69","[闪电]":"70","[炸弹]":"71","[刀]":"72","[足球]":"73","[瓢虫]":"74","[便便]":"75","[月亮]":"76","[太阳]":"77","[礼物]":"78","[拥抱]":"79","[强]":"80","[弱]":"81","[握手]":"82","[胜利]":"83","[抱拳]":"84","[勾引]":"85","[拳头]":"86","[差劲]":"87","[爱你]":"88","[NO]":"89","[OK]":"90","[爱情]":"91","[飞吻]":"92","[跳跳]":"93","[发抖]":"94","[怄火]":"95","[转圈]":"96","[磕头]":"97","[回头]":"98","[跳绳]":"99","[投降]":"100","[激动]":"101","[街舞]":"102","[献吻]":"103","[左太极]":"104","[右太极]":"105"}'
+                );
+                //"widget://css/chat/emotion/Expression_" + emotionItem["name"] + ".png";
+
+
+                var imgWidth = imgWidth || 30;
+                var imgHeight = imgHeight || 30;
+                var regx = /\[(.*?)\]/gm;
+                var textTransed = text.replace(regx, function(match) {
+                    var imgSrc = emotionData[match];
+                    if (!imgSrc) {
+                        //说明不对应任何表情，直接返回
+                        return match;
+                    }
+                    var img = '<img class="emotion" src="../css/chat/emotion/Expression_' + imgSrc + '.png" />';
+                    return img;
+                });
+                return textTransed;
+            },
+            send2server: function(msg) {
+                //将数据发送到服务器
+                //图片，文本，音频
+
+                var toServerFun = function(msg, type) {
+                    doAjax("Message", "sendDuihua", "token=" + db2.getVal("user_token")+"&msg=" + msg + "&type=" + type + "&user_id=" + user_id + "&lat=" + db2.getVal("location_lat") + "&lon=" + db2.getVal("location_lon"), "post", function() {
+
+
+                        //通知更新好友列表（最后一条消息有更新了）
+                        //减少更新频率，在用户关闭页面时再更新，程剑虎，2017-6-7
+
+
+                    })
+                };
+                switch (msg.type) {
+                    case "image":
+                    case "sound":
+                        uploadimg(msg.content, function(data) {
+                            toServerFun(data, msg.type);
+                        }, false);
+                        break;
+                    case "text":
+                        toServerFun(msg.content, msg.type);
+                        break;
+                }
+
+
+            },
+            requestDuihuaData: function(isHistory) {
+                var isHistory = (isHistory || 'new');
+                if (isHistory == "history") getHistoryMessageIng == true;
+                doAjax("Message", "getDuihua", "token=" + db2.getVal("user_token")+"&user_id=" + user_id + "&neworhistory=" + isHistory + "&label_record_id=" + (isHistory == "new" ? lastchat_record_id : fristchat_record_id), "get", function(rs) {
+                    if (rs["code"] == 1) {
+                        firstRequet ++;
+                        thisApp.fixDuihuadata(rs["data"], isHistory);
+
+                        //通知更新好友列表（未读消息数更新下,有减少）
+                        //减少更新频率，在用户关闭页面时再更新，程剑虎，2017-6-7
+
+                    } else {
+                        api.toast({
+                            msg: rs["info"]
+                        });
+                    }
+                    api.hideProgress();
+                    api.refreshHeaderLoadDone();
+                })
+            },
+            fixDuihuadata: function(dataOne, isHistory) {
+                var html_msglist = "";
+
+                user_headimg =  dataOne.userOne.user_headimg;
+                my_user_headimg = dataOne.userOne.my_user_headimg;
+                user_nicename = dataOne.userOne.user_realname || dataOne.userOne.user_nicename;
+
+
+                api.execScript({
+                    name: 'chat',
+                    script: 'document.querySelector(".mui-title").innerHTML = "与' + user_nicename + '对话中";'
+                });
+
+
+                var record = [];
+                var temp_id = lastchat_record_id;
+                if (dataOne.msglist) {
+                    var msglist = dataOne.msglist;
+                    for (var i = 0; i < msglist.length; i++) {
+                        //html_msglist = html_msglist + thisApp.getMsgJoinHtml(msglist[i].msg_uid, msglist[i].msg_id, msglist[i].msg_content);
+                        record.push({
+                            sender: msglist[i].chat_record_user_id == my_user_id ? "self" : (msglist[i].chat_record_user_id == 0 ? "system" : msglist[i].chat_record_user_id),
+                            type: msglist[i].chat_record_content_type,
+                            content: msglist[i].chat_record_content,
+                            headimg: msglist[i].chat_record_user_id == my_user_id ? my_user_headimg : user_headimg,
+                        });
+                        if (msglist[i].chat_record_user_id > 0) lastchat_record_id = msglist[i].chat_record_id;
+                        if (msglist[i].chat_record_id < fristchat_record_id || fristchat_record_id == -1) fristchat_record_id = msglist[i].chat_record_id;
+                    }
+                }
+                if(temp_id == 0 && 1 < firstRequet){return false};
+                //log(user_headimg);
+                bindMsgList(record, (isHistory || 'new'));
+
+            },
+            goDown: function() {
+                ui.areaMsgList.scrollTop = ui.areaMsgList.scrollHeight + ui.areaMsgList.offsetHeight;
+            },
+            removeChatItem:function(id,self){
+                var urlParam = "token=" + db2.getVal("user_token") + "&chat_record_id=" + id;
+                doAjax("Message", "deleteDuihua", urlParam, "post", function(rs) {
+                  if (rs.code == 1) {
+                      self.remove();
+                  } else {
+                      PubApp.toast(rs.msg);
+                  }
+                });
+            },
+            addEvt: function() {
+                var temp_num = 0;
+                // mui('body').on('tap','.onChat',function(){
+                //     if(temp_num == 0){
+                //         temp_num = 1;
+                //         setTimeout(function(){
+                //             temp_num = 0;
+                //         },800);
+                //         var id = this.dataset.chatID,self = this;
+                //         api.confirm({
+          			// 						title: '温馨提示？',
+          			// 						msg: '是否删除该条聊天记录？',
+          			// 						buttons: ['确定', '取消']
+          			// 				}, function(ret, err) {
+          			// 						if(ret.buttonIndex == "1"){
+          			// 								thisApp.removeChatItem(id,self);
+          			// 						};
+          			// 				});
+                //     };
+                // });
+
+                //监听 inputBar
+                var changeBodyHeiht = function(inputBarHeight, panelHeight) {
+                    if (panelHeight == 0) {
+                        api.setFrameAttr({
+                            name: 'chat_body',
+                            rect: {
+                                h: "auto"
+                            }
+                        });
+                    } else {
+
+                        api.setFrameAttr({
+                            name: 'chat_body',
+                            rect: {
+                                h: api.winHeight - inputBarHeight - panelHeight,
+                            }
+                        });
+                    }
+                };
+                UIChatBox.addEventListener({
+                    target: 'inputBar',
+                    name: 'move'
+                }, function(ret, err) {
+                    if (ret) {
+                        log(JSON.stringify(ret));
+                        //if (api.systemType == "ios") //ios下面窗口会上顶,android 切换到表情也不对
+                        {
+                            changeBodyHeiht(ret.inputBarHeight, ret.panelHeight);
+                        }
+                        if (ret.panelHeight > 0) {
+                            KeyboardStatus = true;
+                        } else {
+                            KeyboardStatus = false;
+                        }
+                    } else {
+                        log(JSON.stringify(err));
+                    }
+                });
+
+                UIChatBox.addEventListener({
+                    target: 'inputBar',
+                    name: 'change'
+                }, function(ret, err) {
+                    if (ret) {
+                        log(JSON.stringify(ret));
+                        //if (api.systemType == "ios") //ios下面窗口会上顶,android 切换到表情也不对
+                        {
+                            changeBodyHeiht(ret.inputBarHeight, ret.panelHeight);
+                        }
+
+                        if (ret.panelHeight > 0) {
+                            KeyboardStatus = true;
+                        } else {
+                            KeyboardStatus = false;
+                        }
+                    } else {
+                        log(JSON.stringify(err));
+                    }
+                });
+
+                doc = document;
+
+                mui.init({
+                    gestureConfig: {
+                        tap: true, //默认为true
+                        doubletap: true, //默认为false
+                        longtap: true, //默认为false
+                        swipe: true, //默认为true
+                        drag: true, //默认为true
+                        hold: true, //默认为false，不监听
+                        release: true, //默认为false，不监听
+                        swipedown: true,
+                    }
+                });
+
+                var showKeyboard = function() {
+                    if (api.systemType == "ios") {
+
+                        //alert("ios");
+                        // var webView = plus.webview.currentWebview().nativeInstanceObject();
+                        // webView.plusCallMethod(
+                        // {
+                        //     "setKeyboardDisplayRequiresUserAction": false
+                        // });
+                    } else {
+                        // alert("android");
+                        // var Context = plus.android.importClass("android.content.Context");
+                        // var InputMethodManager = plus.android.importClass("android.view.inputmethod.InputMethodManager");
+                        // var main = plus.android.runtimeMainActivity();
+                        // var imm = main.getSystemService(Context.INPUT_METHOD_SERVICE);
+                        // imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
+                        // //var view = ((ViewGroup)main.findViewById(android.R.id.content)).getChildAt(0);
+                        // imm.showSoftInput(main.getWindow().getDecorView(), InputMethodManager.SHOW_IMPLICIT);
+                        // //alert("ll");
+                    }
+                };
+
+                window.ui = {
+                    body: doc.querySelector('body'),
+                    footer: doc.querySelector('footer'),
+                    footerRight: doc.querySelector('.footer-right'),
+                    footerLeft: doc.querySelector('.footer-left'),
+                    btnMsgType: doc.querySelector('#msg-type'),
+                    boxMsgText: doc.querySelector('#msg-text'),
+                    boxMsgSound: doc.querySelector('#msg-sound'),
+                    btnMsgImage: doc.querySelector('#msg-image'),
+                    areaMsgList: doc.querySelector('#msg-list'),
+                    boxSoundAlert: doc.querySelector('#sound-alert'),
+                    h: doc.querySelector('#h'),
+                    content: doc.querySelector('.mui-content')
+                };
+                ui.h.style.width = ui.boxMsgText.offsetWidth + 'px';
+                //alert(ui.boxMsgText.offsetWidth );
+                var footerPadding = ui.footer.offsetHeight - ui.boxMsgText.offsetHeight;
+                window.msgItemTap = function(msgItem, event) {
+                    var msgType = msgItem.getAttribute('msg-type');
+                    var msgContent = msgItem.getAttribute('msg-content')
+                    log("消息点击了");
+                    if (msgType == 'sound') {
+                        var playState = msgItem.querySelector('.play-state');
+
+                        var doPlay = function(filepath) {
+                            playState.innerText = '正在播放';
+                            api.startPlay({
+                                path: filepath
+                            }, function(ret, err) {
+                                playState.innerText = '点击播放';
+                                if (ret) {
+                                    //alert('播放完成');
+                                } else {
+                                    PubApp.toast(err.msg);
+                                }
+                            });
+                        }
+
+                        if (msgContent.indexOf("http") >= 0) //网上的
+                        {
+                            playState.innerText = '加载中…';
+
+                            var startNumber = (msgContent.lastIndexOf("/") > 0) ? msgContent.lastIndexOf("/") : msgContent.lastIndexOf("\\");
+                            var newName = msgContent.substr(startNumber, msgContent.length - startNumber);
+                            var savePath = 'cache://' + newName;
+                            api.download({
+                                url: msgContent,
+                                savePath: savePath,
+                                report: false,
+                                cache: true,
+                                allowResume: false
+                            }, function(ret, err) {
+                                if (ret.state == 1) {
+                                    log(JSON.stringify(ret));
+                                    doPlay(savePath);
+                                    //doPlay(ret.savePath);
+                                } else {
+
+                                }
+                            });
+                        } else {
+                            doPlay(msgContent);
+                        }
+
+
+
+                        /*player = plus.audio.createPlayer(msgContent);
+
+                        player.play(function()
+                        {
+
+                        }, function(e)
+                        {
+                            playState.innerText = '点击播放';
+                        });*/
+                    }
+                };
+                var imageViewer = function(box) {
+                    var imgItems = doc.querySelectorAll('.msg-content-image');
+                    var imgItemsObj = [];
+                    [].forEach.call(imgItems, function(item, index) {
+                        imgItemsObj.push(item.getAttribute("src"));
+                    });
+                    var thisbox = doc;
+                    if (typeof box != "undefine") {
+                        thisbox = box;
+                    }
+
+                    [].forEach.call(thisbox.querySelectorAll('.msg-content-image'), function(item, index) {
+                        item.addEventListener('click', function(event) //tap 有出现双重触发的现象
+                            {
+                                //PubApp.toast(imgItemsObj,index);
+                                showimgzoom(imgItemsObj, index);
+                                //msgItemTap(item, event);
+                            }, false);
+                    });
+                };
+                window.bindMsgList = function(thisrecord, isHistory) {
+                    //绑定数据:
+                    /*tp.bind({
+                        template: 'msg-template',
+                        element: 'msg-list',
+                        model: record
+                    });*/
+
+
+
+                    // 创建div节点
+                    var thisDiv = document.createElement("div");
+                        thisDiv.classList.add('onChat');
+                        thisDiv.dataset.chatID = thisrecord.chat_record_user_id;
+                    var thisrecord2 = thisrecord;
+                    [].forEach.call(thisrecord2, function(item2, index) {
+                        if (item2.type == "text") {
+                            item2.content = thisApp.transText(item2.content);
+                        }
+                    })
+
+                    // 装载html字符串
+                    thisDiv.innerHTML = template('msg-template', {
+                        "record": thisrecord2
+                    });
+                    // 此时div.childNodes就是我们需要的节点了！
+
+
+
+                    var msgItems = thisDiv.querySelectorAll('.msg-item');
+                    //log("bindMsgList");
+                    [].forEach.call(msgItems, function(item, index) {
+                        item.addEventListener('click', function(event) {
+                            msgItemTap(item, event);
+                        }, false);
+                    });
+
+
+                    //return div.childNodes;
+                    if ((isHistory || 'new') == "new") {
+                        ui.areaMsgList.appendChild(thisDiv);
+                    } else {
+                        ui.areaMsgList.insertBefore(thisDiv, ui.areaMsgList.childNodes[0]);
+                    }
+
+                    imageViewer(thisDiv);
+
+                    if ((isHistory || 'new') == "new") {
+                        thisApp.goDown();
+                    } else {
+                        setTimeout(function() {
+                            ui.areaMsgList.scrollTop = 0;
+                        }, 200);
+                        getHistoryMessageIng = false;
+                        api.hideProgress();
+                        PubApp.toast("加载完成");
+                    }
+
+                };
+                //bindMsgList();
+                window.addEventListener('resize', function() {
+                    thisApp.goDown();
+                    //PubApp.toast("window resize");
+                }, false);
+                window.send = function(msg) {
+
+                    var trim = function(str) { //删除左右两端的空格
+                        　　
+                        return str.replace(/(^\s*)|(\s*$)/g, "");
+                    }
+
+                    if (trim(msg.content) == "") {
+                        PubApp.toast("消息不可为空");
+                        return false;
+                    }
+                    msg.content = trim(msg.content);
+                    //record.push(msg);
+                    thisApp.send2server(msg);
+                    bindMsgList([msg]);
+                    //toRobot(msg.content);
+                };
+                /*var toRobot = function(info)
+                {
+                    var apiUrl = 'http://www.tuling123.com/openapi/api';
+                    api.ajax(
+                    {
+                        url: apiUrl,
+                        method: 'post',
+                        type: "json",
+                        data:
+                        {
+                            values:
+                            {
+                                "key": 'acfbca724ea1b5db96d2eef88ce677dc',
+                                "info": info,
+                                "userid": "cjh"
+                            },
+                            files:
+                            {
+                                fileName: 'filePath'
+                            }
+                        }
+                    }, function(ret, err)
+                    {
+                        if (ret)
+                        {
+                            //alert(JSON.stringify(ret));
+                            record.push(
+                            {
+                                sender: 'zs',
+                                type: 'text',
+                                content: ret.text
+                            });
+                            bindMsgList();
+                        }
+                        else
+                        {
+                            alert(JSON.stringify(err));
+                        }
+                    });
+                    $.getJSON(apiUrl,
+                    {
+                        "key": 'acfbca724ea1b5db96d2eef88ce677dc',
+                        "info": info,
+                        "userid": plus.device.uuid
+                    }, function(data)
+                    {
+                        //alert(JSON.stringify(data));
+
+                    });
+                };*/
+
+                function msgTextFocus() {
+                    ui.boxMsgText.focus();
+                    setTimeout(function() {
+                        ui.boxMsgText.focus();
+                    }, 150);
+                }
+
+
+
+
+                //解决长按“发送”按钮，导致键盘关闭的问题；
+                // ui.footerRight.addEventListener('touchstart', function(event) {
+                //     if (ui.btnMsgType.classList.contains('mui-icon-paperplane')) {
+                //         msgTextFocus();
+                //         event.preventDefault();
+                //     }
+                // });
+                //解决长按“发送”按钮，导致键盘关闭的问题；
+                // ui.footerRight.addEventListener('touchmove', function(event) {
+                //     if (ui.btnMsgType.classList.contains('mui-icon-paperplane')) {
+                //         msgTextFocus();
+                //         event.preventDefault();
+                //     }
+                // });
+
+                function iosChatBody(openOrclose) {
+                    if (api.systemType == "ios") {
+                        //  PubApp.toast("change");
+                        //  api.setFrameAttr({
+                        //      name: 'chat_body',
+                        //      rect: {
+                        //          h: (openOrclose||"open")=="open"?280:"auto",
+                        //      }
+                        //  });
+
+                    }
+                }
+
+                // ui.footerRight.addEventListener('release', function(event) {
+                //     if (ui.btnMsgType.classList.contains('mui-icon-paperplane')) {
+                //         //showKeyboard();
+                //         ui.boxMsgText.focus();
+                //         //thisApp.shofkeyboardchang();
+                //         setTimeout(function() {
+                //             ui.boxMsgText.focus();
+                //         }, 150);
+                //         iosChatBody();
+                //         //                          event.detail.gesture.preventDefault();
+                //         send({
+                //             sender: 'self',
+                //             type: 'text',
+                //             headimg: my_user_headimg,
+                //             content: ui.boxMsgText.value.replace(new RegExp('\n', 'gm'), '<br/>')
+                //         });
+                //         ui.boxMsgText.value = '';
+                //         mui.trigger(ui.boxMsgText, 'input', null);
+                //     } else if (ui.btnMsgType.classList.contains('mui-icon-mic')) //当前是文本输入状态
+                //     {
+                //         ui.btnMsgType.classList.add('mui-icon-compose');
+                //         ui.btnMsgType.classList.remove('mui-icon-mic');
+                //         ui.boxMsgText.style.display = 'none';
+                //         ui.boxMsgSound.style.display = 'block';
+                //         ui.boxMsgText.blur();
+                //         document.body.focus();
+                //         iosChatBody('close');
+                //     } else if (ui.btnMsgType.classList.contains('mui-icon-compose')) //当前是按住说话
+                //     {
+                //         ui.btnMsgType.classList.add('mui-icon-mic');
+                //         ui.btnMsgType.classList.remove('mui-icon-compose');
+                //         ui.boxMsgSound.style.display = 'none';
+                //         ui.boxMsgText.style.display = 'block';
+                //         //--
+                //         //showKeyboard();
+                //         ui.boxMsgText.focus();
+                //         setTimeout(function()
+                //         {
+                //             ui.boxMsgText.focus();
+                //         }, 150);
+                //         iosChatBody();
+                //     }
+                // }, false);
+
+                // ui.footerLeft.addEventListener('click', function(event) {
+                //     //上传图片
+                //     getImgAndCrop(function(fileurl) {
+                //         log(fileurl);
+                //         send({
+                //             sender: 'self',
+                //             type: 'image',
+                //             headimg: my_user_headimg,
+                //             content: fileurl
+                //         });
+                //     }, 1000, 1000);
+                //
+                //
+                //
+                //
+                // }, false);
+                var setSoundAlertVisable = function(show) {
+                    if (show) {
+                        ui.boxSoundAlert.style.display = 'block';
+                        ui.boxSoundAlert.style.opacity = 1;
+                    } else {
+                        ui.boxSoundAlert.style.opacity = 0;
+                        //fadeOut 完成再真正隐藏
+                        setTimeout(function() {
+                            ui.boxSoundAlert.style.display = 'none';
+                        }, 200);
+                    }
+                };
+                var recordCancel = false;
+                var recorder = null;
+                var audio_tips = document.getElementById("audio_tips");
+                var startTimestamp = null;
+                var stopTimestamp = null;
+                var stopTimer = null;
+
+                //监听 recordBtn 按钮
+                UIChatBox.addEventListener({
+                    target: 'recordBtn',
+                    name: 'press' //按下录音按钮
+                }, function(ret, err) {
+                    if (ret) {
+
+
+
+                        recordCancel = false;
+                        if (stopTimer) clearTimeout(stopTimer);
+                        audio_tips.innerHTML = "手指上划，取消发送";
+                        ui.boxSoundAlert.classList.remove('rprogress-sigh');
+                        setSoundAlertVisable(true);
+                        startTimestamp = (new Date()).getTime();
+                        api.startRecord({
+                            path: 'cache://' + startTimestamp + '.amr'
+                        });
+                    } else {
+
+                    }
+                });
+
+                UIChatBox.addEventListener({
+                    target: 'recordBtn',
+                    name: 'move_out' //按下录音按钮后，从按钮移出
+                }, function(ret, err) {
+                    if (ret) {
+                        if (!audio_tips.classList.contains("cancel")) {
+                            audio_tips.classList.add("cancel");
+                        }
+                        audio_tips.innerHTML = "松开手指，取消发送";
+                    } else {
+
+                    }
+                });
+
+                UIChatBox.addEventListener({
+                    target: 'recordBtn',
+                    name: 'move_out_cancel' //按下录音按钮后，从按钮移出并松开按钮
+                }, function(ret, err) {
+                    if (ret) {
+                        if (!audio_tips.classList.contains("cancel")) {
+                            audio_tips.classList.add("cancel");
+                        }
+                        audio_tips.innerHTML = "松开手指，取消发送";
+                        api.stopRecord(function(ret, err) {});
+                        stopTimer = setTimeout(function() {
+                            setSoundAlertVisable(false);
+                        }, 300);
+                    } else {
+
+                    }
+                });
+
+                UIChatBox.addEventListener({
+                    target: 'recordBtn',
+                    name: 'move_in' //move_out 事件后，重新移入按钮区域
+                }, function(ret, err) {
+                    if (ret) {
+                        audio_tips.innerHTML = "手指上划，取消发送";
+                        ui.boxSoundAlert.classList.remove('rprogress-sigh');
+                    } else {
+
+                    }
+                });
+
+                UIChatBox.addEventListener({
+                    target: 'recordBtn',
+                    name: 'press_cancel' //松开录音按钮
+                }, function(ret, err) {
+                    if (ret) {
+                        stopTimestamp = (new Date()).getTime();
+                        if (stopTimestamp - startTimestamp < MIN_SOUND_TIME) {
+                            audio_tips.innerHTML = "录音时间太短";
+                            ui.boxSoundAlert.classList.add('rprogress-sigh');
+                            recordCancel = true;
+                            stopTimer = setTimeout(function() {
+                                setSoundAlertVisable(false);
+                            }, 800);
+                            //alert("bb");
+                        } else {
+                            setSoundAlertVisable(false);
+                        }
+                        //recorder.stop();
+                        api.stopRecord(function(ret, err) {
+                            if (ret) {
+
+                                if (recordCancel) return;
+                                send({
+                                    sender: 'self',
+                                    type: 'sound',
+                                    headimg: my_user_headimg,
+                                    content: ret.path
+                                });
+
+                                /*var path = ret.path;
+                                var duration = ret.duration;
+                                log(path);
+                                log(duration);*/
+                            }
+                        });
+                    } else {
+
+                    }
+                });
+
+
+
+                // ui.boxMsgSound.addEventListener("touchstart", function(e) {
+                //     //console.log("start....");
+                //     e.preventDefault();
+                // });
+                // ui.boxMsgText.addEventListener('input', function(event) {
+                //     ui.btnMsgType.classList[ui.boxMsgText.value == '' ? 'remove' : 'add']('mui-icon-paperplane');
+                //     ui.btnMsgType.setAttribute("for", ui.boxMsgText.value == '' ? '' : 'msg-text');
+                //     ui.h.innerText = ui.boxMsgText.value.replace(new RegExp('\n', 'gm'), '\n-') || '-';
+                //     ui.footer.style.height = (ui.h.offsetHeight + footerPadding) + 'px';
+                //     ui.content.style.paddingBottom = ui.footer.style.height;
+                // });
+                window.focus = false;
+                // ui.boxMsgText.addEventListener('tap', function(event) {
+                //     ui.boxMsgText.focus();
+                //     setTimeout(function() {
+                //         ui.boxMsgText.focus();
+                //     }, 0);
+                //     focus = true;
+                //     setTimeout(function() {
+                //         focus = false;
+                //     }, 1000);
+                //     iosChatBody();
+                //     event.detail.gesture.preventDefault();
+                // }, false);
+                //点击消息列表，关闭键盘
+                // ui.areaMsgList.addEventListener('click', function(event) {
+                //     if (!focus) {
+                //         ui.boxMsgText.blur();
+                //         iosChatBody('close');
+                //     }
+                // })
+
+                ui.areaMsgList.addEventListener('touchstart', function(e) {
+                    //ui.boxMsgText.blur();
+                    //document.body.focus();
+                    //PubApp.toast("touchstart");
+                    if (KeyboardStatus == true) //键盘起来的，就收回键盘，不要触发其它事件
+                    {
+                        UIChatBox.closeKeyboard();
+                        e.preventDefault();
+                    }
+
+                });
+
+                api.addEventListener({
+                    name: 'receiveNewChat'
+                }, function(ret, err) {
+                    if (ret) {
+                        if (api.systemType == "ios") log("有receiveNewChat(ios):" + JSON.stringify(ret));
+                        if (ret.value.fromuserid == user_id) {
+                            thisApp.requestDuihuaData();
+                        }
+                    } else {
+                        alert(JSON.stringify(err));
+                    }
+                });
+
+                //app进入后台
+                api.addEventListener({
+                    name: 'pause'
+                }, function(ret, err) {
+                    log("app 进入后台");
+                    window.appPauseResume = "pause";
+                });
+
+                //app进入回到前台
+                api.addEventListener({
+                    name: 'resume'
+                }, function(ret, err) {
+                    log("app 回到前台");
+                    window.appPauseResume = "resume";
+                });
+
+                //mui的下扫事件
+                ui.areaMsgList.addEventListener("swipedown", function() {
+                    if (ui.areaMsgList.scrollTop <= 0 && getHistoryMessageIng == false) {
+                        // api.showProgress({
+                        //     style: 'default',
+                        //     animationType: 'fade',
+                        //     title: '加载历史消息...',
+                        //     text: '稍等',
+                        //     modal: false
+                        // });
+
+                        api.toast({
+                            msg: '加载中',
+                            duration: 2000,
+                            location: 'middle'
+                        });
+
+
+                        thisApp.requestDuihuaData("history");
+                    }
+                    //console.log("你正在向下滑动"+);
+                });
+            },
+            fixdata: function(dataOne) {
+
+
+
+
+                api.hideProgress();
+                api.parseTapmode();
+
+            },
+            //证明窗口有在打开的
+            //窗口名："winName"+当前窗口名
+            //2秒钟的心跳
+            heartbeat: function() {
+                setInterval(function() {
+
+                    //android app 在后台要停止心跳(ios是系统自动冻结程序的)
+                    if ((window.appPauseResume || "resume") == "resume") {
+                        var timestamp = new Date().getTime();
+                        //log(timestamp);
+                        db2.setVal("winName" + api.winName, timestamp);
+                    }
+                }, 2000);
+            },
+            shofkeyboardchang: function() {
+                //if(api.systemType=="ios")PubApp.toast(focus?"打开的":"关闭的");
+            }
+        }
+    </script>
+</body>
+
+</html>
